@@ -9,6 +9,7 @@ import { AuthorizePermissionRequest } from '@backstage/plugin-permission-common'
 import { AuthorizePermissionResponse } from '@backstage/plugin-permission-common';
 import { Config } from '@backstage/config';
 import { Duration } from 'luxon';
+import type { ErrorLike } from '@backstage/errors';
 import { EvaluatorRequestOptions } from '@backstage/plugin-permission-common';
 import { Handler } from 'express';
 import { HumanDuration } from '@backstage/types';
@@ -23,6 +24,64 @@ import { QueryPermissionResponse } from '@backstage/plugin-permission-common';
 import { Readable } from 'stream';
 import { Request as Request_2 } from 'express';
 import { Response as Response_2 } from 'express';
+
+// @public
+export type AuditEvent = [
+  message: string,
+  meta: {
+    actor: AuditEventActorDetails;
+    eventName: string;
+    stage: string;
+    meta?: JsonValue;
+    request?: AuditEventRequest;
+  } & AuditEventStatus,
+];
+
+// @public (undocumented)
+export type AuditEventActorDetails = {
+  actorId?: string;
+  ip?: string;
+  hostname?: string;
+  userAgent?: string;
+};
+
+// @public
+export type AuditEventArgs = {
+  message: string;
+  eventName: string;
+  stage: string;
+  request?: Request_2;
+  actorId?: string;
+  meta?: JsonValue;
+} & AuditEventStatus;
+
+// @public
+export type AuditEventFailureStatus<E = ErrorLike> = {
+  status: 'failed';
+  errors: E[];
+};
+
+// @public (undocumented)
+export type AuditEventRequest = {
+  url: string;
+  method: string;
+};
+
+// @public (undocumented)
+export type AuditEventStatus =
+  | AuditEventSuccessStatus
+  | AuditEventFailureStatus
+  | AuditEventUnknownStatus;
+
+// @public
+export type AuditEventSuccessStatus = {
+  status: 'succeeded';
+};
+
+// @public
+export type AuditEventUnknownStatus = {
+  status: 'unknown';
+};
 
 // @public
 export interface AuthService {
@@ -183,6 +242,7 @@ export namespace coreServices {
   const httpRouter: ServiceRef<HttpRouterService, 'plugin', 'singleton'>;
   const lifecycle: ServiceRef<LifecycleService, 'plugin', 'singleton'>;
   const logger: ServiceRef<LoggerService, 'plugin', 'singleton'>;
+  const eventAuditor: ServiceRef<EventAuditorService, 'plugin', 'singleton'>;
   const permissions: ServiceRef<PermissionsService, 'plugin', 'singleton'>;
   const pluginMetadata: ServiceRef<
     PluginMetadataService,
@@ -192,6 +252,11 @@ export namespace coreServices {
   const rootHttpRouter: ServiceRef<RootHttpRouterService, 'root', 'singleton'>;
   const rootLifecycle: ServiceRef<RootLifecycleService, 'root', 'singleton'>;
   const rootLogger: ServiceRef<RootLoggerService, 'root', 'singleton'>;
+  const rootEventAuditor: ServiceRef<
+    RootEventAuditorService,
+    'plugin',
+    'singleton'
+  >;
   const scheduler: ServiceRef<SchedulerService, 'plugin', 'singleton'>;
   const urlReader: ServiceRef<UrlReaderService, 'plugin', 'singleton'>;
 }
@@ -335,6 +400,22 @@ export interface DatabaseService {
 export interface DiscoveryService {
   getBaseUrl(pluginId: string): Promise<string>;
   getExternalBaseUrl(pluginId: string): Promise<string>;
+}
+
+// @public
+export interface EventAuditorService {
+  // (undocumented)
+  child(meta: JsonObject): EventAuditorService;
+  // (undocumented)
+  debug(args: AuditEventArgs): Promise<void>;
+  // (undocumented)
+  error(args: AuditEventArgs): Promise<void>;
+  // (undocumented)
+  getActorId(request?: Request_2): Promise<string | undefined>;
+  // (undocumented)
+  info(args: AuditEventArgs): Promise<void>;
+  // (undocumented)
+  warn(args: AuditEventArgs): Promise<void>;
 }
 
 // @public
@@ -488,6 +569,9 @@ export function resolveSafeChildPath(base: string, path: string): string;
 
 // @public
 export interface RootConfigService extends Config {}
+
+// @public
+export interface RootEventAuditorService extends EventAuditorService {}
 
 // @public (undocumented)
 export interface RootHealthService {

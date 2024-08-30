@@ -33,7 +33,13 @@ export type { DatabaseService } from './DatabaseService';
 export type { DiscoveryService } from './DiscoveryService';
 export type {
   AuditEvent,
+  AuditEventActorDetails,
   AuditEventArgs,
+  AuditEventFailureStatus,
+  AuditEventRequest,
+  AuditEventStatus,
+  AuditEventSuccessStatus,
+  AuditEventUnknownStatus,
   EventAuditorService,
 } from './EventAuditorService';
 export type { HttpAuthService } from './HttpAuthService';
