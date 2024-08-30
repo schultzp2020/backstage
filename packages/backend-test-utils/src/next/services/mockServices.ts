@@ -20,6 +20,7 @@ import {
   HostDiscovery,
   discoveryServiceFactory,
 } from '@backstage/backend-defaults/discovery';
+import { eventAuditorServiceFactory } from '@backstage/backend-defaults/eventAuditor';
 import { httpRouterServiceFactory } from '@backstage/backend-defaults/httpRouter';
 import { lifecycleServiceFactory } from '@backstage/backend-defaults/lifecycle';
 import { loggerServiceFactory } from '@backstage/backend-defaults/logger';
@@ -34,6 +35,7 @@ import {
   BackstageCredentials,
   BackstageUserInfo,
   DiscoveryService,
+  EventAuditorService,
   HttpAuthService,
   LoggerService,
   RootConfigService,
@@ -50,15 +52,28 @@ import {
 } from '@backstage/plugin-events-node';
 import { JsonObject } from '@backstage/types';
 import { MockAuthService } from './MockAuthService';
+import { mockCredentials } from './mockCredentials';
 import { MockHttpAuthService } from './MockHttpAuthService';
+import { MockRootEventAuditorService } from './MockRootEventAuditorService';
 import { MockRootLoggerService } from './MockRootLoggerService';
 import { MockUserInfoService } from './MockUserInfoService';
-import { mockCredentials } from './mockCredentials';
 
 /** @internal */
 function createLoggerMock() {
   return {
     child: jest.fn().mockImplementation(createLoggerMock),
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  };
+}
+
+/** @internal */
+function createEventAuditorMock() {
+  return {
+    child: jest.fn().mockImplementation(createEventAuditorMock),
+    getActorId: jest.fn(),
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
@@ -175,6 +190,31 @@ export namespace mockServices {
     );
     export const mock = simpleMock(coreServices.rootLogger, () => ({
       child: jest.fn(),
+      debug: jest.fn(),
+      error: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+    }));
+  }
+
+  export function rootEventAuditor(
+    options?: rootEventAuditor.Options,
+  ): EventAuditorService {
+    return MockRootEventAuditorService.create(options);
+  }
+
+  export namespace rootEventAuditor {
+    export type Options = {
+      level?: 'none' | 'error' | 'warn' | 'info' | 'debug';
+    };
+
+    export const factory = simpleFactoryWithOptions(
+      coreServices.rootEventAuditor,
+      rootEventAuditor,
+    );
+    export const mock = simpleMock(coreServices.rootEventAuditor, () => ({
+      child: jest.fn(),
+      getActorId: jest.fn(),
       debug: jest.fn(),
       error: jest.fn(),
       info: jest.fn(),
@@ -377,6 +417,13 @@ export namespace mockServices {
     export const factory = () => loggerServiceFactory;
     export const mock = simpleMock(coreServices.logger, () =>
       createLoggerMock(),
+    );
+  }
+
+  export namespace eventAuditor {
+    export const factory = () => eventAuditorServiceFactory;
+    export const mock = simpleMock(coreServices.eventAuditor, () =>
+      createEventAuditorMock(),
     );
   }
 
