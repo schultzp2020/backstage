@@ -18,28 +18,28 @@ import { mockServices } from '@backstage/backend-test-utils';
 import { format } from 'logform';
 import { MESSAGE } from 'triple-beam';
 import Transport from 'winston-transport';
-import { EventAuditor } from './EventAuditor';
+import { Auditor } from './Auditor';
 
-describe('EventAuditor', () => {
-  it('creates a event auditor instance with default options', () => {
-    const eventAuditor = EventAuditor.create({
+describe('Auditor', () => {
+  it('creates a auditor instance with default options', () => {
+    const auditor = Auditor.create({
       services: {
         auth: mockServices.auth.mock(),
         httpAuth: mockServices.httpAuth.mock(),
       },
     });
-    expect(eventAuditor).toBeInstanceOf(EventAuditor);
+    expect(auditor).toBeInstanceOf(Auditor);
   });
 
   it('creates a child logger', () => {
-    const eventAuditor = EventAuditor.create({
+    const auditor = Auditor.create({
       services: {
         auth: mockServices.auth.mock(),
         httpAuth: mockServices.httpAuth.mock(),
       },
     });
-    const childLogger = eventAuditor.child({ plugin: 'test-plugin' });
-    expect(childLogger).toBeInstanceOf(EventAuditor);
+    const childLogger = auditor.child({ plugin: 'test-plugin' });
+    expect(childLogger).toBeInstanceOf(Auditor);
   });
 
   it('should redact and escape regex', async () => {
@@ -48,7 +48,7 @@ describe('EventAuditor', () => {
       logv: jest.fn(),
     });
 
-    const eventAuditor = EventAuditor.create({
+    const auditor = Auditor.create({
       services: {
         auth: mockServices.auth.mock(),
         httpAuth: mockServices.httpAuth.mock(),
@@ -57,9 +57,9 @@ describe('EventAuditor', () => {
       transports: [mockTransport],
     });
 
-    eventAuditor.addRedactions(['hello (world']);
+    auditor.addRedactions(['hello (world']);
 
-    await eventAuditor.error({
+    await auditor.error({
       message: 'hello (world) from this file',
       eventName: '',
       stage: '',
@@ -87,7 +87,7 @@ describe('EventAuditor', () => {
       logv: jest.fn(),
     });
 
-    const eventAuditor = EventAuditor.create({
+    const auditor = Auditor.create({
       services: {
         auth: mockServices.auth.mock(),
         httpAuth: mockServices.httpAuth.mock(),
@@ -96,9 +96,9 @@ describe('EventAuditor', () => {
       transports: [mockTransport],
     });
 
-    eventAuditor.addRedactions(['hello']);
+    auditor.addRedactions(['hello']);
 
-    await eventAuditor.error({
+    await auditor.error({
       message: 'something went wrong',
       eventName: '',
       stage: '',

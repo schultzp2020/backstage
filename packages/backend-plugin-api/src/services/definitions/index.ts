@@ -15,6 +15,17 @@
  */
 
 export type {
+  AuditorEvent,
+  AuditorEventActorDetails,
+  AuditorEventArgs,
+  AuditorEventFailureStatus,
+  AuditorEventRequest,
+  AuditorEventStatus,
+  AuditorEventSuccessStatus,
+  AuditorEventUnknownStatus,
+  AuditorService,
+} from './AuditorService';
+export type {
   AuthService,
   BackstageCredentials,
   BackstageNonePrincipal,
@@ -31,17 +42,6 @@ export type {
 export { coreServices } from './coreServices';
 export type { DatabaseService } from './DatabaseService';
 export type { DiscoveryService } from './DiscoveryService';
-export type {
-  AuditEvent,
-  AuditEventActorDetails,
-  AuditEventArgs,
-  AuditEventFailureStatus,
-  AuditEventRequest,
-  AuditEventStatus,
-  AuditEventSuccessStatus,
-  AuditEventUnknownStatus,
-  EventAuditorService,
-} from './EventAuditorService';
 export type { HttpAuthService } from './HttpAuthService';
 export type {
   HttpRouterService,
@@ -60,8 +60,8 @@ export type {
   PermissionsServiceRequestOptions,
 } from './PermissionsService';
 export type { PluginMetadataService } from './PluginMetadataService';
+export type { RootAuditorService } from './RootAuditorService';
 export type { RootConfigService } from './RootConfigService';
-export type { RootEventAuditorService } from './RootEventAuditorService';
 export type { RootHealthService } from './RootHealthService';
 export type { RootHttpRouterService } from './RootHttpRouterService';
 export type { RootLifecycleService } from './RootLifecycleService';

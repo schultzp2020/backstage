@@ -15,13 +15,13 @@
  */
 
 import type { ErrorLike } from '@backstage/errors';
-import type { JsonObject, JsonValue } from '@backstage/types';
+import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 
 /**
  * @public
  */
-export type AuditEventActorDetails = {
+export type AuditorEventActorDetails = {
   actorId?: string;
   ip?: string;
   hostname?: string;
@@ -31,7 +31,7 @@ export type AuditEventActorDetails = {
 /**
  * @public
  */
-export type AuditEventRequest = {
+export type AuditorEventRequest = {
   url: string;
   method: string;
 };
@@ -41,14 +41,14 @@ export type AuditEventRequest = {
  *
  * @public
  */
-export type AuditEventSuccessStatus = { status: 'succeeded' };
+export type AuditorEventSuccessStatus = { status: 'succeeded' };
 
 /**
  * Indicates the event failed and includes details about the encountered errors.
  *
  * @public
  */
-export type AuditEventFailureStatus<E = ErrorLike> = {
+export type AuditorEventFailureStatus<E = ErrorLike> = {
   status: 'failed';
   errors: E[];
 };
@@ -58,60 +58,60 @@ export type AuditEventFailureStatus<E = ErrorLike> = {
  *
  * @public
  */
-export type AuditEventUnknownStatus = { status: 'unknown' };
+export type AuditorEventUnknownStatus = { status: 'unknown' };
 
 /**
  * @public
  */
-export type AuditEventStatus =
-  | AuditEventSuccessStatus
-  | AuditEventFailureStatus
-  | AuditEventUnknownStatus;
+export type AuditorEventStatus =
+  | AuditorEventSuccessStatus
+  | AuditorEventFailureStatus
+  | AuditorEventUnknownStatus;
 
 /**
  * Arguments for creating an audit event.
  *
  * @public
  */
-export type AuditEventArgs = {
+export type AuditorEventArgs = {
   message: string;
   eventName: string;
   stage: string;
   request?: Request;
   actorId?: string;
-  meta?: JsonValue;
-} & AuditEventStatus;
+  meta?: JsonObject;
+} & AuditorEventStatus;
 
 /**
  * Common fields of an audit event.
  *
  * @public
  */
-export type AuditEvent = [
+export type AuditorEvent = [
   message: string,
   meta: {
-    actor: AuditEventActorDetails;
+    actor: AuditorEventActorDetails;
     eventName: string;
     stage: string;
-    meta?: JsonValue;
-    request?: AuditEventRequest;
-  } & AuditEventStatus,
+    meta?: JsonObject;
+    request?: AuditorEventRequest;
+  } & AuditorEventStatus,
 ];
 
 /**
- * A service that provides an event auditor facility.
+ * A service that provides an auditor facility.
  *
- * See the {@link https://backstage.io/docs/backend-system/core-services/event-auditor | service documentation} for more details.
+ * See the {@link https://backstage.io/docs/backend-system/core-services/auditor | service documentation} for more details.
  *
  * @public
  */
-export interface EventAuditorService {
-  error(args: AuditEventArgs): Promise<void>;
-  warn(args: AuditEventArgs): Promise<void>;
-  info(args: AuditEventArgs): Promise<void>;
-  debug(args: AuditEventArgs): Promise<void>;
+export interface AuditorService {
+  error(args: AuditorEventArgs): Promise<void>;
+  warn(args: AuditorEventArgs): Promise<void>;
+  info(args: AuditorEventArgs): Promise<void>;
+  debug(args: AuditorEventArgs): Promise<void>;
 
-  child(meta: JsonObject): EventAuditorService;
+  child(meta: JsonObject): AuditorService;
 
   getActorId(request?: Request): Promise<string | undefined>;
 }

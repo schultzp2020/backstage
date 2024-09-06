@@ -26,19 +26,19 @@ import { Request as Request_2 } from 'express';
 import { Response as Response_2 } from 'express';
 
 // @public
-export type AuditEvent = [
+export type AuditorEvent = [
   message: string,
   meta: {
-    actor: AuditEventActorDetails;
+    actor: AuditorEventActorDetails;
     eventName: string;
     stage: string;
-    meta?: JsonValue;
-    request?: AuditEventRequest;
-  } & AuditEventStatus,
+    meta?: JsonObject;
+    request?: AuditorEventRequest;
+  } & AuditorEventStatus,
 ];
 
 // @public (undocumented)
-export type AuditEventActorDetails = {
+export type AuditorEventActorDetails = {
   actorId?: string;
   ip?: string;
   hostname?: string;
@@ -46,42 +46,58 @@ export type AuditEventActorDetails = {
 };
 
 // @public
-export type AuditEventArgs = {
+export type AuditorEventArgs = {
   message: string;
   eventName: string;
   stage: string;
   request?: Request_2;
   actorId?: string;
-  meta?: JsonValue;
-} & AuditEventStatus;
+  meta?: JsonObject;
+} & AuditorEventStatus;
 
 // @public
-export type AuditEventFailureStatus<E = ErrorLike> = {
+export type AuditorEventFailureStatus<E = ErrorLike> = {
   status: 'failed';
   errors: E[];
 };
 
 // @public (undocumented)
-export type AuditEventRequest = {
+export type AuditorEventRequest = {
   url: string;
   method: string;
 };
 
 // @public (undocumented)
-export type AuditEventStatus =
-  | AuditEventSuccessStatus
-  | AuditEventFailureStatus
-  | AuditEventUnknownStatus;
+export type AuditorEventStatus =
+  | AuditorEventSuccessStatus
+  | AuditorEventFailureStatus
+  | AuditorEventUnknownStatus;
 
 // @public
-export type AuditEventSuccessStatus = {
+export type AuditorEventSuccessStatus = {
   status: 'succeeded';
 };
 
 // @public
-export type AuditEventUnknownStatus = {
+export type AuditorEventUnknownStatus = {
   status: 'unknown';
 };
+
+// @public
+export interface AuditorService {
+  // (undocumented)
+  child(meta: JsonObject): AuditorService;
+  // (undocumented)
+  debug(args: AuditorEventArgs): Promise<void>;
+  // (undocumented)
+  error(args: AuditorEventArgs): Promise<void>;
+  // (undocumented)
+  getActorId(request?: Request_2): Promise<string | undefined>;
+  // (undocumented)
+  info(args: AuditorEventArgs): Promise<void>;
+  // (undocumented)
+  warn(args: AuditorEventArgs): Promise<void>;
+}
 
 // @public
 export interface AuthService {
@@ -242,7 +258,7 @@ export namespace coreServices {
   const httpRouter: ServiceRef<HttpRouterService, 'plugin', 'singleton'>;
   const lifecycle: ServiceRef<LifecycleService, 'plugin', 'singleton'>;
   const logger: ServiceRef<LoggerService, 'plugin', 'singleton'>;
-  const eventAuditor: ServiceRef<EventAuditorService, 'plugin', 'singleton'>;
+  const auditor: ServiceRef<AuditorService, 'plugin', 'singleton'>;
   const permissions: ServiceRef<PermissionsService, 'plugin', 'singleton'>;
   const pluginMetadata: ServiceRef<
     PluginMetadataService,
@@ -252,11 +268,7 @@ export namespace coreServices {
   const rootHttpRouter: ServiceRef<RootHttpRouterService, 'root', 'singleton'>;
   const rootLifecycle: ServiceRef<RootLifecycleService, 'root', 'singleton'>;
   const rootLogger: ServiceRef<RootLoggerService, 'root', 'singleton'>;
-  const rootEventAuditor: ServiceRef<
-    RootEventAuditorService,
-    'plugin',
-    'singleton'
-  >;
+  const rootAuditor: ServiceRef<RootAuditorService, 'plugin', 'singleton'>;
   const scheduler: ServiceRef<SchedulerService, 'plugin', 'singleton'>;
   const urlReader: ServiceRef<UrlReaderService, 'plugin', 'singleton'>;
 }
@@ -400,22 +412,6 @@ export interface DatabaseService {
 export interface DiscoveryService {
   getBaseUrl(pluginId: string): Promise<string>;
   getExternalBaseUrl(pluginId: string): Promise<string>;
-}
-
-// @public
-export interface EventAuditorService {
-  // (undocumented)
-  child(meta: JsonObject): EventAuditorService;
-  // (undocumented)
-  debug(args: AuditEventArgs): Promise<void>;
-  // (undocumented)
-  error(args: AuditEventArgs): Promise<void>;
-  // (undocumented)
-  getActorId(request?: Request_2): Promise<string | undefined>;
-  // (undocumented)
-  info(args: AuditEventArgs): Promise<void>;
-  // (undocumented)
-  warn(args: AuditEventArgs): Promise<void>;
 }
 
 // @public
@@ -568,10 +564,10 @@ export function resolvePackagePath(name: string, ...paths: string[]): string;
 export function resolveSafeChildPath(base: string, path: string): string;
 
 // @public
-export interface RootConfigService extends Config {}
+export interface RootAuditorService extends AuditorService {}
 
 // @public
-export interface RootEventAuditorService extends EventAuditorService {}
+export interface RootConfigService extends Config {}
 
 // @public (undocumented)
 export interface RootHealthService {

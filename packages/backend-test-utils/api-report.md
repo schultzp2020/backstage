@@ -8,6 +8,7 @@
 /// <reference types="node" />
 /// <reference types="qs" />
 
+import { AuditorService } from '@backstage/backend-plugin-api';
 import { AuthService } from '@backstage/backend-plugin-api';
 import { Backend } from '@backstage/backend-app-api';
 import { BackendFeature } from '@backstage/backend-plugin-api';
@@ -21,7 +22,6 @@ import { CacheService } from '@backstage/backend-plugin-api';
 import { DatabaseService } from '@backstage/backend-plugin-api';
 import { DiscoveryService } from '@backstage/backend-plugin-api';
 import { ErrorRequestHandler } from 'express';
-import { EventAuditorService } from '@backstage/backend-plugin-api';
 import { EventsService } from '@backstage/plugin-events-node';
 import { ExtendedHttpServer } from '@backstage/backend-defaults/rootHttpRouter';
 import { ExtensionPoint } from '@backstage/backend-plugin-api';
@@ -35,8 +35,8 @@ import { LoggerService } from '@backstage/backend-plugin-api';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { PermissionsService } from '@backstage/backend-plugin-api';
+import { RootAuditorService } from '@backstage/backend-plugin-api';
 import { RootConfigService } from '@backstage/backend-plugin-api';
-import { RootEventAuditorService } from '@backstage/backend-plugin-api';
 import { RootHealthService } from '@backstage/backend-plugin-api';
 import { RootHttpRouterService } from '@backstage/backend-plugin-api';
 import { RootLifecycleService } from '@backstage/backend-plugin-api';
@@ -155,6 +155,15 @@ export function mockErrorHandler(): ErrorRequestHandler<
 // @public (undocumented)
 export namespace mockServices {
   // (undocumented)
+  export namespace auditor {
+    const // (undocumented)
+      factory: () => ServiceFactory<AuditorService, 'plugin', 'singleton'>;
+    const // (undocumented)
+      mock: (
+        partialImpl?: Partial<AuditorService> | undefined,
+      ) => ServiceMock<AuditorService>;
+  }
+  // (undocumented)
   export function auth(options?: {
     pluginId?: string;
     disableDefaultAuthPolicy?: boolean;
@@ -196,15 +205,6 @@ export namespace mockServices {
       mock: (
         partialImpl?: Partial<DiscoveryService> | undefined,
       ) => ServiceMock<DiscoveryService>;
-  }
-  // (undocumented)
-  export namespace eventAuditor {
-    const // (undocumented)
-      factory: () => ServiceFactory<EventAuditorService, 'plugin', 'singleton'>;
-    const // (undocumented)
-      mock: (
-        partialImpl?: Partial<EventAuditorService> | undefined,
-      ) => ServiceMock<EventAuditorService>;
   }
   // (undocumented)
   export namespace events {
@@ -266,6 +266,23 @@ export namespace mockServices {
       ) => ServiceMock<PermissionsService>;
   }
   // (undocumented)
+  export function rootAuditor(options?: rootAuditor.Options): AuditorService;
+  // (undocumented)
+  export namespace rootAuditor {
+    // (undocumented)
+    export type Options = {
+      level?: 'none' | 'error' | 'warn' | 'info' | 'debug';
+    };
+    const // (undocumented)
+      factory: (
+        options?: Options | undefined,
+      ) => ServiceFactory<AuditorService, 'plugin', 'singleton' | 'multiton'>;
+    const // (undocumented)
+      mock: (
+        partialImpl?: Partial<RootAuditorService> | undefined,
+      ) => ServiceMock<RootAuditorService>;
+  }
+  // (undocumented)
   export function rootConfig(options?: rootConfig.Options): RootConfigService;
   // (undocumented)
   export namespace rootConfig {
@@ -281,29 +298,6 @@ export namespace mockServices {
       mock: (
         partialImpl?: Partial<RootConfigService> | undefined,
       ) => ServiceMock<RootConfigService>;
-  }
-  // (undocumented)
-  export function rootEventAuditor(
-    options?: rootEventAuditor.Options,
-  ): EventAuditorService;
-  // (undocumented)
-  export namespace rootEventAuditor {
-    // (undocumented)
-    export type Options = {
-      level?: 'none' | 'error' | 'warn' | 'info' | 'debug';
-    };
-    const // (undocumented)
-      factory: (
-        options?: Options | undefined,
-      ) => ServiceFactory<
-        EventAuditorService,
-        'plugin',
-        'singleton' | 'multiton'
-      >;
-    const // (undocumented)
-      mock: (
-        partialImpl?: Partial<RootEventAuditorService> | undefined,
-      ) => ServiceMock<RootEventAuditorService>;
   }
   // (undocumented)
   export namespace rootHealth {

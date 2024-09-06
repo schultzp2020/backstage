@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { rootEventAuditorServiceFactory } from './rootEventAuditorServiceFactory';
+export { auditorServiceFactory } from './auditorServiceFactory';

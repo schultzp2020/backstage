@@ -20,21 +20,21 @@ import {
 } from '@backstage/backend-plugin-api';
 
 /**
- * Plugin-level event auditing.
+ * Plugin-level auditing.
  *
- * See {@link @backstage/code-plugin-api#EventAuditorService}
- * and {@link https://backstage.io/docs/backend-system/core-services/event-auditor | the service docs}
+ * See {@link @backstage/code-plugin-api#AuditorService}
+ * and {@link https://backstage.io/docs/backend-system/core-services/auditor | the service docs}
  * for more information.
  *
  * @public
  */
-export const eventAuditorServiceFactory = createServiceFactory({
-  service: coreServices.eventAuditor,
+export const auditorServiceFactory = createServiceFactory({
+  service: coreServices.auditor,
   deps: {
-    rootEventAuditor: coreServices.rootEventAuditor,
+    rootAuditor: coreServices.rootAuditor,
     plugin: coreServices.pluginMetadata,
   },
-  factory({ rootEventAuditor, plugin }) {
-    return rootEventAuditor.child({ plugin: plugin.getId() });
+  factory({ rootAuditor, plugin }) {
+    return rootAuditor.child({ plugin: plugin.getId() });
   },
 });

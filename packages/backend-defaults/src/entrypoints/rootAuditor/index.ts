@@ -14,13 +14,4 @@
  * limitations under the License.
  */
 
-import { EventAuditorService } from './EventAuditorService';
-
-/**
- * Root-level event auditing.
- *
- * See the {@link https://backstage.io/docs/backend-system/core-services/root-event-auditor | service documentation} for more details.
- *
- * @public
- */
-export interface RootEventAuditorService extends EventAuditorService {}
+export { rootAuditorServiceFactory } from './rootAuditorServiceFactory';

@@ -21,10 +21,10 @@ import {
 import type { Config } from '@backstage/config';
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
-import { EventAuditor, defaultFormat } from './EventAuditor';
+import { Auditor, defaultFormat } from './Auditor';
 
 const transports = {
-  eventAuditorConsole: (config?: Config) => {
+  auditorConsole: (config?: Config) => {
     if (config?.getOptionalBoolean('console.enabled') === false) {
       return [];
     }
@@ -34,7 +34,7 @@ const transports = {
       }),
     ];
   },
-  eventAuditorFile: (config?: Config) => {
+  auditorFile: (config?: Config) => {
     if (!config?.getOptionalBoolean('rotateFile.enabled')) {
       return [];
     }
@@ -59,27 +59,25 @@ const transports = {
 };
 
 /**
- * Root-level event auditing.
+ * Root-level auditing.
  *
- * See {@link @backstage/code-plugin-api#RootLoggerService}
- * and {@link https://backstage.io/docs/backend-system/core-services/root-logger | the service docs}
+ * See {@link @backstage/code-plugin-api#RootAuditorService}
+ * and {@link https://backstage.io/docs/backend-system/core-services/root-auditor | the service docs}
  * for more information.
  *
  * @public
  */
-export const rootEventAuditorServiceFactory = createServiceFactory({
-  service: coreServices.rootEventAuditor,
+export const rootAuditorServiceFactory = createServiceFactory({
+  service: coreServices.rootAuditor,
   deps: {
     config: coreServices.rootConfig,
     auth: coreServices.auth,
     httpAuth: coreServices.httpAuth,
   },
   async factory({ config, auth, httpAuth }) {
-    const eventAuditorConfig = config.getOptionalConfig(
-      'backend.rootEventAuditor',
-    );
+    const auditorConfig = config.getOptionalConfig('backend.rootAuditor');
 
-    const eventAuditor = EventAuditor.create({
+    const auditor = Auditor.create({
       services: {
         auth,
         httpAuth,
@@ -90,11 +88,11 @@ export const rootEventAuditorServiceFactory = createServiceFactory({
       level: process.env.LOG_LEVEL ?? 'info',
       format: winston.format.combine(defaultFormat, winston.format.json()),
       transports: [
-        ...transports.eventAuditorConsole(eventAuditorConfig),
-        ...transports.eventAuditorFile(eventAuditorConfig),
+        ...transports.auditorConsole(auditorConfig),
+        ...transports.auditorFile(auditorConfig),
       ],
     });
 
-    return eventAuditor;
+    return auditor;
   },
 });

@@ -20,18 +20,18 @@
   "license": "Apache-2.0",
   "exports": {
     ".": "./src/index.ts",
+    "./auditor": "./src/entrypoints/auditor/index.ts",
     "./auth": "./src/entrypoints/auth/index.ts",
     "./cache": "./src/entrypoints/cache/index.ts",
     "./database": "./src/entrypoints/database/index.ts",
     "./discovery": "./src/entrypoints/discovery/index.ts",
-    "./eventAuditor": "./src/entrypoints/eventAuditor/index.ts",
     "./httpAuth": "./src/entrypoints/httpAuth/index.ts",
     "./httpRouter": "./src/entrypoints/httpRouter/index.ts",
     "./lifecycle": "./src/entrypoints/lifecycle/index.ts",
     "./logger": "./src/entrypoints/logger/index.ts",
     "./permissions": "./src/entrypoints/permissions/index.ts",
+    "./rootAuditor": "./src/entrypoints/rootAuditor/index.ts",
     "./rootConfig": "./src/entrypoints/rootConfig/index.ts",
-    "./rootEventAuditor": "./src/entrypoints/rootEventAuditor/index.ts",
     "./rootHealth": "./src/entrypoints/rootHealth/index.ts",
     "./rootHttpRouter": "./src/entrypoints/rootHttpRouter/index.ts",
     "./rootLifecycle": "./src/entrypoints/rootLifecycle/index.ts",
@@ -45,6 +45,9 @@
   "types": "src/index.ts",
   "typesVersions": {
     "*": {
+      "auditor": [
+        "src/entrypoints/auditor/index.ts"
+      ],
       "auth": [
         "src/entrypoints/auth/index.ts"
       ],
@@ -56,9 +59,6 @@
       ],
       "discovery": [
         "src/entrypoints/discovery/index.ts"
-      ],
-      "eventAuditor": [
-        "src/entrypoints/eventAuditor/index.ts"
       ],
       "httpAuth": [
         "src/entrypoints/httpAuth/index.ts"
@@ -75,11 +75,11 @@
       "permissions": [
         "src/entrypoints/permissions/index.ts"
       ],
+      "rootAuditor": [
+        "src/entrypoints/rootAuditor/index.ts"
+      ],
       "rootConfig": [
         "src/entrypoints/rootConfig/index.ts"
-      ],
-      "rootEventAuditor": [
-        "src/entrypoints/rootEventAuditor/index.ts"
       ],
       "rootHealth": [
         "src/entrypoints/rootHealth/index.ts"

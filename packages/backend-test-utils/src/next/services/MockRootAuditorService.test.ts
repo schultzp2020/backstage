@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { MockRootEventAuditorService } from './MockRootEventAuditorService';
+import { MockRootAuditorService } from './MockRootAuditorService';
 
-describe('MockRootEventAuditorService', () => {
+describe('MockRootAuditorService', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -27,26 +27,26 @@ describe('MockRootEventAuditorService', () => {
     jest.spyOn(console, 'info').mockImplementation(() => {});
     jest.spyOn(console, 'debug').mockImplementation(() => {});
 
-    const eventAuditor = MockRootEventAuditorService.create();
-    await eventAuditor.error({
+    const auditor = MockRootAuditorService.create();
+    await auditor.error({
       message: 'error',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.warn({
+    await auditor.warn({
       message: 'warn',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.info({
+    await auditor.info({
       message: 'info',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.debug({
+    await auditor.debug({
       message: 'debug',
       eventName: '',
       stage: '',
@@ -65,26 +65,26 @@ describe('MockRootEventAuditorService', () => {
     jest.spyOn(console, 'info').mockImplementation(() => {});
     jest.spyOn(console, 'debug').mockImplementation(() => {});
 
-    const eventAuditor = MockRootEventAuditorService.create({ level: 'none' });
-    await eventAuditor.error({
+    const auditor = MockRootAuditorService.create({ level: 'none' });
+    await auditor.error({
       message: 'error',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.warn({
+    await auditor.warn({
       message: 'warn',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.info({
+    await auditor.info({
       message: 'info',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.debug({
+    await auditor.debug({
       message: 'debug',
       eventName: '',
       stage: '',
@@ -103,26 +103,26 @@ describe('MockRootEventAuditorService', () => {
     jest.spyOn(console, 'info').mockImplementation(() => {});
     jest.spyOn(console, 'debug').mockImplementation(() => {});
 
-    const eventAuditor = MockRootEventAuditorService.create({ level: 'error' });
-    await eventAuditor.error({
+    const auditor = MockRootAuditorService.create({ level: 'error' });
+    await auditor.error({
       message: 'error',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.warn({
+    await auditor.warn({
       message: 'warn',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.info({
+    await auditor.info({
       message: 'info',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.debug({
+    await auditor.debug({
       message: 'debug',
       eventName: '',
       stage: '',
@@ -141,26 +141,26 @@ describe('MockRootEventAuditorService', () => {
     jest.spyOn(console, 'info').mockImplementation(() => {});
     jest.spyOn(console, 'debug').mockImplementation(() => {});
 
-    const eventAuditor = MockRootEventAuditorService.create({ level: 'warn' });
-    await eventAuditor.error({
+    const auditor = MockRootAuditorService.create({ level: 'warn' });
+    await auditor.error({
       message: 'error',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.warn({
+    await auditor.warn({
       message: 'warn',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.info({
+    await auditor.info({
       message: 'info',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.debug({
+    await auditor.debug({
       message: 'debug',
       eventName: '',
       stage: '',
@@ -179,26 +179,26 @@ describe('MockRootEventAuditorService', () => {
     jest.spyOn(console, 'info').mockImplementation(() => {});
     jest.spyOn(console, 'debug').mockImplementation(() => {});
 
-    const eventAuditor = MockRootEventAuditorService.create({ level: 'info' });
-    await eventAuditor.error({
+    const auditor = MockRootAuditorService.create({ level: 'info' });
+    await auditor.error({
       message: 'error',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.warn({
+    await auditor.warn({
       message: 'warn',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.info({
+    await auditor.info({
       message: 'info',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.debug({
+    await auditor.debug({
       message: 'debug',
       eventName: '',
       stage: '',
@@ -217,26 +217,26 @@ describe('MockRootEventAuditorService', () => {
     jest.spyOn(console, 'info').mockImplementation(() => {});
     jest.spyOn(console, 'debug').mockImplementation(() => {});
 
-    const eventAuditor = MockRootEventAuditorService.create({ level: 'debug' });
-    await eventAuditor.error({
+    const auditor = MockRootAuditorService.create({ level: 'debug' });
+    await auditor.error({
       message: 'error',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.warn({
+    await auditor.warn({
       message: 'warn',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.info({
+    await auditor.info({
       message: 'info',
       eventName: '',
       stage: '',
       status: 'unknown',
     });
-    await eventAuditor.debug({
+    await auditor.debug({
       message: 'debug',
       eventName: '',
       stage: '',

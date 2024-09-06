@@ -15,12 +15,12 @@
  */
 
 import type {
-  AuditEvent,
-  AuditEventArgs,
+  AuditorEvent,
+  AuditorEventArgs,
+  AuditorService,
   AuthService,
-  EventAuditorService,
   HttpAuthService,
-  RootEventAuditorService,
+  RootAuditorService,
 } from '@backstage/backend-plugin-api';
 import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
@@ -37,7 +37,7 @@ const levels = {
   debug: 4,
 };
 
-export class MockRootEventAuditorService implements RootEventAuditorService {
+export class MockRootAuditorService implements RootAuditorService {
   #level: number;
   #meta: JsonObject;
   #services: {
@@ -46,37 +46,37 @@ export class MockRootEventAuditorService implements RootEventAuditorService {
   };
 
   static create(
-    options?: mockServices.rootEventAuditor.Options,
-  ): MockRootEventAuditorService {
+    options?: mockServices.rootAuditor.Options,
+  ): MockRootAuditorService {
     const level = options?.level ?? 'none';
     if (!(level in levels)) {
       throw new Error(`Invalid log level '${level}'`);
     }
-    return new MockRootEventAuditorService(levels[level], {});
+    return new MockRootAuditorService(levels[level], {});
   }
 
-  async error(args: AuditEventArgs): Promise<void> {
-    const auditEvent = await this.createAuditEvent(args);
+  async error(args: AuditorEventArgs): Promise<void> {
+    const auditEvent = await this.createAuditorEvent(args);
     this.#log('error', ...auditEvent);
   }
 
-  async warn(args: AuditEventArgs): Promise<void> {
-    const auditEvent = await this.createAuditEvent(args);
+  async warn(args: AuditorEventArgs): Promise<void> {
+    const auditEvent = await this.createAuditorEvent(args);
     this.#log('warn', ...auditEvent);
   }
 
-  async info(args: AuditEventArgs): Promise<void> {
-    const auditEvent = await this.createAuditEvent(args);
+  async info(args: AuditorEventArgs): Promise<void> {
+    const auditEvent = await this.createAuditorEvent(args);
     this.#log('info', ...auditEvent);
   }
 
-  async debug(args: AuditEventArgs): Promise<void> {
-    const auditEvent = await this.createAuditEvent(args);
+  async debug(args: AuditorEventArgs): Promise<void> {
+    const auditEvent = await this.createAuditorEvent(args);
     this.#log('debug', ...auditEvent);
   }
 
-  child(meta: JsonObject): EventAuditorService {
-    return new MockRootEventAuditorService(this.#level, {
+  child(meta: JsonObject): AuditorService {
+    return new MockRootAuditorService(this.#level, {
       ...this.#meta,
       ...meta,
     });
@@ -104,10 +104,12 @@ export class MockRootEventAuditorService implements RootEventAuditorService {
     }
   }
 
-  private async createAuditEvent(args: AuditEventArgs): Promise<AuditEvent> {
+  private async createAuditorEvent(
+    args: AuditorEventArgs,
+  ): Promise<AuditorEvent> {
     const { message, actorId, request, ...rest } = args;
 
-    const auditEvent: AuditEvent = [
+    const auditEvent: AuditorEvent = [
       message,
       {
         actor: {
@@ -134,20 +136,17 @@ export class MockRootEventAuditorService implements RootEventAuditorService {
     this.#meta = meta;
     this.#services = {
       auth: new MockAuthService({
-        pluginId: 'rootEventAuditor',
+        pluginId: 'rootAuditor',
         disableDefaultAuthPolicy: false,
       }),
-      httpAuth: new MockHttpAuthService(
-        'rootEventAuditor',
-        mockCredentials.user(),
-      ),
+      httpAuth: new MockHttpAuthService('rootAuditor', mockCredentials.user()),
     };
   }
 
   #log(
     level: 'error' | 'warn' | 'info' | 'debug',
     message: string,
-    meta?: AuditEvent[1],
+    meta?: AuditorEvent[1],
   ) {
     const levelValue = levels[level] ?? 0;
     if (levelValue <= this.#level) {

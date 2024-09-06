@@ -551,14 +551,14 @@ export interface Config {
         paths?: string[];
       }>;
     };
-    rootEventAuditor?: {
+    rootAuditor?: {
       /**
-       * Configuration for the event auditing to the console
+       * Configuration for the auditing to the console
        * @visibility frontend
        */
       console: {
         /**
-         * Enables event auditing to console
+         * Enables auditing to console
          * @default true
          * @visibility frontend
          */
@@ -570,7 +570,7 @@ export interface Config {
        */
       rotateFile?: {
         /**
-         * Enables event auditing to a rotating file
+         * Enables auditing to a rotating file
          * Default: false
          * @visibility frontend
          */

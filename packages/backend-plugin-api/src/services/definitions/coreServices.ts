@@ -162,17 +162,17 @@ export namespace coreServices {
   >({ id: 'core.logger' });
 
   /**
-   * Plugin-level logging.
+   * Plugin-level auditing.
    *
-   * See {@link EventAuditorService}
-   * and {@link https://backstage.io/docs/backend-system/core-services/event-auditor | the service docs}
+   * See {@link AuditorService}
+   * and {@link https://backstage.io/docs/backend-system/core-services/auditor | the service docs}
    * for more information.
    *
    * @public
    */
-  export const eventAuditor = createServiceRef<
-    import('./EventAuditorService').EventAuditorService
-  >({ id: 'core.eventAuditor' });
+  export const auditor = createServiceRef<
+    import('./AuditorService').AuditorService
+  >({ id: 'core.auditor' });
 
   /**
    * Permission system integration for authorization of user actions.
@@ -240,17 +240,17 @@ export namespace coreServices {
   >({ id: 'core.rootLogger', scope: 'root' });
 
   /**
-   * Root-level event auditing.
+   * Root-level auditing.
    *
-   * See {@link RootEventAuditorService}
-   * and {@link https://backstage.io/docs/backend-system/core-services/root-event-auditor | the service docs}
+   * See {@link RootAuditorService}
+   * and {@link https://backstage.io/docs/backend-system/core-services/root-auditor | the service docs}
    * for more information.
    *
    * @public
    */
-  export const rootEventAuditor = createServiceRef<
-    import('./RootEventAuditorService').RootEventAuditorService
-  >({ id: 'core.rootEventAuditor' }); // Do we need `scope: root` here?
+  export const rootAuditor = createServiceRef<
+    import('./RootAuditorService').RootAuditorService
+  >({ id: 'core.rootAuditor' });
 
   /**
    * Scheduling of distributed background tasks.

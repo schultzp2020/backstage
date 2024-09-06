@@ -15,11 +15,11 @@
  */
 
 import type {
-  AuditEvent,
-  AuditEventArgs,
+  AuditorEvent,
+  AuditorEventArgs,
   AuthService,
   HttpAuthService,
-  RootEventAuditorService,
+  RootAuditorService,
 } from '@backstage/backend-plugin-api';
 import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
@@ -40,7 +40,7 @@ export const defaultFormat = winston.format.combine(
 /**
  * @public
  */
-export interface EventAuditorOptions {
+export interface AuditorOptions {
   services: {
     auth: AuthService;
     httpAuth: HttpAuthService;
@@ -52,11 +52,11 @@ export interface EventAuditorOptions {
 }
 
 /**
- * A {@link @backstage/backend-plugin-api#RootEventAuditorService} implementation based on winston.
+ * A {@link @backstage/backend-plugin-api#RootAuditorService} implementation based on winston.
  *
  * @public
  */
-export class EventAuditor implements RootEventAuditorService {
+export class Auditor implements RootAuditorService {
   #winstonLogger: winston.Logger;
   #services: {
     auth: AuthService;
@@ -65,12 +65,12 @@ export class EventAuditor implements RootEventAuditorService {
   #addRedactions?: (redactions: Iterable<string>) => void;
 
   /**
-   * Creates a {@link EventAuditor} instance.
+   * Creates a {@link Auditor} instance.
    */
-  static create(options: EventAuditorOptions): EventAuditor {
-    const redacter = EventAuditor.redacter();
+  static create(options: AuditorOptions): Auditor {
+    const redacter = Auditor.redacter();
 
-    let eventAuditor = winston.createLogger({
+    let auditor = winston.createLogger({
       level: process.env.LOG_LEVEL ?? options.level ?? 'info',
       format: options?.format
         ? winston.format.combine(options.format, redacter.format)
@@ -79,10 +79,10 @@ export class EventAuditor implements RootEventAuditorService {
     });
 
     if (options.meta) {
-      eventAuditor = eventAuditor.child(options.meta);
+      auditor = auditor.child(options.meta);
     }
 
-    return new EventAuditor(eventAuditor, options.services, redacter.add);
+    return new Auditor(auditor, options.services, redacter.add);
   }
 
   /**
@@ -108,29 +108,29 @@ export class EventAuditor implements RootEventAuditorService {
     this.#addRedactions = addRedactions;
   }
 
-  async error(args: AuditEventArgs): Promise<void> {
-    const auditEvent = await this.createAuditEvent(args);
+  async error(args: AuditorEventArgs): Promise<void> {
+    const auditEvent = await this.createAuditorEvent(args);
     console.log(auditEvent);
     this.#winstonLogger.error(...auditEvent);
   }
 
-  async warn(args: AuditEventArgs): Promise<void> {
-    const auditEvent = await this.createAuditEvent(args);
+  async warn(args: AuditorEventArgs): Promise<void> {
+    const auditEvent = await this.createAuditorEvent(args);
     this.#winstonLogger.warn(...auditEvent);
   }
 
-  async info(args: AuditEventArgs): Promise<void> {
-    const auditEvent = await this.createAuditEvent(args);
+  async info(args: AuditorEventArgs): Promise<void> {
+    const auditEvent = await this.createAuditorEvent(args);
     this.#winstonLogger.info(...auditEvent);
   }
 
-  async debug(args: AuditEventArgs): Promise<void> {
-    const auditEvent = await this.createAuditEvent(args);
+  async debug(args: AuditorEventArgs): Promise<void> {
+    const auditEvent = await this.createAuditorEvent(args);
     this.#winstonLogger.debug(...auditEvent);
   }
 
-  child(meta: JsonObject): EventAuditor {
-    return new EventAuditor(this.#winstonLogger.child(meta), this.#services);
+  child(meta: JsonObject): Auditor {
+    return new Auditor(this.#winstonLogger.child(meta), this.#services);
   }
 
   addRedactions(redactions: Iterable<string>) {
@@ -159,10 +159,12 @@ export class EventAuditor implements RootEventAuditorService {
     }
   }
 
-  private async createAuditEvent(args: AuditEventArgs): Promise<AuditEvent> {
+  private async createAuditorEvent(
+    args: AuditorEventArgs,
+  ): Promise<AuditorEvent> {
     const { message, actorId, request, ...rest } = args;
 
-    const auditEvent: AuditEvent = [
+    const auditEvent: AuditorEvent = [
       message,
       {
         actor: {
