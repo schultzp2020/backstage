@@ -551,7 +551,7 @@ export interface Config {
         paths?: string[];
       }>;
     };
-    rootAuditor?: {
+    auditor?: {
       /**
        * Configuration for the auditing to the console
        * @visibility frontend

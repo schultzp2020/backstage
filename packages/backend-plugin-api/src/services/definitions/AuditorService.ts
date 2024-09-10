@@ -113,5 +113,5 @@ export interface AuditorService {
 
   child(meta: JsonObject): AuditorService;
 
-  getActorId(request?: Request): Promise<string | undefined>;
+  getActorId(request: Request): Promise<string | undefined>;
 }

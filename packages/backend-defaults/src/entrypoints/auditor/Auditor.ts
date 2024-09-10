@@ -17,10 +17,12 @@
 import type {
   AuditorEvent,
   AuditorEventArgs,
+  AuditorService,
   AuthService,
+  BackstageCredentials,
   HttpAuthService,
-  RootAuditorService,
 } from '@backstage/backend-plugin-api';
+import { AuthenticationError, ForwardedError } from '@backstage/errors';
 import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 import type { Format } from 'logform';
@@ -41,10 +43,8 @@ export const defaultFormat = winston.format.combine(
  * @public
  */
 export interface AuditorOptions {
-  services: {
-    auth: AuthService;
-    httpAuth: HttpAuthService;
-  };
+  auth?: AuthService;
+  httpAuth?: HttpAuthService;
   meta?: JsonObject;
   level?: string;
   format?: Format;
@@ -56,12 +56,10 @@ export interface AuditorOptions {
  *
  * @public
  */
-export class Auditor implements RootAuditorService {
+export class Auditor implements AuditorService {
   #winstonLogger: winston.Logger;
-  #services: {
-    auth: AuthService;
-    httpAuth: HttpAuthService;
-  };
+  #auth?: AuthService;
+  #httpAuth?: HttpAuthService;
   #addRedactions?: (redactions: Iterable<string>) => void;
 
   /**
@@ -82,7 +80,7 @@ export class Auditor implements RootAuditorService {
       auditor = auditor.child(options.meta);
     }
 
-    return new Auditor(auditor, options.services, redacter.add);
+    return new Auditor(auditor, options.auth, options.httpAuth, redacter.add);
   }
 
   /**
@@ -97,14 +95,13 @@ export class Auditor implements RootAuditorService {
 
   private constructor(
     winstonLogger: winston.Logger,
-    services: {
-      auth: AuthService;
-      httpAuth: HttpAuthService;
-    },
+    auth?: AuthService,
+    httpAuth?: HttpAuthService,
     addRedactions?: (redactions: Iterable<string>) => void,
   ) {
     this.#winstonLogger = winstonLogger;
-    this.#services = services;
+    this.#auth = auth;
+    this.#httpAuth = httpAuth;
     this.#addRedactions = addRedactions;
   }
 
@@ -129,34 +126,52 @@ export class Auditor implements RootAuditorService {
     this.#winstonLogger.debug(...auditEvent);
   }
 
-  child(meta: JsonObject): Auditor {
-    return new Auditor(this.#winstonLogger.child(meta), this.#services);
+  child(
+    meta: JsonObject,
+    auth?: AuthService,
+    httpAuth?: HttpAuthService,
+  ): AuditorService {
+    return new Auditor(
+      this.#winstonLogger.child(meta),
+      auth ?? this.#auth,
+      httpAuth ?? this.#httpAuth,
+    );
   }
 
   addRedactions(redactions: Iterable<string>) {
     this.#addRedactions?.(redactions);
   }
 
-  async getActorId(request?: Request): Promise<string | undefined> {
-    const { auth, httpAuth } = this.#services;
-
-    if (!(request && httpAuth && auth)) {
-      return undefined;
+  async getActorId(request: Request): Promise<string | undefined> {
+    if (!this.#auth) {
+      throw new AuthenticationError(
+        `The core service 'auth' was not provided during the auditor's instantiation`,
+      );
     }
+
+    if (!this.#httpAuth) {
+      throw new AuthenticationError(
+        `The core service 'httpAuth' was not provided during the auditor's instantiation`,
+      );
+    }
+
+    let credentials: BackstageCredentials;
+
     try {
-      const credentials = await httpAuth.credentials(request);
-      const userEntityRef = auth.isPrincipal(credentials, 'user')
-        ? credentials.principal.userEntityRef
-        : undefined;
-
-      const serviceEntityRef = auth.isPrincipal(credentials, 'service')
-        ? credentials.principal.subject
-        : undefined;
-
-      return userEntityRef ?? serviceEntityRef;
-    } catch {
-      return undefined;
+      credentials = await this.#httpAuth.credentials(request);
+    } catch (error) {
+      throw new ForwardedError('Could not resolve credentials', error);
     }
+
+    if (this.#auth.isPrincipal(credentials, 'user')) {
+      return credentials.principal.userEntityRef;
+    }
+
+    if (this.#auth.isPrincipal(credentials, 'service')) {
+      return credentials.principal.subject;
+    }
+
+    return undefined;
   }
 
   private async createAuditorEvent(
@@ -164,21 +179,26 @@ export class Auditor implements RootAuditorService {
   ): Promise<AuditorEvent> {
     const { message, actorId, request, ...rest } = args;
 
+    const eventRequest = request
+      ? {
+          url: request?.originalUrl,
+          method: request?.method,
+        }
+      : undefined;
+
+    const eventActorId =
+      actorId ?? (request ? await this.getActorId(request) : undefined);
+
     const auditEvent: AuditorEvent = [
       message,
       {
         actor: {
-          actorId: actorId ?? (await this.getActorId(request)),
+          actorId: eventActorId,
           ip: request?.ip,
           hostname: request?.hostname,
           userAgent: request?.get('user-agent'),
         },
-        request: request
-          ? {
-              url: request?.originalUrl,
-              method: request?.method,
-            }
-          : undefined,
+        request: eventRequest,
         ...rest,
       },
     ];

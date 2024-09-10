@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { auditorServiceFactory } from '@backstage/backend-defaults/auditor';
+import type { AuditorOptions } from '@backstage/backend-defaults/auditor';
 import { cacheServiceFactory } from '@backstage/backend-defaults/cache';
 import { databaseServiceFactory } from '@backstage/backend-defaults/database';
 import {
@@ -51,10 +51,10 @@ import {
   eventsServiceRef,
 } from '@backstage/plugin-events-node';
 import { JsonObject } from '@backstage/types';
+import { MockAuditorService } from './MockAuditorService';
 import { MockAuthService } from './MockAuthService';
 import { mockCredentials } from './mockCredentials';
 import { MockHttpAuthService } from './MockHttpAuthService';
-import { MockRootAuditorService } from './MockRootAuditorService';
 import { MockRootLoggerService } from './MockRootLoggerService';
 import { MockUserInfoService } from './MockUserInfoService';
 
@@ -62,18 +62,6 @@ import { MockUserInfoService } from './MockUserInfoService';
 function createLoggerMock() {
   return {
     child: jest.fn().mockImplementation(createLoggerMock),
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  };
-}
-
-/** @internal */
-function createAuditorMock() {
-  return {
-    child: jest.fn().mockImplementation(createAuditorMock),
-    getActorId: jest.fn(),
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
@@ -197,20 +185,66 @@ export namespace mockServices {
     }));
   }
 
-  export function rootAuditor(options?: rootAuditor.Options): AuditorService {
-    return MockRootAuditorService.create(options);
+  /**
+   * Creates a mock implementation of the `AuditorService`.
+   */
+  export function auditor(
+    options?: auditor.Options & {
+      pluginId?: string;
+    },
+  ): AuditorService {
+    const service = 'backstage';
+    const pluginId = options?.pluginId ?? 'test';
+    const mockAuth =
+      options?.auth ??
+      new MockAuthService({
+        pluginId,
+        disableDefaultAuthPolicy: false,
+      });
+    const mockHttpAuth =
+      options?.httpAuth ??
+      new MockHttpAuthService(pluginId, mockCredentials.user());
+
+    const auditorMock = MockAuditorService.create({
+      meta: options?.meta ? { ...options.meta, service } : { service },
+      level: options?.level ?? 'info',
+    });
+
+    return auditorMock.child({ pluginId }, mockAuth, mockHttpAuth);
   }
 
-  export namespace rootAuditor {
-    export type Options = {
-      level?: 'none' | 'error' | 'warn' | 'info' | 'debug';
-    };
+  export namespace auditor {
+    export type Options = Omit<AuditorOptions, 'format' | 'transports'>;
 
-    export const factory = simpleFactoryWithOptions(
-      coreServices.rootAuditor,
-      rootAuditor,
-    );
-    export const mock = simpleMock(coreServices.rootAuditor, () => ({
+    export const factory = (options?: auditor.Options) =>
+      createServiceFactory({
+        service: coreServices.auditor,
+        deps: {
+          auth: coreServices.auth,
+          httpAuth: coreServices.httpAuth,
+          plugin: coreServices.pluginMetadata,
+        },
+        createRootContext() {
+          const service = 'backstage';
+
+          return MockAuditorService.create({
+            meta: options?.meta ? { ...options.meta, service } : { service },
+            level: options?.level ?? 'info',
+          });
+        },
+        factory(
+          { plugin, auth: mockAuth, httpAuth: mockHttpAuth },
+          rootAuditor,
+        ) {
+          return rootAuditor.child(
+            { plugin: plugin.getId() },
+            mockAuth,
+            mockHttpAuth,
+          );
+        },
+      });
+
+    export const mock = simpleMock(coreServices.auditor, () => ({
       child: jest.fn(),
       getActorId: jest.fn(),
       debug: jest.fn(),
@@ -415,13 +449,6 @@ export namespace mockServices {
     export const factory = () => loggerServiceFactory;
     export const mock = simpleMock(coreServices.logger, () =>
       createLoggerMock(),
-    );
-  }
-
-  export namespace auditor {
-    export const factory = () => auditorServiceFactory;
-    export const mock = simpleMock(coreServices.auditor, () =>
-      createAuditorMock(),
     );
   }
 

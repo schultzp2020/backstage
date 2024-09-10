@@ -60,7 +60,6 @@ export type {
   PermissionsServiceRequestOptions,
 } from './PermissionsService';
 export type { PluginMetadataService } from './PluginMetadataService';
-export type { RootAuditorService } from './RootAuditorService';
 export type { RootConfigService } from './RootConfigService';
 export type { RootHealthService } from './RootHealthService';
 export type { RootHttpRouterService } from './RootHttpRouterService';

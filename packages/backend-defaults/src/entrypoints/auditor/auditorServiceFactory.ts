@@ -18,6 +18,45 @@ import {
   coreServices,
   createServiceFactory,
 } from '@backstage/backend-plugin-api';
+import type { Config } from '@backstage/config';
+import * as winston from 'winston';
+import 'winston-daily-rotate-file';
+import { Auditor, defaultFormat } from './Auditor';
+
+const transports = {
+  auditorConsole: (config?: Config) => {
+    if (!config?.getOptionalBoolean('console.enabled')) {
+      return [];
+    }
+    return [
+      new winston.transports.Console({
+        format: defaultFormat,
+      }),
+    ];
+  },
+  auditorFile: (config?: Config) => {
+    if (!config?.getOptionalBoolean('rotateFile.enabled')) {
+      return [];
+    }
+    return [
+      new winston.transports.DailyRotateFile({
+        format: defaultFormat,
+        dirname:
+          config?.getOptionalString('rotateFile.logFileDirPath') ??
+          '/var/log/backstage/audit',
+        filename:
+          config?.getOptionalString('rotateFile.logFileName') ??
+          'backstage-audit-%DATE%.log',
+        datePattern: config?.getOptionalString('rotateFile.dateFormat'),
+        frequency: config?.getOptionalString('rotateFile.frequency'),
+        zippedArchive: config?.getOptionalBoolean('rotateFile.zippedArchive'),
+        utc: config?.getOptionalBoolean('rotateFile.utc'),
+        maxSize: config?.getOptionalString('rotateFile.maxSize'),
+        maxFiles: config?.getOptional('rotateFile.maxFilesOrDays'),
+      }),
+    ];
+  },
+};
 
 /**
  * Plugin-level auditing.
@@ -31,10 +70,29 @@ import {
 export const auditorServiceFactory = createServiceFactory({
   service: coreServices.auditor,
   deps: {
-    rootAuditor: coreServices.rootAuditor,
+    config: coreServices.rootConfig,
+    auth: coreServices.auth,
+    httpAuth: coreServices.httpAuth,
     plugin: coreServices.pluginMetadata,
   },
-  factory({ rootAuditor, plugin }) {
-    return rootAuditor.child({ plugin: plugin.getId() });
+  createRootContext({ config }) {
+    const auditorConfig = config.getOptionalConfig('backend.auditor');
+
+    const auditor = Auditor.create({
+      meta: {
+        service: 'backstage',
+      },
+      level: process.env.LOG_LEVEL ?? 'info',
+      format: winston.format.combine(defaultFormat, winston.format.json()),
+      transports: [
+        ...transports.auditorConsole(auditorConfig),
+        ...transports.auditorFile(auditorConfig),
+      ],
+    });
+
+    return auditor;
+  },
+  factory({ plugin, auth, httpAuth }, rootAuditor) {
+    return rootAuditor.child({ plugin: plugin.getId() }, auth, httpAuth);
   },
 });

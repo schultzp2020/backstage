@@ -23,20 +23,16 @@ import { Auditor } from './Auditor';
 describe('Auditor', () => {
   it('creates a auditor instance with default options', () => {
     const auditor = Auditor.create({
-      services: {
-        auth: mockServices.auth.mock(),
-        httpAuth: mockServices.httpAuth.mock(),
-      },
+      auth: mockServices.auth.mock(),
+      httpAuth: mockServices.httpAuth.mock(),
     });
     expect(auditor).toBeInstanceOf(Auditor);
   });
 
   it('creates a child logger', () => {
     const auditor = Auditor.create({
-      services: {
-        auth: mockServices.auth.mock(),
-        httpAuth: mockServices.httpAuth.mock(),
-      },
+      auth: mockServices.auth.mock(),
+      httpAuth: mockServices.httpAuth.mock(),
     });
     const childLogger = auditor.child({ plugin: 'test-plugin' });
     expect(childLogger).toBeInstanceOf(Auditor);
@@ -49,10 +45,8 @@ describe('Auditor', () => {
     });
 
     const auditor = Auditor.create({
-      services: {
-        auth: mockServices.auth.mock(),
-        httpAuth: mockServices.httpAuth.mock(),
-      },
+      auth: mockServices.auth.mock(),
+      httpAuth: mockServices.httpAuth.mock(),
       format: format.json(),
       transports: [mockTransport],
     });
@@ -88,10 +82,8 @@ describe('Auditor', () => {
     });
 
     const auditor = Auditor.create({
-      services: {
-        auth: mockServices.auth.mock(),
-        httpAuth: mockServices.httpAuth.mock(),
-      },
+      auth: mockServices.auth.mock(),
+      httpAuth: mockServices.httpAuth.mock(),
       format: format.json(),
       transports: [mockTransport],
     });

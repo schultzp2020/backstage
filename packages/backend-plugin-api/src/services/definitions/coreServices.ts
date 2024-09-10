@@ -240,19 +240,6 @@ export namespace coreServices {
   >({ id: 'core.rootLogger', scope: 'root' });
 
   /**
-   * Root-level auditing.
-   *
-   * See {@link RootAuditorService}
-   * and {@link https://backstage.io/docs/backend-system/core-services/root-auditor | the service docs}
-   * for more information.
-   *
-   * @public
-   */
-  export const rootAuditor = createServiceRef<
-    import('./RootAuditorService').RootAuditorService
-  >({ id: 'core.rootAuditor' });
-
-  /**
    * Scheduling of distributed background tasks.
    *
    * See {@link SchedulerService}
