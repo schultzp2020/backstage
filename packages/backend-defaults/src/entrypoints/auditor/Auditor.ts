@@ -52,7 +52,7 @@ export interface AuditorOptions {
 }
 
 /**
- * A {@link @backstage/backend-plugin-api#RootAuditorService} implementation based on winston.
+ * A {@link @backstage/backend-plugin-api#AuditorService} implementation based on winston.
  *
  * @public
  */

@@ -16,7 +16,7 @@
 
 import { MockAuditorService } from './MockAuditorService';
 
-describe('MockRootAuditorService', () => {
+describe('MockAuditorService', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });

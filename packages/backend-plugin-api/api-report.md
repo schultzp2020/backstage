@@ -92,7 +92,7 @@ export interface AuditorService {
   // (undocumented)
   error(args: AuditorEventArgs): Promise<void>;
   // (undocumented)
-  getActorId(request?: Request_2): Promise<string | undefined>;
+  getActorId(request: Request_2): Promise<string | undefined>;
   // (undocumented)
   info(args: AuditorEventArgs): Promise<void>;
   // (undocumented)
@@ -268,7 +268,6 @@ export namespace coreServices {
   const rootHttpRouter: ServiceRef<RootHttpRouterService, 'root', 'singleton'>;
   const rootLifecycle: ServiceRef<RootLifecycleService, 'root', 'singleton'>;
   const rootLogger: ServiceRef<RootLoggerService, 'root', 'singleton'>;
-  const rootAuditor: ServiceRef<RootAuditorService, 'plugin', 'singleton'>;
   const scheduler: ServiceRef<SchedulerService, 'plugin', 'singleton'>;
   const urlReader: ServiceRef<UrlReaderService, 'plugin', 'singleton'>;
 }
@@ -562,9 +561,6 @@ export function resolvePackagePath(name: string, ...paths: string[]): string;
 
 // @public
 export function resolveSafeChildPath(base: string, path: string): string;
-
-// @public
-export interface RootAuditorService extends AuditorService {}
 
 // @public
 export interface RootConfigService extends Config {}
