@@ -39,7 +39,7 @@ export class MockAuditorService implements AuditorService {
   #options: mockServices.auditor.Options;
 
   static create(options?: mockServices.auditor.Options): MockAuditorService {
-    const level = options?.level ?? 'info';
+    const level = options?.level ?? 'none';
     if (!(level in LEVELS)) {
       throw new Error(`Invalid log level '${level}'`);
     }
