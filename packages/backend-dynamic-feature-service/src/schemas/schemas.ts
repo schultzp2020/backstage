@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import { ScannedPluginPackage } from '../scanner/types';
 import {
   coreServices,
   createServiceFactory,
   createServiceRef,
+  LoggerService,
 } from '@backstage/backend-plugin-api';
 import { findPaths } from '@backstage/cli-common';
+import { ScannedPluginPackage } from '../scanner/types';
 
+import { ConfigSchema, loadConfigSchema } from '@backstage/config-loader';
+import { JsonObject } from '@backstage/types';
 import fs from 'fs-extra';
+import { isEmpty } from 'lodash';
 import * as path from 'path';
 import * as url from 'url';
-import { isEmpty } from 'lodash';
-import { LoggerService } from '@backstage/backend-plugin-api';
-import { JsonObject } from '@backstage/types';
 import { PluginScanner } from '../scanner/plugin-scanner';
-import { ConfigSchema, loadConfigSchema } from '@backstage/config-loader';
 
 /**
  *

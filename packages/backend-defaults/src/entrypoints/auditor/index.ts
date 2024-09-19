@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { Auditor, type AuditorOptions } from './Auditor';
+export { Auditor, defaultFormat, type AuditorOptions } from './Auditor';
 export { auditorServiceFactory } from './auditorServiceFactory';

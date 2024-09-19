@@ -105,23 +105,23 @@ export class Auditor implements AuditorService {
     this.#addRedactions = addRedactions;
   }
 
-  async error(args: AuditorEventArgs): Promise<void> {
+  async error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     console.log(auditEvent);
     this.#winstonLogger.error(...auditEvent);
   }
 
-  async warn(args: AuditorEventArgs): Promise<void> {
+  async warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.#winstonLogger.warn(...auditEvent);
   }
 
-  async info(args: AuditorEventArgs): Promise<void> {
+  async info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.#winstonLogger.info(...auditEvent);
   }
 
-  async debug(args: AuditorEventArgs): Promise<void> {
+  async debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.#winstonLogger.debug(...auditEvent);
   }
@@ -174,8 +174,8 @@ export class Auditor implements AuditorService {
     return undefined;
   }
 
-  private async createAuditorEvent(
-    args: AuditorEventArgs,
+  private async createAuditorEvent<T extends JsonObject>(
+    args: AuditorEventArgs<T>,
   ): Promise<AuditorEvent> {
     const { message, actorId, request, ...rest } = args;
 

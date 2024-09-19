@@ -3739,6 +3739,7 @@ __metadata:
     lodash: ^4.17.21
     wait-for-expect: ^3.0.2
     winston: ^3.2.1
+    winston-daily-rotate-file: ^5.0.0
   languageName: unknown
   linkType: soft
 

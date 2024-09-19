@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
+import { Auditor, defaultFormat } from '@backstage/backend-defaults/auditor';
+import { createConfigSecretEnumerator } from '@backstage/backend-defaults/rootConfig';
 import {
   coreServices,
   createServiceFactory,
 } from '@backstage/backend-plugin-api';
 import type { Config } from '@backstage/config';
+import { loadConfigSchema } from '@backstage/config-loader';
+import { getPackages } from '@manypkg/get-packages';
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
-import { createConfigSecretEnumerator } from '../rootConfig/createConfigSecretEnumerator';
-import { Auditor, defaultFormat } from './Auditor';
+import { dynamicPluginsSchemasServiceRef } from './schemas';
 
 const transports = {
   auditorConsole: (config?: Config) => {
@@ -59,15 +62,7 @@ const transports = {
   },
 };
 
-/**
- * Plugin-level auditing.
- *
- * See {@link @backstage/code-plugin-api#AuditorService}
- * and {@link https://backstage.io/docs/backend-system/core-services/auditor | the service docs}
- * for more information.
- *
- * @public
- */
+/** @public */
 export const auditorServiceFactory = createServiceFactory({
   service: coreServices.auditor,
   deps: {
@@ -75,8 +70,9 @@ export const auditorServiceFactory = createServiceFactory({
     auth: coreServices.auth,
     httpAuth: coreServices.httpAuth,
     plugin: coreServices.pluginMetadata,
+    schemas: dynamicPluginsSchemasServiceRef,
   },
-  async createRootContext({ config }) {
+  async createRootContext({ config, schemas }) {
     const auditorConfig = config.getOptionalConfig('backend.auditor');
 
     const auditor = Auditor.create({
@@ -91,8 +87,15 @@ export const auditorServiceFactory = createServiceFactory({
       ],
     });
 
+    const configSchema = await loadConfigSchema({
+      dependencies: (
+        await getPackages(process.cwd())
+      ).packages.map(p => p.packageJson.name),
+    });
+
     const secretEnumerator = await createConfigSecretEnumerator({
       auditor,
+      schema: (await schemas.addDynamicPluginsSchemas(configSchema)).schema,
     });
     auditor.addRedactions(secretEnumerator(config));
     config.subscribe?.(() => auditor.addRedactions(secretEnumerator(config)));
