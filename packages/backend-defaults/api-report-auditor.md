@@ -25,19 +25,19 @@ export class Auditor implements AuditorService {
   ): AuditorService;
   static create(options: AuditorOptions): Auditor;
   // (undocumented)
-  debug(args: AuditorEventArgs): Promise<void>;
+  debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
   // (undocumented)
-  error(args: AuditorEventArgs): Promise<void>;
+  error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
   // (undocumented)
   getActorId(request: Request_2): Promise<string | undefined>;
   // (undocumented)
-  info(args: AuditorEventArgs): Promise<void>;
+  info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
   static redacter(): {
     format: Format;
     add: (redactions: Iterable<string>) => void;
   };
   // (undocumented)
-  warn(args: AuditorEventArgs): Promise<void>;
+  warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
 }
 
 // @public (undocumented)
@@ -62,6 +62,9 @@ export const auditorServiceFactory: ServiceFactory<
   'plugin',
   'singleton'
 >;
+
+// @public (undocumented)
+export const defaultFormat: Format;
 
 // (No @packageDocumentation comment for this package)
 ```

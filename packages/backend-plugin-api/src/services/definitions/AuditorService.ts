@@ -19,15 +19,6 @@ import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 
 /**
- * Utility type to expand object in intellisense
- *
- * @internal
- */
-type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & unknown;
-
-/**
  * @public
  */
 export type AuditorEventActorDetails = {
@@ -98,15 +89,13 @@ export type AuditorEventArgs<T extends JsonObject> = {
  */
 export type AuditorEvent = [
   message: string,
-  meta: Prettify<
-    {
-      actor: AuditorEventActorDetails;
-      eventName: string;
-      stage: string;
-      meta?: JsonObject;
-      request?: AuditorEventRequest;
-    } & AuditorEventStatus
-  >,
+  meta: {
+    actor: AuditorEventActorDetails;
+    eventName: string;
+    stage: string;
+    meta?: JsonObject;
+    request?: AuditorEventRequest;
+  } & AuditorEventStatus,
 ];
 
 /**
@@ -117,18 +106,10 @@ export type AuditorEvent = [
  * @public
  */
 export interface AuditorService {
-  error<T extends JsonObject>(
-    args: Prettify<AuditorEventArgs<T>>,
-  ): Promise<void>;
-  warn<T extends JsonObject>(
-    args: Prettify<AuditorEventArgs<T>>,
-  ): Promise<void>;
-  info<T extends JsonObject>(
-    args: Prettify<AuditorEventArgs<T>>,
-  ): Promise<void>;
-  debug<T extends JsonObject>(
-    args: Prettify<AuditorEventArgs<T>>,
-  ): Promise<void>;
+  error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
+  warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
+  info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
+  debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
 
   child(meta: JsonObject): AuditorService;
 

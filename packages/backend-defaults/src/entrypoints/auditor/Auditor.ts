@@ -29,6 +29,7 @@ import type { Format } from 'logform';
 import * as winston from 'winston';
 import { redacterFormat } from '../../lib/redacterFormat';
 
+/** @public */
 export const defaultFormat = winston.format.combine(
   winston.format.timestamp({
     format: 'YYYY-MM-DD HH:mm:ss',
@@ -39,9 +40,7 @@ export const defaultFormat = winston.format.combine(
   redacterFormat().format,
 );
 
-/**
- * @public
- */
+/** @public */
 export interface AuditorOptions {
   auth?: AuthService;
   httpAuth?: HttpAuthService;

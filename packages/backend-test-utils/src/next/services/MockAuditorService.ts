@@ -47,22 +47,22 @@ export class MockAuditorService implements AuditorService {
     return new MockAuditorService(options ? { ...options, level } : { level });
   }
 
-  async error(args: AuditorEventArgs): Promise<void> {
+  async error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.log('error', ...auditEvent);
   }
 
-  async warn(args: AuditorEventArgs): Promise<void> {
+  async warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.log('warn', ...auditEvent);
   }
 
-  async info(args: AuditorEventArgs): Promise<void> {
+  async info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.log('info', ...auditEvent);
   }
 
-  async debug(args: AuditorEventArgs): Promise<void> {
+  async debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.log('debug', ...auditEvent);
   }
@@ -116,8 +116,8 @@ export class MockAuditorService implements AuditorService {
     return undefined;
   }
 
-  private async createAuditorEvent(
-    args: AuditorEventArgs,
+  private async createAuditorEvent<T extends JsonObject>(
+    args: AuditorEventArgs<T>,
   ): Promise<AuditorEvent> {
     const { message, actorId, request, ...rest } = args;
 

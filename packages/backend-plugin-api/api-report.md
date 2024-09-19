@@ -46,13 +46,13 @@ export type AuditorEventActorDetails = {
 };
 
 // @public
-export type AuditorEventArgs = {
+export type AuditorEventArgs<T extends JsonObject> = {
   message: string;
   eventName: string;
   stage: string;
   request?: Request_2;
   actorId?: string;
-  meta?: JsonObject;
+  meta?: T;
 } & AuditorEventStatus;
 
 // @public
@@ -88,15 +88,15 @@ export interface AuditorService {
   // (undocumented)
   child(meta: JsonObject): AuditorService;
   // (undocumented)
-  debug(args: AuditorEventArgs): Promise<void>;
+  debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
   // (undocumented)
-  error(args: AuditorEventArgs): Promise<void>;
+  error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
   // (undocumented)
   getActorId(request: Request_2): Promise<string | undefined>;
   // (undocumented)
-  info(args: AuditorEventArgs): Promise<void>;
+  info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
   // (undocumented)
-  warn(args: AuditorEventArgs): Promise<void>;
+  warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
 }
 
 // @public
