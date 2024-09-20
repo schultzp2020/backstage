@@ -7,6 +7,7 @@
 /// <reference types="webpack-env" />
 
 import { AppConfig } from '@backstage/config';
+import type { AuditorService } from '@backstage/backend-plugin-api';
 import { AuthCallback } from 'isomorphic-git';
 import { AuthService } from '@backstage/backend-plugin-api';
 import { BackendFeature } from '@backstage/backend-plugin-api';
