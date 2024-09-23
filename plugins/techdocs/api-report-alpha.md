@@ -16,6 +16,7 @@ import { default as React_2 } from 'react';
 import { RouteRef } from '@backstage/frontend-plugin-api';
 import { SearchResultItemExtensionComponent } from '@backstage/plugin-search-react/alpha';
 import { SearchResultItemExtensionPredicate } from '@backstage/plugin-search-react/alpha';
+import { SearchResultListItemBlueprintParams } from '@backstage/plugin-search-react/alpha';
 
 // @alpha (undocumented)
 const _default: FrontendPlugin<
@@ -32,7 +33,6 @@ const _default: FrontendPlugin<
   {
     'api:techdocs': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: undefined;
       config: {};
       configInput: {};
@@ -42,10 +42,12 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'page:techdocs': ExtensionDefinition<{
       kind: 'page';
-      namespace: undefined;
       name: undefined;
       config: {
         path: string | undefined;
@@ -68,10 +70,14 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        defaultPath: string;
+        loader: () => Promise<JSX.Element>;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+      };
     }>;
     'nav-item:techdocs': ExtensionDefinition<{
       kind: 'nav-item';
-      namespace: undefined;
       name: undefined;
       config: {};
       configInput: {};
@@ -85,10 +91,14 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        title: string;
+        icon: IconComponent;
+        routeRef: RouteRef<undefined>;
+      };
     }>;
     'api:techdocs/storage': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'storage';
       config: {};
       configInput: {};
@@ -98,6 +108,9 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'search-result-list-item:techdocs': ExtensionDefinition<{
       config: {
@@ -134,12 +147,11 @@ const _default: FrontendPlugin<
         >;
       };
       kind: 'search-result-list-item';
-      namespace: undefined;
       name: undefined;
+      params: SearchResultListItemBlueprintParams;
     }>;
     'page:techdocs/reader': ExtensionDefinition<{
       kind: 'page';
-      namespace: undefined;
       name: 'reader';
       config: {
         path: string | undefined;
@@ -162,11 +174,13 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        defaultPath: string;
+        loader: () => Promise<JSX.Element>;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+      };
     }>;
     'entity-content:techdocs': ExtensionDefinition<{
-      kind: 'entity-content';
-      namespace: undefined;
-      name: undefined;
       config: {
         path: string | undefined;
         title: string | undefined;
@@ -210,7 +224,53 @@ const _default: FrontendPlugin<
               optional: true;
             }
           >;
-      inputs: {};
+      inputs: {
+        emptyState: ExtensionInput<
+          ConfigurableExtensionDataRef<
+            React_2.JSX.Element,
+            'core.reactElement',
+            {
+              optional: true;
+            }
+          >,
+          {
+            singleton: true;
+            optional: true;
+          }
+        >;
+      };
+      kind: 'entity-content';
+      name: undefined;
+      params: {
+        loader: () => Promise<JSX.Element>;
+        defaultPath: string;
+        defaultTitle: string;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+        filter?: string | ((entity: Entity) => boolean) | undefined;
+      };
+    }>;
+    'empty-state:techdocs/entity-content': ExtensionDefinition<{
+      config: {};
+      configInput: {};
+      output: ConfigurableExtensionDataRef<
+        React_2.JSX.Element,
+        'core.reactElement',
+        {
+          optional: true;
+        }
+      >;
+      inputs: {
+        [x: string]: ExtensionInput<
+          AnyExtensionDataRef,
+          {
+            optional: boolean;
+            singleton: boolean;
+          }
+        >;
+      };
+      params: never;
+      kind: 'empty-state';
+      name: 'entity-content';
     }>;
   }
 >;
@@ -252,8 +312,8 @@ export const techDocsSearchResultListItemExtension: ExtensionDefinition<{
     >;
   };
   kind: 'search-result-list-item';
-  namespace: undefined;
   name: undefined;
+  params: SearchResultListItemBlueprintParams;
 }>;
 
 // (No @packageDocumentation comment for this package)

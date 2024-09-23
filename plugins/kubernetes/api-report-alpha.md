@@ -23,7 +23,6 @@ const _default: FrontendPlugin<
   {
     'api:kubernetes': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: undefined;
       config: {};
       configInput: {};
@@ -33,10 +32,12 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'page:kubernetes': ExtensionDefinition<{
       kind: 'page';
-      namespace: undefined;
       name: undefined;
       config: {
         path: string | undefined;
@@ -55,10 +56,14 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        defaultPath: string;
+        loader: () => Promise<JSX.Element>;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+      };
     }>;
     'entity-content:kubernetes/kubernetes': ExtensionDefinition<{
       kind: 'entity-content';
-      namespace: undefined;
       name: 'kubernetes';
       config: {
         path: string | undefined;
@@ -100,10 +105,16 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        loader: () => Promise<JSX.Element>;
+        defaultPath: string;
+        defaultTitle: string;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+        filter?: string | ((entity: Entity) => boolean) | undefined;
+      };
     }>;
     'api:kubernetes/proxy': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'proxy';
       config: {};
       configInput: {};
@@ -113,10 +124,12 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:kubernetes/auth-providers': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'auth-providers';
       config: {};
       configInput: {};
@@ -126,10 +139,12 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:kubernetes/cluster-link-formatter': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'cluster-link-formatter';
       config: {};
       configInput: {};
@@ -139,6 +154,9 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
   }
 >;

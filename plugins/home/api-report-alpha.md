@@ -60,8 +60,12 @@ const _default: FrontendPlugin<
         >;
       };
       kind: 'page';
-      namespace: undefined;
       name: undefined;
+      params: {
+        defaultPath: string;
+        loader: () => Promise<JSX.Element>;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+      };
     }>;
   }
 >;

@@ -19,7 +19,6 @@ const _default: FrontendPlugin<
   {
     'entity-card:org/group-profile': ExtensionDefinition<{
       kind: 'entity-card';
-      namespace: undefined;
       name: 'group-profile';
       config: {
         filter: string | undefined;
@@ -48,10 +47,13 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        loader: () => Promise<JSX.Element>;
+        filter?: string | ((entity: Entity) => boolean) | undefined;
+      };
     }>;
     'entity-card:org/members-list': ExtensionDefinition<{
       kind: 'entity-card';
-      namespace: undefined;
       name: 'members-list';
       config: {
         filter: string | undefined;
@@ -80,10 +82,13 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        loader: () => Promise<JSX.Element>;
+        filter?: string | ((entity: Entity) => boolean) | undefined;
+      };
     }>;
     'entity-card:org/ownership': ExtensionDefinition<{
       kind: 'entity-card';
-      namespace: undefined;
       name: 'ownership';
       config: {
         filter: string | undefined;
@@ -112,10 +117,13 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        loader: () => Promise<JSX.Element>;
+        filter?: string | ((entity: Entity) => boolean) | undefined;
+      };
     }>;
     'entity-card:org/user-profile': ExtensionDefinition<{
       kind: 'entity-card';
-      namespace: undefined;
       name: 'user-profile';
       config: {
         filter: string | undefined;
@@ -144,6 +152,10 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        loader: () => Promise<JSX.Element>;
+        filter?: string | ((entity: Entity) => boolean) | undefined;
+      };
     }>;
   }
 >;

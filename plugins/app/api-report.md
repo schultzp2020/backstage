@@ -29,30 +29,6 @@ const appPlugin: FrontendPlugin<
   {},
   {},
   {
-    [x: `component:app/${string}`]: ExtensionDefinition<{
-      config: {};
-      configInput: {};
-      output: ConfigurableExtensionDataRef<
-        {
-          ref: ComponentRef;
-          impl: ComponentType;
-        },
-        'core.component.component',
-        {}
-      >;
-      inputs: {
-        [x: string]: ExtensionInput<
-          AnyExtensionDataRef,
-          {
-            optional: boolean;
-            singleton: boolean;
-          }
-        >;
-      };
-      kind: 'component';
-      namespace: string;
-      name: string;
-    }>;
     app: ExtensionDefinition<{
       config: {};
       configInput: {};
@@ -70,13 +46,12 @@ const appPlugin: FrontendPlugin<
           }
         >;
       };
+      params: never;
       kind: undefined;
-      namespace: 'app';
       name: undefined;
     }>;
     'api:app/app-language': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'app-language';
       config: {};
       configInput: {};
@@ -86,6 +61,9 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'app/layout': ExtensionDefinition<{
       config: {};
@@ -111,8 +89,8 @@ const appPlugin: FrontendPlugin<
           }
         >;
       };
+      params: never;
       kind: undefined;
-      namespace: 'app';
       name: 'layout';
     }>;
     'app/nav': ExtensionDefinition<{
@@ -154,8 +132,8 @@ const appPlugin: FrontendPlugin<
           }
         >;
       };
+      params: never;
       kind: undefined;
-      namespace: 'app';
       name: 'nav';
     }>;
     'app/root': ExtensionDefinition<{
@@ -219,8 +197,8 @@ const appPlugin: FrontendPlugin<
           }
         >;
       };
+      params: never;
       kind: undefined;
-      namespace: 'app';
       name: 'root';
     }>;
     'app/routes': ExtensionDefinition<{
@@ -248,8 +226,8 @@ const appPlugin: FrontendPlugin<
           }
         >;
       };
+      params: never;
       kind: undefined;
-      namespace: 'app';
       name: 'routes';
     }>;
     'api:app/app-theme': ExtensionDefinition<{
@@ -270,26 +248,32 @@ const appPlugin: FrontendPlugin<
         >;
       };
       kind: 'api';
-      namespace: undefined;
       name: 'app-theme';
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'theme:app/light': ExtensionDefinition<{
       kind: 'theme';
-      namespace: 'app';
       name: 'light';
       config: {};
       configInput: {};
       output: ConfigurableExtensionDataRef<AppTheme, 'core.theme.theme', {}>;
       inputs: {};
+      params: {
+        theme: AppTheme;
+      };
     }>;
     'theme:app/dark': ExtensionDefinition<{
       kind: 'theme';
-      namespace: 'app';
       name: 'dark';
       config: {};
       configInput: {};
       output: ConfigurableExtensionDataRef<AppTheme, 'core.theme.theme', {}>;
       inputs: {};
+      params: {
+        theme: AppTheme;
+      };
     }>;
     'api:app/components': ExtensionDefinition<{
       config: {};
@@ -316,8 +300,10 @@ const appPlugin: FrontendPlugin<
         >;
       };
       kind: 'api';
-      namespace: undefined;
       name: 'components';
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/icons': ExtensionDefinition<{
       config: {};
@@ -343,12 +329,13 @@ const appPlugin: FrontendPlugin<
         >;
       };
       kind: 'api';
-      namespace: undefined;
       name: 'icons';
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/feature-flags': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'feature-flags';
       config: {};
       configInput: {};
@@ -358,6 +345,9 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/translations': ExtensionDefinition<{
       config: {};
@@ -388,12 +378,13 @@ const appPlugin: FrontendPlugin<
         >;
       };
       kind: 'api';
-      namespace: undefined;
       name: 'translations';
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'app-root-element:app/oauth-request-dialog': ExtensionDefinition<{
       kind: 'app-root-element';
-      namespace: 'app';
       name: 'oauth-request-dialog';
       config: {};
       configInput: {};
@@ -403,6 +394,9 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        element: JSX.Element | (() => JSX.Element);
+      };
     }>;
     'app-root-element:app/alert-display': ExtensionDefinition<{
       config: {
@@ -436,12 +430,13 @@ const appPlugin: FrontendPlugin<
         >;
       };
       kind: 'app-root-element';
-      namespace: 'app';
       name: 'alert-display';
+      params: {
+        element: JSX.Element | (() => JSX.Element);
+      };
     }>;
     'api:app/discovery': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'discovery';
       config: {};
       configInput: {};
@@ -451,10 +446,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/alert': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'alert';
       config: {};
       configInput: {};
@@ -464,10 +461,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/analytics': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'analytics';
       config: {};
       configInput: {};
@@ -477,10 +476,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/error': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'error';
       config: {};
       configInput: {};
@@ -490,10 +491,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/storage': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'storage';
       config: {};
       configInput: {};
@@ -503,10 +506,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/fetch': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'fetch';
       config: {};
       configInput: {};
@@ -516,10 +521,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/oauth-request': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'oauth-request';
       config: {};
       configInput: {};
@@ -529,10 +536,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/google-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'google-auth';
       config: {};
       configInput: {};
@@ -542,10 +551,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/microsoft-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'microsoft-auth';
       config: {};
       configInput: {};
@@ -555,10 +566,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/github-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'github-auth';
       config: {};
       configInput: {};
@@ -568,10 +581,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/okta-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'okta-auth';
       config: {};
       configInput: {};
@@ -581,10 +596,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/gitlab-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'gitlab-auth';
       config: {};
       configInput: {};
@@ -594,10 +611,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/onelogin-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'onelogin-auth';
       config: {};
       configInput: {};
@@ -607,10 +626,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/bitbucket-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'bitbucket-auth';
       config: {};
       configInput: {};
@@ -620,10 +641,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/bitbucket-server-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'bitbucket-server-auth';
       config: {};
       configInput: {};
@@ -633,10 +656,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/atlassian-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'atlassian-auth';
       config: {};
       configInput: {};
@@ -646,10 +671,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/vmware-cloud-auth': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'vmware-cloud-auth';
       config: {};
       configInput: {};
@@ -659,10 +686,12 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'api:app/permission': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: 'permission';
       config: {};
       configInput: {};
@@ -672,6 +701,9 @@ const appPlugin: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
   }
 >;

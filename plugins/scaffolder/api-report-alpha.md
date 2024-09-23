@@ -46,7 +46,6 @@ const _default: FrontendPlugin<
   {
     'api:scaffolder': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: undefined;
       config: {};
       configInput: {};
@@ -56,10 +55,12 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'page:scaffolder': ExtensionDefinition<{
       kind: 'page';
-      namespace: undefined;
       name: undefined;
       config: {
         path: string | undefined;
@@ -82,10 +83,14 @@ const _default: FrontendPlugin<
             }
           >;
       inputs: {};
+      params: {
+        defaultPath: string;
+        loader: () => Promise<JSX.Element>;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+      };
     }>;
     'nav-item:scaffolder': ExtensionDefinition<{
       kind: 'nav-item';
-      namespace: undefined;
       name: undefined;
       config: {};
       configInput: {};
@@ -99,6 +104,11 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        title: string;
+        icon: IconComponent;
+        routeRef: RouteRef<undefined>;
+      };
     }>;
   }
 >;
@@ -109,6 +119,28 @@ export type FormProps = Pick<
   FormProps_2,
   'transformErrors' | 'noHtml5Validate'
 >;
+
+// @public (undocumented)
+export type ScaffolderCustomFieldExplorerClassKey =
+  | 'root'
+  | 'controls'
+  | 'fieldForm'
+  | 'preview';
+
+// @public (undocumented)
+export type ScaffolderTemplateEditorClassKey =
+  | 'root'
+  | 'browser'
+  | 'editor'
+  | 'preview'
+  | 'results';
+
+// @public (undocumented)
+export type ScaffolderTemplateFormPreviewerClassKey =
+  | 'root'
+  | 'controls'
+  | 'textArea'
+  | 'preview';
 
 // @alpha (undocumented)
 export const scaffolderTranslationRef: TranslationRef<
@@ -195,7 +227,10 @@ export const scaffolderTranslationRef: TranslationRef<
     readonly 'ongoingTask.startOverButtonTitle': 'Start Over';
     readonly 'ongoingTask.hideLogsButtonTitle': 'Hide Logs';
     readonly 'ongoingTask.showLogsButtonTitle': 'Show Logs';
+    readonly 'templateEditorForm.stepper.emptyText': 'There are no spec parameters in the template to preview.';
     readonly 'templateTypePicker.title': 'Categories';
+    readonly 'templateFormPage.title': 'Template Form Playground';
+    readonly 'templateFormPage.subtitle': 'Edit, preview, and try out templates and template forms';
     readonly 'templateEditorPage.title': 'Template Editor';
     readonly 'templateEditorPage.subtitle': 'Edit, preview, and try out templates and template forms';
     readonly 'templateEditorPage.dryRunResults.title': 'Dry-run results';
@@ -206,10 +241,11 @@ export const scaffolderTranslationRef: TranslationRef<
     readonly 'templateEditorPage.dryRunResultsView.tab.log': 'Log';
     readonly 'templateEditorPage.dryRunResultsView.tab.files': 'Files';
     readonly 'templateEditorPage.taskStatusStepper.skippedStepTitle': 'Skipped';
-    readonly 'templateEditorPage.customFieldExplorer.selectFieldLabel': 'Choose Custom Field Extension';
+    readonly 'templateEditorPage.customFieldExplorer.preview.title': 'Template Spec';
     readonly 'templateEditorPage.customFieldExplorer.fieldForm.title': 'Field Options';
     readonly 'templateEditorPage.customFieldExplorer.fieldForm.applyButtonTitle': 'Apply';
-    readonly 'templateEditorPage.customFieldExplorer.preview.title': 'Example Template Spec';
+    readonly 'templateEditorPage.customFieldExplorer.selectFieldLabel': 'Choose Custom Field Extension';
+    readonly 'templateEditorPage.customFieldExplorer.fieldPreview.title': 'Field Preview';
     readonly 'templateEditorPage.templateEditorBrowser.closeConfirmMessage': 'Are you sure? Unsaved changes will be lost';
     readonly 'templateEditorPage.templateEditorBrowser.saveIconTooltip': 'Save all files';
     readonly 'templateEditorPage.templateEditorBrowser.reloadIconTooltip': 'Reload directory';
@@ -218,6 +254,9 @@ export const scaffolderTranslationRef: TranslationRef<
     readonly 'templateEditorPage.templateEditorIntro.loadLocal.title': 'Load Template Directory';
     readonly 'templateEditorPage.templateEditorIntro.loadLocal.description': 'Load a local template directory, allowing you to both edit and try executing your own template.';
     readonly 'templateEditorPage.templateEditorIntro.loadLocal.unsupportedTooltip': 'Only supported in some Chromium-based browsers';
+    readonly 'templateEditorPage.templateEditorIntro.createLocal.title': 'Create New Template';
+    readonly 'templateEditorPage.templateEditorIntro.createLocal.description': 'Create a local template directory, allowing you to both edit and try executing your own template.';
+    readonly 'templateEditorPage.templateEditorIntro.createLocal.unsupportedTooltip': 'Only supported in some Chromium-based browsers';
     readonly 'templateEditorPage.templateEditorIntro.formEditor.title': 'Edit Template Form';
     readonly 'templateEditorPage.templateEditorIntro.formEditor.description': 'Preview and edit a template form, either using a sample template or by loading a template from the catalog.';
     readonly 'templateEditorPage.templateEditorIntro.fieldExplorer.title': 'Custom Field Explorer';
@@ -230,7 +269,6 @@ export const scaffolderTranslationRef: TranslationRef<
     readonly 'templateListPage.pageTitle': 'Create a new component';
     readonly 'templateListPage.templateGroups.defaultTitle': 'Templates';
     readonly 'templateListPage.templateGroups.otherTitle': 'Other Templates';
-    readonly 'templateListPage.contentHeader.title': 'Available Templates';
     readonly 'templateListPage.contentHeader.registerExistingButtonTitle': 'Register Existing Component';
     readonly 'templateListPage.contentHeader.supportButtonTitle': 'Create new software components using standard templates. Different templates create different kinds of components (services, websites, documentation, ...).';
     readonly 'templateListPage.additionalLinksForEntity.viewTechDocsTitle': 'View TechDocs';

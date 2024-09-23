@@ -89,8 +89,11 @@ const _default: FrontendPlugin<
         >;
       };
       kind: 'entity-card';
-      namespace: undefined;
       name: 'relations';
+      params: {
+        loader: () => Promise<JSX.Element>;
+        filter?: string | ((entity: Entity) => boolean) | undefined;
+      };
     }>;
     'page:catalog-graph': ExtensionDefinition<{
       config: {
@@ -151,8 +154,12 @@ const _default: FrontendPlugin<
         >;
       };
       kind: 'page';
-      namespace: undefined;
       name: undefined;
+      params: {
+        defaultPath: string;
+        loader: () => Promise<JSX.Element>;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+      };
     }>;
   }
 >;

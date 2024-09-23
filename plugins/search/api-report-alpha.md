@@ -24,7 +24,6 @@ const _default: FrontendPlugin<
   {
     'api:search': ExtensionDefinition<{
       kind: 'api';
-      namespace: undefined;
       name: undefined;
       config: {};
       configInput: {};
@@ -34,10 +33,12 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        factory: AnyApiFactory;
+      };
     }>;
     'nav-item:search': ExtensionDefinition<{
       kind: 'nav-item';
-      namespace: undefined;
       name: undefined;
       config: {};
       configInput: {};
@@ -51,6 +52,11 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        title: string;
+        icon: IconComponent;
+        routeRef: RouteRef<undefined>;
+      };
     }>;
     'page:search': ExtensionDefinition<{
       config: {
@@ -94,8 +100,12 @@ const _default: FrontendPlugin<
         >;
       };
       kind: 'page';
-      namespace: undefined;
       name: undefined;
+      params: {
+        defaultPath: string;
+        loader: () => Promise<JSX.Element>;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+      };
     }>;
   }
 >;
@@ -104,18 +114,19 @@ export default _default;
 // @alpha (undocumented)
 export const searchApi: ExtensionDefinition<{
   kind: 'api';
-  namespace: undefined;
   name: undefined;
   config: {};
   configInput: {};
   output: ConfigurableExtensionDataRef<AnyApiFactory, 'core.api.factory', {}>;
   inputs: {};
+  params: {
+    factory: AnyApiFactory;
+  };
 }>;
 
 // @alpha (undocumented)
 export const searchNavItem: ExtensionDefinition<{
   kind: 'nav-item';
-  namespace: undefined;
   name: undefined;
   config: {};
   configInput: {};
@@ -129,6 +140,11 @@ export const searchNavItem: ExtensionDefinition<{
     {}
   >;
   inputs: {};
+  params: {
+    title: string;
+    icon: IconComponent;
+    routeRef: RouteRef<undefined>;
+  };
 }>;
 
 // @alpha (undocumented)
@@ -170,8 +186,12 @@ export const searchPage: ExtensionDefinition<{
     >;
   };
   kind: 'page';
-  namespace: undefined;
   name: undefined;
+  params: {
+    defaultPath: string;
+    loader: () => Promise<JSX.Element>;
+    routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+  };
 }>;
 
 // (No @packageDocumentation comment for this package)

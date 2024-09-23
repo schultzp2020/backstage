@@ -22,7 +22,6 @@ const _default: FrontendPlugin<
   {
     'nav-item:user-settings': ExtensionDefinition<{
       kind: 'nav-item';
-      namespace: undefined;
       name: undefined;
       config: {};
       configInput: {};
@@ -36,6 +35,11 @@ const _default: FrontendPlugin<
         {}
       >;
       inputs: {};
+      params: {
+        title: string;
+        icon: IconComponent;
+        routeRef: RouteRef<undefined>;
+      };
     }>;
     'page:user-settings': ExtensionDefinition<{
       config: {
@@ -72,8 +76,12 @@ const _default: FrontendPlugin<
         >;
       };
       kind: 'page';
-      namespace: undefined;
       name: undefined;
+      params: {
+        defaultPath: string;
+        loader: () => Promise<JSX.Element>;
+        routeRef?: RouteRef<AnyRouteRefParams> | undefined;
+      };
     }>;
   }
 >;
@@ -82,7 +90,6 @@ export default _default;
 // @alpha (undocumented)
 export const settingsNavItem: ExtensionDefinition<{
   kind: 'nav-item';
-  namespace: undefined;
   name: undefined;
   config: {};
   configInput: {};
@@ -96,6 +103,11 @@ export const settingsNavItem: ExtensionDefinition<{
     {}
   >;
   inputs: {};
+  params: {
+    title: string;
+    icon: IconComponent;
+    routeRef: RouteRef<undefined>;
+  };
 }>;
 
 // @alpha (undocumented)

@@ -16,13 +16,17 @@
 import { useApiHolder } from '@backstage/core-plugin-api';
 import { JsonObject, JsonValue } from '@backstage/types';
 import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 import React, { Component, ReactNode, useMemo, useState } from 'react';
 import useDebounce from 'react-use/esm/useDebounce';
 import yaml from 'yaml';
+import { useTranslationRef } from '@backstage/frontend-plugin-api';
 import {
   LayoutOptions,
   TemplateParameterSchema,
   FieldExtensionOptions,
+  FormProps,
 } from '@backstage/plugin-scaffolder-react';
 import {
   Stepper,
@@ -30,20 +34,11 @@ import {
 } from '@backstage/plugin-scaffolder-react/alpha';
 import { useDryRun } from './DryRunContext';
 import { useDirectoryEditor } from './DirectoryEditorContext';
+import { scaffolderTranslationRef } from '../../translation';
 
 const useStyles = makeStyles({
   containerWrapper: {
-    position: 'relative',
     width: '100%',
-    height: '100%',
-  },
-  container: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    overflow: 'auto',
   },
 });
 
@@ -87,6 +82,7 @@ interface TemplateEditorFormProps {
   onDryRun?: (data: JsonObject) => Promise<void>;
   fieldExtensions?: FieldExtensionOptions<any, any>[];
   layouts?: LayoutOptions[];
+  formProps?: FormProps;
 }
 
 function isJsonObject(value: JsonValue | undefined): value is JsonObject {
@@ -105,6 +101,7 @@ export function TemplateEditorForm(props: TemplateEditorFormProps) {
   } = props;
   const classes = useStyles();
   const apiHolder = useApiHolder();
+  const { t } = useTranslationRef(scaffolderTranslationRef);
 
   const [steps, setSteps] = useState<TemplateParameterSchema['steps']>();
 
@@ -179,25 +176,28 @@ export function TemplateEditorForm(props: TemplateEditorFormProps) {
     [contentIsSpec, content, apiHolder],
   );
 
-  if (!steps) {
-    return null;
-  }
-
   return (
     <div className={classes.containerWrapper}>
-      <div className={classes.container}>
-        <ErrorBoundary invalidator={steps} setErrorText={setErrorText}>
-          <Stepper
-            manifest={{ steps, title: 'Template Editor' }}
-            extensions={fieldExtensions}
-            components={fields}
-            onCreate={async options => {
-              await onDryRun?.(options);
-            }}
-            layouts={layouts}
-          />
-        </ErrorBoundary>
-      </div>
+      {steps ? (
+        <Paper variant="outlined">
+          <ErrorBoundary invalidator={steps} setErrorText={setErrorText}>
+            <Stepper
+              manifest={{ steps, title: 'Template Editor' }}
+              extensions={fieldExtensions}
+              components={fields}
+              onCreate={async options => {
+                await onDryRun?.(options);
+              }}
+              layouts={layouts}
+              formProps={props.formProps}
+            />
+          </ErrorBoundary>
+        </Paper>
+      ) : (
+        <Typography variant="body1" color="textSecondary">
+          {t('templateEditorForm.stepper.emptyText')}
+        </Typography>
+      )}
     </div>
   );
 }
@@ -206,14 +206,14 @@ export function TemplateEditorForm(props: TemplateEditorFormProps) {
 export function TemplateEditorFormDirectoryEditorDryRun(
   props: Pick<
     TemplateEditorFormProps,
-    'setErrorText' | 'fieldExtensions' | 'layouts'
+    'setErrorText' | 'fieldExtensions' | 'layouts' | 'formProps'
   >,
 ) {
   const { setErrorText, fieldExtensions = [], layouts } = props;
   const dryRun = useDryRun();
 
   const directoryEditor = useDirectoryEditor();
-  const { selectedFile } = directoryEditor;
+  const { selectedFile } = directoryEditor ?? {};
 
   const handleDryRun = async (data: JsonObject) => {
     if (!selectedFile) {
@@ -224,7 +224,7 @@ export function TemplateEditorFormDirectoryEditorDryRun(
       await dryRun.execute({
         templateContent: selectedFile.content,
         values: data,
-        files: directoryEditor.files,
+        files: directoryEditor?.files ?? [],
       });
       setErrorText();
     } catch (e) {
@@ -238,15 +238,16 @@ export function TemplateEditorFormDirectoryEditorDryRun(
       ? selectedFile.content
       : undefined;
 
-  return (
+  return directoryEditor ? (
     <TemplateEditorForm
       onDryRun={handleDryRun}
       fieldExtensions={fieldExtensions}
       setErrorText={setErrorText}
       content={content}
       layouts={layouts}
+      formProps={props.formProps}
     />
-  );
+  ) : null;
 }
 
 TemplateEditorForm.DirectoryEditorDryRun =
