@@ -66,5 +66,23 @@ export const auditorServiceFactory: ServiceFactory<
 // @public (undocumented)
 export const defaultFormat: Format;
 
+// Warnings were encountered during analysis:
+//
+// src/entrypoints/auditor/Auditor.d.ts:7:22 - (ae-undocumented) Missing documentation for "defaultFormat".
+// src/entrypoints/auditor/Auditor.d.ts:9:1 - (ae-undocumented) Missing documentation for "AuditorOptions".
+// src/entrypoints/auditor/Auditor.d.ts:10:5 - (ae-undocumented) Missing documentation for "auth".
+// src/entrypoints/auditor/Auditor.d.ts:11:5 - (ae-undocumented) Missing documentation for "httpAuth".
+// src/entrypoints/auditor/Auditor.d.ts:12:5 - (ae-undocumented) Missing documentation for "meta".
+// src/entrypoints/auditor/Auditor.d.ts:13:5 - (ae-undocumented) Missing documentation for "level".
+// src/entrypoints/auditor/Auditor.d.ts:14:5 - (ae-undocumented) Missing documentation for "format".
+// src/entrypoints/auditor/Auditor.d.ts:15:5 - (ae-undocumented) Missing documentation for "transports".
+// src/entrypoints/auditor/Auditor.d.ts:36:5 - (ae-undocumented) Missing documentation for "error".
+// src/entrypoints/auditor/Auditor.d.ts:37:5 - (ae-undocumented) Missing documentation for "warn".
+// src/entrypoints/auditor/Auditor.d.ts:38:5 - (ae-undocumented) Missing documentation for "info".
+// src/entrypoints/auditor/Auditor.d.ts:39:5 - (ae-undocumented) Missing documentation for "debug".
+// src/entrypoints/auditor/Auditor.d.ts:40:5 - (ae-undocumented) Missing documentation for "child".
+// src/entrypoints/auditor/Auditor.d.ts:41:5 - (ae-undocumented) Missing documentation for "addRedactions".
+// src/entrypoints/auditor/Auditor.d.ts:42:5 - (ae-undocumented) Missing documentation for "getActorId".
+
 // (No @packageDocumentation comment for this package)
 ```

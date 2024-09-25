@@ -87,15 +87,11 @@ export type AuditorEventUnknownStatus = {
 export interface AuditorService {
   // (undocumented)
   child(meta: JsonObject): AuditorService;
-  // (undocumented)
   debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
-  // (undocumented)
   error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
   // (undocumented)
   getActorId(request: Request_2): Promise<string | undefined>;
-  // (undocumented)
   info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
-  // (undocumented)
   warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
 }
 
@@ -814,6 +810,11 @@ export interface UserInfoService {
 
 // Warnings were encountered during analysis:
 //
+// src/services/definitions/AuditorService.d.ts:7:1 - (ae-undocumented) Missing documentation for "AuditorEventActorDetails".
+// src/services/definitions/AuditorService.d.ts:16:1 - (ae-undocumented) Missing documentation for "AuditorEventRequest".
+// src/services/definitions/AuditorService.d.ts:48:1 - (ae-undocumented) Missing documentation for "AuditorEventStatus".
+// src/services/definitions/AuditorService.d.ts:101:5 - (ae-undocumented) Missing documentation for "child".
+// src/services/definitions/AuditorService.d.ts:102:5 - (ae-undocumented) Missing documentation for "getActorId".
 // src/services/definitions/HttpRouterService.d.ts:8:5 - (ae-undocumented) Missing documentation for "path".
 // src/services/definitions/HttpRouterService.d.ts:9:5 - (ae-undocumented) Missing documentation for "allow".
 // src/services/definitions/LifecycleService.d.ts:5:1 - (ae-undocumented) Missing documentation for "LifecycleServiceStartupHook".
