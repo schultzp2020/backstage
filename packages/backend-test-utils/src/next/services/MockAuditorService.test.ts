@@ -25,7 +25,6 @@ describe('MockAuditorService', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.spyOn(console, 'info').mockImplementation(() => {});
-    jest.spyOn(console, 'debug').mockImplementation(() => {});
 
     const auditor = MockAuditorService.create();
     await auditor.error({
@@ -46,24 +45,16 @@ describe('MockAuditorService', () => {
       stage: '',
       status: 'unknown',
     });
-    await auditor.debug({
-      message: 'debug',
-      eventName: '',
-      stage: '',
-      status: 'unknown',
-    });
 
     expect(console.error).not.toHaveBeenCalled();
     expect(console.warn).not.toHaveBeenCalled();
     expect(console.info).not.toHaveBeenCalled();
-    expect(console.debug).not.toHaveBeenCalled();
   });
 
   it('should be able to set none level', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.spyOn(console, 'info').mockImplementation(() => {});
-    jest.spyOn(console, 'debug').mockImplementation(() => {});
 
     const auditor = MockAuditorService.create({ level: 'none' });
     await auditor.error({
@@ -84,24 +75,16 @@ describe('MockAuditorService', () => {
       stage: '',
       status: 'unknown',
     });
-    await auditor.debug({
-      message: 'debug',
-      eventName: '',
-      stage: '',
-      status: 'unknown',
-    });
 
     expect(console.error).not.toHaveBeenCalled();
     expect(console.warn).not.toHaveBeenCalled();
     expect(console.info).not.toHaveBeenCalled();
-    expect(console.debug).not.toHaveBeenCalled();
   });
 
   it('should be able to set error level', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.spyOn(console, 'info').mockImplementation(() => {});
-    jest.spyOn(console, 'debug').mockImplementation(() => {});
 
     const auditor = MockAuditorService.create({ level: 'error' });
     await auditor.error({
@@ -122,24 +105,16 @@ describe('MockAuditorService', () => {
       stage: '',
       status: 'unknown',
     });
-    await auditor.debug({
-      message: 'debug',
-      eventName: '',
-      stage: '',
-      status: 'unknown',
-    });
 
     expect(console.error).toHaveBeenCalled();
     expect(console.warn).not.toHaveBeenCalled();
     expect(console.info).not.toHaveBeenCalled();
-    expect(console.debug).not.toHaveBeenCalled();
   });
 
   it('should be able to set warn level', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.spyOn(console, 'info').mockImplementation(() => {});
-    jest.spyOn(console, 'debug').mockImplementation(() => {});
 
     const auditor = MockAuditorService.create({ level: 'warn' });
     await auditor.error({
@@ -160,24 +135,16 @@ describe('MockAuditorService', () => {
       stage: '',
       status: 'unknown',
     });
-    await auditor.debug({
-      message: 'debug',
-      eventName: '',
-      stage: '',
-      status: 'unknown',
-    });
 
     expect(console.error).toHaveBeenCalled();
     expect(console.warn).toHaveBeenCalled();
     expect(console.info).not.toHaveBeenCalled();
-    expect(console.debug).not.toHaveBeenCalled();
   });
 
   it('should be able to set info level', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.spyOn(console, 'info').mockImplementation(() => {});
-    jest.spyOn(console, 'debug').mockImplementation(() => {});
 
     const auditor = MockAuditorService.create({ level: 'info' });
     await auditor.error({
@@ -198,24 +165,16 @@ describe('MockAuditorService', () => {
       stage: '',
       status: 'unknown',
     });
-    await auditor.debug({
-      message: 'debug',
-      eventName: '',
-      stage: '',
-      status: 'unknown',
-    });
 
     expect(console.error).toHaveBeenCalled();
     expect(console.warn).toHaveBeenCalled();
     expect(console.info).toHaveBeenCalled();
-    expect(console.debug).not.toHaveBeenCalled();
   });
 
   it('should be able to set debug level', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.spyOn(console, 'info').mockImplementation(() => {});
-    jest.spyOn(console, 'debug').mockImplementation(() => {});
 
     const auditor = MockAuditorService.create({ level: 'debug' });
     await auditor.error({
@@ -236,16 +195,9 @@ describe('MockAuditorService', () => {
       stage: '',
       status: 'unknown',
     });
-    await auditor.debug({
-      message: 'debug',
-      eventName: '',
-      stage: '',
-      status: 'unknown',
-    });
 
     expect(console.error).toHaveBeenCalled();
     expect(console.warn).toHaveBeenCalled();
     expect(console.info).toHaveBeenCalled();
-    expect(console.debug).toHaveBeenCalled();
   });
 });

@@ -68,13 +68,6 @@ export class MockAuditorService implements AuditorService {
     this.log('info', ...auditEvent);
   }
 
-  async debug<T extends JsonObject>(
-    args: AuditorEventOptions<T>,
-  ): Promise<void> {
-    const auditEvent = await this.createAuditorEvent(args);
-    this.log('debug', ...auditEvent);
-  }
-
   child(
     meta: JsonObject,
     auth?: AuthService,
@@ -91,7 +84,7 @@ export class MockAuditorService implements AuditorService {
     });
   }
 
-  async getActorId(request: Request): Promise<string | undefined> {
+  private async getActorId(request: Request): Promise<string | undefined> {
     if (!this.#options.auth) {
       throw new AuthenticationError(
         `The core service 'auth' was not provided during the auditor's instantiation`,

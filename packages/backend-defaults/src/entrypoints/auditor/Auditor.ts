@@ -73,12 +73,12 @@ export const defaultProdFormat = winston.format.combine(
 );
 
 /**
- * Adds `isAuditorLog` field
+ * Adds `isAuditorEvent` field
  *
  * @public
  */
 export const auditorFieldFormat = winston.format(info => {
-  return { ...info, isAuditorLog: true };
+  return { ...info, isAuditorEvent: true };
 })();
 
 /** @public */

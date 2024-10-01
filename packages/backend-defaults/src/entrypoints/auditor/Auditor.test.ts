@@ -65,6 +65,7 @@ describe('Auditor', () => {
         [MESSAGE]: JSON.stringify({
           actor: {},
           eventName: '',
+          isAuditorEvent: true,
           level: 'error',
           message: '***) from this file',
           stage: '',
@@ -109,6 +110,7 @@ describe('Auditor', () => {
         [MESSAGE]: JSON.stringify({
           actor: {},
           eventName: '',
+          isAuditorEvent: true,
           level: 'error',
           message: 'something went wrong',
           meta: {
