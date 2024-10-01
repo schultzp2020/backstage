@@ -11,6 +11,7 @@ import { AnalyzeLocationGenerateEntity as AnalyzeLocationGenerateEntity_2 } from
 import { AnalyzeLocationRequest as AnalyzeLocationRequest_2 } from '@backstage/plugin-catalog-common';
 import { AnalyzeLocationResponse as AnalyzeLocationResponse_2 } from '@backstage/plugin-catalog-common';
 import { AnalyzeOptions as AnalyzeOptions_2 } from '@backstage/plugin-catalog-node';
+import { AuditorService } from '@backstage/backend-plugin-api';
 import { AuthService } from '@backstage/backend-plugin-api';
 import { CatalogApi } from '@backstage/catalog-client';
 import { CatalogCollatorEntityTransformer as CatalogCollatorEntityTransformer_2 } from '@backstage/plugin-search-backend-module-catalog';
@@ -204,6 +205,7 @@ export type CatalogEnvironment = {
   discovery?: DiscoveryService;
   auth?: AuthService;
   httpAuth?: HttpAuthService;
+  auditor: AuditorService;
 };
 
 // @public
@@ -557,6 +559,6 @@ export class UrlReaderProcessor implements CatalogProcessor_2 {
 // src/search/DefaultCatalogCollator.d.ts:31:5 - (ae-undocumented) Missing documentation for "applyArgsToFormat".
 // src/search/DefaultCatalogCollator.d.ts:33:5 - (ae-undocumented) Missing documentation for "execute".
 // src/service/CatalogBuilder.d.ts:19:1 - (ae-undocumented) Missing documentation for "CatalogEnvironment".
-// src/service/CatalogBuilder.d.ts:233:5 - (ae-undocumented) Missing documentation for "subscribe".
+// src/service/CatalogBuilder.d.ts:234:5 - (ae-undocumented) Missing documentation for "subscribe".
 // src/util/parse.d.ts:6:1 - (ae-undocumented) Missing documentation for "parseEntityYaml".
 ```
