@@ -19,24 +19,6 @@ import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 
 /**
- * @public
- */
-export type AuditorEventActorDetails = {
-  actorId?: string;
-  ip?: string;
-  hostname?: string;
-  userAgent?: string;
-};
-
-/**
- * @public
- */
-export type AuditorEventRequest = {
-  url: string;
-  method: string;
-};
-
-/**
  * Indicates the event was successful.
  *
  * @public
@@ -69,34 +51,35 @@ export type AuditorEventStatus =
   | AuditorEventUnknownStatus;
 
 /**
- * Arguments for creating an audit event.
+ * Options for creating an auditor event.
  *
  * @public
  */
-export type AuditorEventArgs<T extends JsonObject> = {
-  message: string;
+export type AuditorEventOptions<T extends JsonObject> = {
+  /**
+   * The name of the audit event, formatted in PascalCase (e.g., "UserLogin", "FileDownload").
+   *
+   * If applicable, it's required to prefix the `eventName` with the name of the component
+   * responsible for the event (e.g., "ScaffolderTaskRead", "CatalogEntityFetch").
+   * This improves searchability within the central log collector.
+   */
   eventName: string;
+
+  /** A descriptive message about the event. */
+  message: string;
+
+  /** The current stage or phase of the process where the event occurred. */
   stage: string;
+
+  /** (Optional) The associated HTTP request, if applicable. */
   request?: Request;
+
+  /** (Optional) An identifier for the entity or user who triggered the event. */
   actorId?: string;
+
+  /** (Optional) Additional metadata relevant to the event, structured as a JSON object. */
   meta?: T;
 } & AuditorEventStatus;
-
-/**
- * Common fields of an audit event.
- *
- * @public
- */
-export type AuditorEvent = [
-  message: string,
-  meta: {
-    actor: AuditorEventActorDetails;
-    eventName: string;
-    stage: string;
-    meta?: JsonObject;
-    request?: AuditorEventRequest;
-  } & AuditorEventStatus,
-];
 
 /**
  * A service that provides an auditor facility.
@@ -109,21 +92,13 @@ export interface AuditorService {
   /**
    * Records critical failures that affect system integrity, like failed transactions or security breaches, essential for incident response.
    */
-  error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
+  error<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
   /**
    * Highlights non-critical issues, such as blocked access attempts or slow performance, which may indicate potential risks.
    */
-  warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
+  warn<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
   /**
    * Logs high-level, significant events such as successful logins or configuration changes, which are key for compliance and routine audits.
    */
-  info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
-  /**
-   * Offers granular details such as API calls, database queries, or internal parameters, useful for troubleshooting and diagnosing issues.
-   */
-  debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
-
-  child(meta: JsonObject): AuditorService;
-
-  getActorId(request: Request): Promise<string | undefined>;
+  info<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
 }

@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-export * from './Auditor';
-export { auditorServiceFactory } from './auditorServiceFactory';
+import { transports } from 'winston';
+
+export const defaultConsoleTransport = new transports.Console();

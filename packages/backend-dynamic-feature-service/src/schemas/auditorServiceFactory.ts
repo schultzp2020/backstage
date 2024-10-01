@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { Auditor, defaultFormat } from '@backstage/backend-defaults/auditor';
+import {
+  Auditor,
+  defaultProdFormat,
+} from '@backstage/backend-defaults/auditor';
 import { createConfigSecretEnumerator } from '@backstage/backend-defaults/rootConfig';
 import {
   coreServices,
@@ -34,7 +37,7 @@ const transports = {
     }
     return [
       new winston.transports.Console({
-        format: defaultFormat,
+        format: defaultProdFormat,
       }),
     ];
   },
@@ -44,7 +47,7 @@ const transports = {
     }
     return [
       new winston.transports.DailyRotateFile({
-        format: defaultFormat,
+        format: defaultProdFormat,
         dirname:
           config?.getOptionalString('rotateFile.logFileDirPath') ??
           '/var/log/backstage/audit',
@@ -80,7 +83,7 @@ export const auditorServiceFactory = createServiceFactory({
         service: 'backstage',
       },
       level: process.env.LOG_LEVEL ?? 'info',
-      format: winston.format.combine(defaultFormat, winston.format.json()),
+      format: winston.format.combine(defaultProdFormat, winston.format.json()),
       transports: [
         ...transports.auditorConsole(auditorConfig),
         ...transports.auditorFile(auditorConfig),

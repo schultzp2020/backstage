@@ -20,14 +20,9 @@ import {
 } from '@backstage/backend-plugin-api';
 import { JsonObject } from '@backstage/types';
 import { Format } from 'logform';
-import {
-  Logger,
-  transport as Transport,
-  createLogger,
-  format,
-  transports,
-} from 'winston';
+import { Logger, transport as Transport, createLogger, format } from 'winston';
 import { colorFormat } from '../../lib/colorFormat';
+import { defaultConsoleTransport } from '../../lib/defaultConsoleTransport';
 import { redacterFormat } from '../../lib/redacterFormat';
 
 /**
@@ -65,7 +60,7 @@ export class WinstonLogger implements RootLoggerService {
         options.format ?? defaultFormatter,
         redacter.format,
       ),
-      transports: options.transports ?? new transports.Console(),
+      transports: options.transports ?? defaultConsoleTransport,
     });
 
     if (options.meta) {

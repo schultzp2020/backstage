@@ -15,8 +15,8 @@
  */
 
 import type {
-  AuditorEvent,
-  AuditorEventArgs,
+  AuditorEventOptions,
+  AuditorEventStatus,
   AuditorService,
   AuthService,
   BackstageCredentials,
@@ -27,10 +27,42 @@ import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 import type { Format } from 'logform';
 import * as winston from 'winston';
+import { colorFormat } from '../../lib/colorFormat';
+import { defaultConsoleTransport } from '../../lib/defaultConsoleTransport';
 import { redacterFormat } from '../../lib/redacterFormat';
 
 /** @public */
-export const defaultFormat = winston.format.combine(
+export type AuditorEventActorDetails = {
+  actorId?: string;
+  ip?: string;
+  hostname?: string;
+  userAgent?: string;
+};
+
+/** @public */
+export type AuditorEventRequest = {
+  url: string;
+  method: string;
+};
+
+/**
+ * Common fields of an audit event.
+ *
+ * @public
+ */
+export type AuditorEvent = [
+  message: string,
+  meta: {
+    actor: AuditorEventActorDetails;
+    eventName: string;
+    stage: string;
+    meta?: JsonObject;
+    request?: AuditorEventRequest;
+  } & AuditorEventStatus,
+];
+
+/** @public */
+export const defaultProdFormat = winston.format.combine(
   winston.format.timestamp({
     format: 'YYYY-MM-DD HH:mm:ss',
   }),
@@ -39,6 +71,15 @@ export const defaultFormat = winston.format.combine(
   winston.format.json(),
   redacterFormat().format,
 );
+
+/**
+ * Adds `isAuditorLog` field
+ *
+ * @public
+ */
+export const auditorFieldFormat = winston.format(info => {
+  return { ...info, isAuditorLog: true };
+})();
 
 /** @public */
 export interface AuditorOptions {
@@ -56,23 +97,29 @@ export interface AuditorOptions {
  * @public
  */
 export class Auditor implements AuditorService {
-  #winstonLogger: winston.Logger;
-  #auth?: AuthService;
-  #httpAuth?: HttpAuthService;
-  #addRedactions?: (redactions: Iterable<string>) => void;
+  readonly #winstonLogger: winston.Logger;
+  readonly #auth?: AuthService;
+  readonly #httpAuth?: HttpAuthService;
+  readonly #addRedactions?: (redactions: Iterable<string>) => void;
 
   /**
    * Creates a {@link Auditor} instance.
    */
   static create(options: AuditorOptions): Auditor {
     const redacter = Auditor.redacter();
+    const defaultFormatter =
+      process.env.NODE_ENV === 'production'
+        ? defaultProdFormat
+        : Auditor.colorFormat();
 
     let auditor = winston.createLogger({
       level: process.env.LOG_LEVEL ?? options.level ?? 'info',
-      format: options?.format
-        ? winston.format.combine(options.format, redacter.format)
-        : defaultFormat,
-      transports: options.transports ?? new winston.transports.Console(),
+      format: winston.format.combine(
+        auditorFieldFormat,
+        options.format ?? defaultFormatter,
+        redacter.format,
+      ),
+      transports: options.transports ?? defaultConsoleTransport,
     });
 
     if (options.meta) {
@@ -92,6 +139,13 @@ export class Auditor implements AuditorService {
     return redacterFormat();
   }
 
+  /**
+   * Creates a pretty printed winston log formatter.
+   */
+  static colorFormat(): Format {
+    return colorFormat();
+  }
+
   private constructor(
     winstonLogger: winston.Logger,
     auth?: AuthService,
@@ -104,25 +158,25 @@ export class Auditor implements AuditorService {
     this.#addRedactions = addRedactions;
   }
 
-  async error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
+  async error<T extends JsonObject>(
+    args: AuditorEventOptions<T>,
+  ): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
-    console.log(auditEvent);
     this.#winstonLogger.error(...auditEvent);
   }
 
-  async warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
+  async warn<T extends JsonObject>(
+    args: AuditorEventOptions<T>,
+  ): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.#winstonLogger.warn(...auditEvent);
   }
 
-  async info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
+  async info<T extends JsonObject>(
+    args: AuditorEventOptions<T>,
+  ): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.#winstonLogger.info(...auditEvent);
-  }
-
-  async debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
-    const auditEvent = await this.createAuditorEvent(args);
-    this.#winstonLogger.debug(...auditEvent);
   }
 
   child(
@@ -141,7 +195,7 @@ export class Auditor implements AuditorService {
     this.#addRedactions?.(redactions);
   }
 
-  async getActorId(request: Request): Promise<string | undefined> {
+  private async getActorId(request: Request): Promise<string | undefined> {
     if (!this.#auth) {
       throw new AuthenticationError(
         `The core service 'auth' was not provided during the auditor's instantiation`,
@@ -174,7 +228,7 @@ export class Auditor implements AuditorService {
   }
 
   private async createAuditorEvent<T extends JsonObject>(
-    args: AuditorEventArgs<T>,
+    args: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
     const { message, actorId, request, ...rest } = args;
 

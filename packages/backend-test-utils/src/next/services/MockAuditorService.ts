@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { AuditorEvent } from '@backstage/backend-defaults/auditor';
 import type {
-  AuditorEvent,
-  AuditorEventArgs,
+  AuditorEventOptions,
   AuditorService,
   AuthService,
   BackstageCredentials,
@@ -36,7 +36,7 @@ const LEVELS = {
 } as const;
 
 export class MockAuditorService implements AuditorService {
-  #options: mockServices.auditor.Options;
+  readonly #options: mockServices.auditor.Options;
 
   static create(options?: mockServices.auditor.Options): MockAuditorService {
     const level = options?.level ?? 'none';
@@ -47,22 +47,30 @@ export class MockAuditorService implements AuditorService {
     return new MockAuditorService(options ? { ...options, level } : { level });
   }
 
-  async error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
+  async error<T extends JsonObject>(
+    args: AuditorEventOptions<T>,
+  ): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.log('error', ...auditEvent);
   }
 
-  async warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
+  async warn<T extends JsonObject>(
+    args: AuditorEventOptions<T>,
+  ): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.log('warn', ...auditEvent);
   }
 
-  async info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
+  async info<T extends JsonObject>(
+    args: AuditorEventOptions<T>,
+  ): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.log('info', ...auditEvent);
   }
 
-  async debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void> {
+  async debug<T extends JsonObject>(
+    args: AuditorEventOptions<T>,
+  ): Promise<void> {
     const auditEvent = await this.createAuditorEvent(args);
     this.log('debug', ...auditEvent);
   }
@@ -117,7 +125,7 @@ export class MockAuditorService implements AuditorService {
   }
 
   private async createAuditorEvent<T extends JsonObject>(
-    args: AuditorEventArgs<T>,
+    args: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
     const { message, actorId, request, ...rest } = args;
 

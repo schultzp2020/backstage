@@ -15,11 +15,8 @@
  */
 
 export type {
-  AuditorEvent,
-  AuditorEventActorDetails,
-  AuditorEventArgs,
   AuditorEventFailureStatus,
-  AuditorEventRequest,
+  AuditorEventOptions,
   AuditorEventStatus,
   AuditorEventSuccessStatus,
   AuditorEventUnknownStatus,

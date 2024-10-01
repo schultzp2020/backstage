@@ -21,19 +21,16 @@ import {
 import type { Config } from '@backstage/config';
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
+import { defaultConsoleTransport } from '../../lib/defaultConsoleTransport';
 import { createConfigSecretEnumerator } from '../rootConfig/createConfigSecretEnumerator';
-import { Auditor, defaultFormat } from './Auditor';
+import { Auditor, auditorFieldFormat, defaultProdFormat } from './Auditor';
 
 const transports = {
   auditorConsole: (config?: Config) => {
     if (!config?.getOptionalBoolean('console.enabled')) {
       return [];
     }
-    return [
-      new winston.transports.Console({
-        format: defaultFormat,
-      }),
-    ];
+    return [defaultConsoleTransport];
   },
   auditorFile: (config?: Config) => {
     if (!config?.getOptionalBoolean('rotateFile.enabled')) {
@@ -41,7 +38,7 @@ const transports = {
     }
     return [
       new winston.transports.DailyRotateFile({
-        format: defaultFormat,
+        format: defaultProdFormat,
         dirname:
           config?.getOptionalString('rotateFile.logFileDirPath') ??
           '/var/log/backstage/audit',
@@ -84,7 +81,12 @@ export const auditorServiceFactory = createServiceFactory({
         service: 'backstage',
       },
       level: process.env.LOG_LEVEL ?? 'info',
-      format: winston.format.combine(defaultFormat, winston.format.json()),
+      format: winston.format.combine(
+        auditorFieldFormat,
+        process.env.NODE_ENV === 'production'
+          ? defaultProdFormat
+          : Auditor.colorFormat(),
+      ),
       transports: [
         ...transports.auditorConsole(auditorConfig),
         ...transports.auditorFile(auditorConfig),
