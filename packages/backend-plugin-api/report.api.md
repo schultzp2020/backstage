@@ -26,46 +26,20 @@ import { Request as Request_2 } from 'express';
 import { Response as Response_2 } from 'express';
 
 // @public
-export type AuditorEvent = [
-  message: string,
-  meta: {
-    actor: AuditorEventActorDetails;
-    eventName: string;
-    stage: string;
-    meta?: JsonObject;
-    request?: AuditorEventRequest;
-  } & AuditorEventStatus,
-];
-
-// @public (undocumented)
-export type AuditorEventActorDetails = {
-  actorId?: string;
-  ip?: string;
-  hostname?: string;
-  userAgent?: string;
-};
-
-// @public
-export type AuditorEventArgs<T extends JsonObject> = {
-  message: string;
-  eventName: string;
-  stage: string;
-  request?: Request_2;
-  actorId?: string;
-  meta?: T;
-} & AuditorEventStatus;
-
-// @public
 export type AuditorEventFailureStatus<E = ErrorLike> = {
   status: 'failed';
   errors: E[];
 };
 
-// @public (undocumented)
-export type AuditorEventRequest = {
-  url: string;
-  method: string;
-};
+// @public
+export type AuditorEventOptions<T extends JsonObject> = {
+  eventName: string;
+  message: string;
+  stage: string;
+  request?: Request_2;
+  actorId?: string;
+  meta?: T;
+} & AuditorEventStatus;
 
 // @public (undocumented)
 export type AuditorEventStatus =
@@ -85,14 +59,9 @@ export type AuditorEventUnknownStatus = {
 
 // @public
 export interface AuditorService {
-  // (undocumented)
-  child(meta: JsonObject): AuditorService;
-  debug<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
-  error<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
-  // (undocumented)
-  getActorId(request: Request_2): Promise<string | undefined>;
-  info<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
-  warn<T extends JsonObject>(args: AuditorEventArgs<T>): Promise<void>;
+  error<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
+  info<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
+  warn<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
 }
 
 // @public
@@ -810,11 +779,7 @@ export interface UserInfoService {
 
 // Warnings were encountered during analysis:
 //
-// src/services/definitions/AuditorService.d.ts:7:1 - (ae-undocumented) Missing documentation for "AuditorEventActorDetails".
-// src/services/definitions/AuditorService.d.ts:16:1 - (ae-undocumented) Missing documentation for "AuditorEventRequest".
-// src/services/definitions/AuditorService.d.ts:48:1 - (ae-undocumented) Missing documentation for "AuditorEventStatus".
-// src/services/definitions/AuditorService.d.ts:101:5 - (ae-undocumented) Missing documentation for "child".
-// src/services/definitions/AuditorService.d.ts:102:5 - (ae-undocumented) Missing documentation for "getActorId".
+// src/services/definitions/AuditorService.d.ts:32:1 - (ae-undocumented) Missing documentation for "AuditorEventStatus".
 // src/services/definitions/HttpRouterService.d.ts:8:5 - (ae-undocumented) Missing documentation for "path".
 // src/services/definitions/HttpRouterService.d.ts:9:5 - (ae-undocumented) Missing documentation for "allow".
 // src/services/definitions/LifecycleService.d.ts:5:1 - (ae-undocumented) Missing documentation for "LifecycleServiceStartupHook".
