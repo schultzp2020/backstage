@@ -195,7 +195,9 @@ export class Auditor implements AuditorService {
     this.#addRedactions?.(redactions);
   }
 
-  private async getActorId(request: Request): Promise<string | undefined> {
+  private async getActorId(
+    request: Request<any, any, any, any, any>,
+  ): Promise<string | undefined> {
     if (!this.#auth) {
       throw new AuthenticationError(
         `The core service 'auth' was not provided during the auditor's instantiation`,

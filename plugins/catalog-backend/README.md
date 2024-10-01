@@ -87,6 +87,25 @@ yarn start
 This will launch both frontend and backend in the same window, populated with
 some example entities.
 
+## Audit Events
+
+- **`CatalogEntityAncestryFetch`**: Tracks `GET` requests to the `/entities/by-name/:kind/:namespace/:name/ancestry` endpoint which return the ancestry of an entity.
+- **`CatalogEntityBatchFetch`**: Tracks `POST` requests to the `/entities/by-refs` endpoint which return a batch of entities.
+- **`CatalogEntityDelete`**: Tracks `DELETE` requests to the `/entities/by-uid/:uid` endpoint which delete an entity. Note: this will not be a permanent deletion and the entity will be restored if the parent location is still present in the catalog.
+- **`CatalogEntityFacetFetch`**: Tracks `GET` requests to the `/entity-facets` endpoint which return the facets of an entity.
+- **`CatalogEntityFetch`**: Tracks `GET` requests to the `/entities` endpoint which returns a list of entities.
+- **`CatalogEntityFetchByName`**: Tracks `GET` requests to the `/entities/by-name/:kind/:namespace/:name` endpoint which return an entity matching the specified entity ref.
+- **`CatalogEntityFetchByUid`**: Tracks `GET` requests to the `/entities/by-uid/:uid` endpoint which return an entity matching the specified entity uid.
+- **`CatalogEntityRefresh`**: Tracks `POST` requests to the `/entities/refresh` endpoint which schedules the specified entity to be refreshed.
+- **`CatalogEntityValidate`**: Tracks `POST` requests to the `/entities/validate` endpoint which validates the specified entity.
+- **`CatalogLocationAnalyze`**: Tracks `POST` requests to the `/locations/analyze` endpoint which analyzes the specified location.
+- **`CatalogLocationCreate`**: Tracks `POST` requests to the `/locations` endpoint which creates a location.
+- **`CatalogLocationDelete`**: Tracks `DELETE` requests to the `/locations/:id` endpoint which deletes a location as well as all child entities associated with it.
+- **`CatalogLocationFetch`**: Tracks `GET` requests to the `/locations` endpoint which returns a list of locations.
+- **`CatalogLocationFetchByEntityRef`**: Tracks `GET` requests to the `/locations/by-entity` endpoint which returns a list of locations associated with the specified entity ref.
+- **`CatalogLocationFetchById`**: Tracks `GET` requests to the `/locations/:id` endpoint which returns a location matching the specified location id.
+- **`CatalogEntityFetchByQuery`**: Tracks `GET` requests to the `/entities/by-query` endpoint which returns a list of entities matching the specified query.
+
 ## Links
 
 - [catalog](https://github.com/backstage/backstage/tree/master/plugins/catalog)

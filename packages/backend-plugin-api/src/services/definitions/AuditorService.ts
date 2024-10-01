@@ -72,7 +72,7 @@ export type AuditorEventOptions<T extends JsonObject> = {
   stage: string;
 
   /** (Optional) The associated HTTP request, if applicable. */
-  request?: Request;
+  request?: Request<any, any, any, any, any>;
 
   /** (Optional) An identifier for the entity or user who triggered the event. */
   actorId?: string;
