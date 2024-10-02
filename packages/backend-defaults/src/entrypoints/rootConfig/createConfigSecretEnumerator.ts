@@ -58,9 +58,7 @@ export async function createConfigSecretEnumerator(
     } else if ('auditor' in options) {
       options.auditor
         .info({
-          message: `Found ${secrets.size} new secrets in config that will be redacted`,
-          eventName: 'RedactSecrets',
-          stage: 'redactingSecrets',
+          eventId: 'RedactSecrets',
           status: 'succeeded',
         })
         .then();

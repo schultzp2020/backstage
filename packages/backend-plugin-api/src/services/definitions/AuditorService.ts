@@ -19,36 +19,16 @@ import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 
 /**
- * Indicates the event was successful.
- *
  * @public
  */
-export type AuditorEventSuccessStatus = { status: 'succeeded' };
-
-/**
- * Indicates the event failed and includes details about the encountered errors.
- *
- * @public
- */
-export type AuditorEventFailureStatus<E = ErrorLike> = {
-  status: 'failed';
-  errors: E[];
-};
-
-/**
- * Indicates the event is unknown.
- *
- * @public
- */
-export type AuditorEventUnknownStatus = { status: 'unknown' };
-
-/**
- * @public
- */
-export type AuditorEventStatus =
-  | AuditorEventSuccessStatus
-  | AuditorEventFailureStatus
-  | AuditorEventUnknownStatus;
+export type AuditorEventStatus<E = ErrorLike> =
+  | { status: 'unknown' }
+  | { status: 'initiated' }
+  | { status: 'succeeded' }
+  | {
+      status: 'failed';
+      errors: E[];
+    };
 
 /**
  * Options for creating an auditor event.
@@ -63,13 +43,7 @@ export type AuditorEventOptions<T extends JsonObject> = {
    * responsible for the event (e.g., "ScaffolderTaskRead", "CatalogEntityFetch").
    * This improves searchability within the central log collector.
    */
-  eventName: string;
-
-  /** A descriptive message about the event. */
-  message: string;
-
-  /** The current stage or phase of the process where the event occurred. */
-  stage: string;
+  eventId: string;
 
   /** (Optional) The associated HTTP request, if applicable. */
   request?: Request<any, any, any, any, any>;

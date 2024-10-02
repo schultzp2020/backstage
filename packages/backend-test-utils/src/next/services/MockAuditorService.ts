@@ -122,7 +122,7 @@ export class MockAuditorService implements AuditorService {
   private async createAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
-    const { message, actorId, request, ...rest } = options;
+    const { eventId, actorId, request, ...rest } = options;
 
     const eventRequest = request
       ? {
@@ -135,7 +135,7 @@ export class MockAuditorService implements AuditorService {
       actorId ?? (request ? await this.getActorId(request) : undefined);
 
     const auditEvent: AuditorEvent = [
-      message,
+      eventId,
       {
         actor: {
           actorId: eventActorId,

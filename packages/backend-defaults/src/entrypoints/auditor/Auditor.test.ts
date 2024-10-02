@@ -55,8 +55,7 @@ describe('Auditor', () => {
 
     await auditor.error({
       message: 'hello (world) from this file',
-      eventName: '',
-      stage: '',
+      eventId: '',
       status: 'unknown',
     });
 
@@ -68,7 +67,6 @@ describe('Auditor', () => {
           isAuditorEvent: true,
           level: 'error',
           message: '***) from this file',
-          stage: '',
           status: 'unknown',
         }),
       }),
@@ -93,8 +91,7 @@ describe('Auditor', () => {
 
     await auditor.error({
       message: 'something went wrong',
-      eventName: '',
-      stage: '',
+      eventId: '',
       status: 'unknown',
       meta: {
         null: null,
@@ -120,7 +117,6 @@ describe('Auditor', () => {
               foo: '*** foo',
             },
           },
-          stage: '',
           status: 'unknown',
         }),
       }),

@@ -28,21 +28,15 @@ describe('MockAuditorService', () => {
 
     const auditor = MockAuditorService.create();
     await auditor.error({
-      message: 'error',
-      eventName: '',
-      stage: '',
+      eventId: 'error',
       status: 'unknown',
     });
     await auditor.warn({
-      message: 'warn',
-      eventName: '',
-      stage: '',
+      eventId: 'warn',
       status: 'unknown',
     });
     await auditor.info({
-      message: 'info',
-      eventName: '',
-      stage: '',
+      eventId: 'info',
       status: 'unknown',
     });
 
@@ -58,21 +52,15 @@ describe('MockAuditorService', () => {
 
     const auditor = MockAuditorService.create({ level: 'none' });
     await auditor.error({
-      message: 'error',
-      eventName: '',
-      stage: '',
+      eventId: 'error',
       status: 'unknown',
     });
     await auditor.warn({
-      message: 'warn',
-      eventName: '',
-      stage: '',
+      eventId: 'warn',
       status: 'unknown',
     });
     await auditor.info({
-      message: 'info',
-      eventName: '',
-      stage: '',
+      eventId: 'info',
       status: 'unknown',
     });
 
@@ -88,21 +76,15 @@ describe('MockAuditorService', () => {
 
     const auditor = MockAuditorService.create({ level: 'error' });
     await auditor.error({
-      message: 'error',
-      eventName: '',
-      stage: '',
+      eventId: 'error',
       status: 'unknown',
     });
     await auditor.warn({
-      message: 'warn',
-      eventName: '',
-      stage: '',
+      eventId: 'warn',
       status: 'unknown',
     });
     await auditor.info({
-      message: 'info',
-      eventName: '',
-      stage: '',
+      eventId: 'info',
       status: 'unknown',
     });
 
@@ -118,21 +100,15 @@ describe('MockAuditorService', () => {
 
     const auditor = MockAuditorService.create({ level: 'warn' });
     await auditor.error({
-      message: 'error',
-      eventName: '',
-      stage: '',
+      eventId: 'error',
       status: 'unknown',
     });
     await auditor.warn({
-      message: 'warn',
-      eventName: '',
-      stage: '',
+      eventId: 'warn',
       status: 'unknown',
     });
     await auditor.info({
-      message: 'info',
-      eventName: '',
-      stage: '',
+      eventId: 'info',
       status: 'unknown',
     });
 
@@ -148,21 +124,15 @@ describe('MockAuditorService', () => {
 
     const auditor = MockAuditorService.create({ level: 'info' });
     await auditor.error({
-      message: 'error',
-      eventName: '',
-      stage: '',
+      eventId: 'error',
       status: 'unknown',
     });
     await auditor.warn({
-      message: 'warn',
-      eventName: '',
-      stage: '',
+      eventId: 'warn',
       status: 'unknown',
     });
     await auditor.info({
-      message: 'info',
-      eventName: '',
-      stage: '',
+      eventId: 'info',
       status: 'unknown',
     });
 
@@ -178,21 +148,15 @@ describe('MockAuditorService', () => {
 
     const auditor = MockAuditorService.create({ level: 'debug' });
     await auditor.error({
-      message: 'error',
-      eventName: '',
-      stage: '',
+      eventId: 'error',
       status: 'unknown',
     });
     await auditor.warn({
-      message: 'warn',
-      eventName: '',
-      stage: '',
+      eventId: 'warn',
       status: 'unknown',
     });
     await auditor.info({
-      message: 'info',
-      eventName: '',
-      stage: '',
+      eventId: 'info',
       status: 'unknown',
     });
 

@@ -123,10 +123,8 @@ export async function createRouter(
 
       try {
         await auditor?.info({
-          eventName: 'CatalogEntityRefresh',
-          message: 'Refreshing entity with ref',
-          status: 'unknown',
-          stage: 'initiation',
+          eventId: 'CatalogEntityRefresh',
+          status: 'initiated',
           meta: {
             entityRef: restBody.entityRef,
           },
@@ -143,10 +141,8 @@ export async function createRouter(
         });
 
         await auditor?.info({
-          eventName: 'CatalogEntityRefresh',
-          message: 'Successfully refreshed entity with ref',
+          eventId: 'CatalogEntityRefresh',
           status: 'succeeded',
-          stage: 'completion',
           meta: {
             entityRef: restBody.entityRef,
           },
@@ -155,10 +151,8 @@ export async function createRouter(
         res.status(200).end();
       } catch (err) {
         await auditor?.error({
-          eventName: 'CatalogEntityRefresh',
-          message: 'Failed to refresh entity with ref',
+          eventId: 'CatalogEntityRefresh',
           status: 'failed',
-          stage: 'completion',
           errors: [err],
           meta: {
             entityRef: restBody.entityRef,
@@ -179,10 +173,8 @@ export async function createRouter(
       .get('/entities', async (req, res) => {
         try {
           await auditor?.info({
-            eventName: 'CatalogEntityFetch',
-            message: 'Fetching entities with query parameters',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogEntityFetch',
+            status: 'initiated',
             request: req,
           });
 
@@ -203,10 +195,8 @@ export async function createRouter(
           }
 
           await auditor?.info({
-            eventName: 'CatalogEntityFetch',
-            message: `Successfully fetched entities with query parameters`,
+            eventId: 'CatalogEntityFetch',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
             // Let's not log out the entities since this can make the log very big due to it not being paged
           });
@@ -215,10 +205,8 @@ export async function createRouter(
           res.json(entities);
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogEntityFetch',
-            message: 'Failed to fetch entities with query parameters',
+            eventId: 'CatalogEntityFetch',
             status: 'failed',
-            stage: 'completion',
             request: req,
             errors: [err],
           });
@@ -228,10 +216,8 @@ export async function createRouter(
       .get('/entities/by-query', async (req, res) => {
         try {
           await auditor?.info({
-            eventName: 'CatalogEntityFetchByQuery',
-            message: 'Fetching entities with query',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogEntityFetchByQuery',
+            status: 'initiated',
             request: req,
           });
 
@@ -244,10 +230,8 @@ export async function createRouter(
             });
 
           await auditor?.info({
-            eventName: 'CatalogEntityFetchByQuery',
-            message: 'Successfully fetched entities with query',
+            eventId: 'CatalogEntityFetchByQuery',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
             meta: {
               totalEntities: totalItems,
@@ -277,10 +261,8 @@ export async function createRouter(
           });
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogEntityFetchByQuery',
-            message: 'Failed to fetch entities with query',
+            eventId: 'CatalogEntityFetchByQuery',
             status: 'failed',
-            stage: 'completion',
             request: req,
             errors: [err],
           });
@@ -292,10 +274,8 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventName: 'CatalogEntityFetchByUid',
-            message: 'Fetching entity with uid',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogEntityFetchByUid',
+            status: 'initiated',
             request: req,
             meta: {
               uid: uid,
@@ -311,10 +291,8 @@ export async function createRouter(
           }
 
           await auditor?.info({
-            eventName: 'CatalogEntityFetchByUid',
-            message: 'Successfully fetched entity with uid',
+            eventId: 'CatalogEntityFetchByUid',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
             meta: {
               uid: uid,
@@ -325,10 +303,8 @@ export async function createRouter(
           res.status(200).json(entities.at(0));
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogEntityFetchByUid',
-            message: 'Failed to fetch entity with uid',
+            eventId: 'CatalogEntityFetchByUid',
             status: 'failed',
-            stage: 'completion',
             request: req,
             meta: {
               uid: uid,
@@ -343,10 +319,8 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventName: 'CatalogEntityDelete',
-            message: 'Deleting entity with uid',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogEntityDelete',
+            status: 'initiated',
             request: req,
             meta: {
               uid: uid,
@@ -358,10 +332,8 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventName: 'CatalogEntityDelete',
-            message: 'Successfully deleted entity with uid',
+            eventId: 'CatalogEntityDelete',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
             meta: {
               uid: uid,
@@ -371,10 +343,8 @@ export async function createRouter(
           res.status(204).end();
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogEntityDelete',
-            message: 'Failed to delete entity with uid',
+            eventId: 'CatalogEntityDelete',
             status: 'failed',
-            stage: 'completion',
             request: req,
             errors: [err],
             meta: {
@@ -390,10 +360,8 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventName: 'CatalogEntityFetchByName',
-            message: 'Fetching entity with ref',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogEntityFetchByName',
+            status: 'initiated',
             request: req,
             meta: {
               entityRef: entityRef,
@@ -415,10 +383,8 @@ export async function createRouter(
           }
 
           await auditor?.info({
-            eventName: 'CatalogEntityFetchByName',
-            message: 'Successfully fetched entity with ref',
+            eventId: 'CatalogEntityFetchByName',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
             meta: {
               entityRef: entityRef,
@@ -428,10 +394,8 @@ export async function createRouter(
           res.status(200).json(entities.at(0));
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogEntityFetchByName',
-            message: 'Failed to fetch entity with ref',
+            eventId: 'CatalogEntityFetchByName',
             status: 'failed',
-            stage: 'completion',
             request: req,
             meta: {
               entityRef: entityRef,
@@ -449,10 +413,8 @@ export async function createRouter(
 
           try {
             await auditor?.info({
-              eventName: 'CatalogEntityAncestryFetch',
-              message: 'Fetching ancestry for entity with ref',
-              status: 'unknown',
-              stage: 'initiation',
+              eventId: 'CatalogEntityAncestryFetch',
+              status: 'initiated',
               request: req,
               meta: {
                 entityRef: entityRef,
@@ -464,10 +426,8 @@ export async function createRouter(
             });
 
             await auditor?.info({
-              eventName: 'CatalogEntityAncestryFetch',
-              message: 'Successfully fetched ancestry for entity with ref',
+              eventId: 'CatalogEntityAncestryFetch',
               status: 'succeeded',
-              stage: 'completion',
               request: req,
               meta: {
                 rootEntityRef: response.rootEntityRef,
@@ -483,10 +443,8 @@ export async function createRouter(
             res.status(200).json(response);
           } catch (err) {
             await auditor?.error({
-              eventName: 'CatalogEntityAncestryFetch',
-              message: 'Failed to fetch ancestry for entity with ref',
+              eventId: 'CatalogEntityAncestryFetch',
               status: 'failed',
-              stage: 'completion',
               request: req,
               meta: {
                 entityRef: entityRef,
@@ -500,10 +458,8 @@ export async function createRouter(
       .post('/entities/by-refs', async (req, res) => {
         try {
           await auditor?.info({
-            eventName: 'CatalogEntityBatchFetch',
-            message: 'Fetching batch of entities with refs',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogEntityBatchFetch',
+            status: 'initiated',
             request: req,
           });
 
@@ -516,10 +472,8 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventName: 'CatalogEntityBatchFetch',
-            message: 'Successfully fetched batch of entities with refs',
+            eventId: 'CatalogEntityBatchFetch',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
             meta: {
               ...request,
@@ -529,10 +483,8 @@ export async function createRouter(
           res.status(200).json(response);
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogEntityBatchFetch',
-            message: 'Failed to fetch batch of entities with refs',
+            eventId: 'CatalogEntityBatchFetch',
             status: 'failed',
-            stage: 'completion',
             request: req,
             errors: [err],
           });
@@ -542,10 +494,8 @@ export async function createRouter(
       .get('/entity-facets', async (req, res) => {
         try {
           await auditor?.info({
-            eventName: 'CatalogEntityFacetFetch',
-            message: 'Fetching facets for entity with ref',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogEntityFacetFetch',
+            status: 'initiated',
             request: req,
           });
 
@@ -556,20 +506,16 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventName: 'CatalogEntityFacetFetch',
-            message: 'Successfully fetched facets for entity with ref',
+            eventId: 'CatalogEntityFacetFetch',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
           });
 
           res.status(200).json(response);
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogEntityFacetFetch',
-            message: 'Failed to fetch facets for entity with ref',
+            eventId: 'CatalogEntityFacetFetch',
             status: 'failed',
-            stage: 'completion',
             request: req,
             errors: [err],
           });
@@ -586,10 +532,8 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventName: 'CatalogLocationCreate',
-            message: 'Creating location with payload',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogLocationCreate',
+            status: 'initiated',
             meta: {
               location: location,
               isDryRun: dryRun,
@@ -612,10 +556,8 @@ export async function createRouter(
           );
 
           await auditor?.info({
-            eventName: 'CatalogLocationCreate',
-            message: 'Successfully created location with payload',
+            eventId: 'CatalogLocationCreate',
             status: 'succeeded',
-            stage: 'completion',
             meta: {
               location: output.location,
               isDryRun: dryRun,
@@ -626,10 +568,8 @@ export async function createRouter(
           res.status(201).json(output);
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogLocationCreate',
-            message: 'Failed to create location with payload',
+            eventId: 'CatalogLocationCreate',
             status: 'failed',
-            stage: 'completion',
             meta: {
               location: location,
               isDryRun: dryRun,
@@ -643,10 +583,8 @@ export async function createRouter(
       .get('/locations', async (req, res) => {
         try {
           await auditor?.info({
-            eventName: 'CatalogLocationFetch',
-            message: 'Fetching locations with query parameters',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogLocationFetch',
+            status: 'initiated',
             request: req,
           });
 
@@ -655,20 +593,16 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventName: 'CatalogLocationFetch',
-            message: 'Successfully fetched locations with query parameters',
+            eventId: 'CatalogLocationFetch',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
           });
 
           res.status(200).json(locations.map(l => ({ data: l })));
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogLocationFetch',
-            message: 'Failed to fetch locations with query parameters',
+            eventId: 'CatalogLocationFetch',
             status: 'failed',
-            stage: 'completion',
             request: req,
             errors: [err],
           });
@@ -681,10 +615,8 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventName: 'CatalogLocationFetchById',
-            message: 'Fetching location with id',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogLocationFetchById',
+            status: 'initiated',
             meta: {
               id: id,
             },
@@ -696,10 +628,8 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventName: 'CatalogLocationFetchById',
-            message: 'Successfully fetched location with id',
+            eventId: 'CatalogLocationFetchById',
             status: 'succeeded',
-            stage: 'completion',
             meta: {
               id: id,
               output: output,
@@ -710,10 +640,8 @@ export async function createRouter(
           res.status(200).json(output);
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogLocationFetchById',
-            message: 'Failed to fetch location with id',
+            eventId: 'CatalogLocationFetchById',
             status: 'failed',
-            stage: 'completion',
             meta: {
               id: id,
             },
@@ -728,10 +656,8 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventName: 'CatalogLocationDelete',
-            message: 'Deleting location with id',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogLocationDelete',
+            status: 'initiated',
             meta: {
               id: id,
             },
@@ -745,10 +671,8 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventName: 'CatalogLocationDelete',
-            message: 'Successfully deleted location with id',
+            eventId: 'CatalogLocationDelete',
             status: 'succeeded',
-            stage: 'completion',
             meta: {
               id: id,
             },
@@ -758,10 +682,8 @@ export async function createRouter(
           res.status(204).end();
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogLocationDelete',
-            message: 'Failed to delete location with id',
+            eventId: 'CatalogLocationDelete',
             status: 'failed',
-            stage: 'completion',
             meta: {
               id: id,
             },
@@ -777,10 +699,8 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventName: 'CatalogLocationFetchByEntityRef',
-            message: 'Fetching locations associated with entity with ref',
-            status: 'unknown',
-            stage: 'initiation',
+            eventId: 'CatalogLocationFetchByEntityRef',
+            status: 'initiated',
             meta: {
               locationRef: locationRef,
             },
@@ -793,11 +713,8 @@ export async function createRouter(
           );
 
           await auditor?.info({
-            eventName: 'CatalogLocationFetchByEntityRef',
-            message:
-              'Successfully fetched locations associated with entity with ref',
+            eventId: 'CatalogLocationFetchByEntityRef',
             status: 'succeeded',
-            stage: 'completion',
             meta: {
               locationRef: locationRef,
               output: output,
@@ -808,11 +725,8 @@ export async function createRouter(
           res.status(200).json(output);
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogLocationFetchByEntityRef',
-            message:
-              'Failed to fetch locations associated with entity with ref',
+            eventId: 'CatalogLocationFetchByEntityRef',
             status: 'failed',
-            stage: 'completion',
             meta: {
               locationRef: locationRef,
             },
@@ -828,10 +742,8 @@ export async function createRouter(
     router.post('/analyze-location', async (req, res) => {
       try {
         await auditor?.info({
-          eventName: 'CatalogLocationAnalyze',
-          message: 'Analyzing location with payload',
-          status: 'unknown',
-          stage: 'initiation',
+          eventId: 'CatalogLocationAnalyze',
+          status: 'initiated',
           request: req,
         });
 
@@ -855,10 +767,8 @@ export async function createRouter(
           );
 
           await auditor?.info({
-            eventName: 'CatalogLocationAnalyze',
-            message: 'Successfully analyzed location with payload',
+            eventId: 'CatalogLocationAnalyze',
             status: 'succeeded',
-            stage: 'completion',
             request: req,
             meta: {
               output: output,
@@ -878,10 +788,8 @@ export async function createRouter(
         }
       } catch (err) {
         await auditor?.error({
-          eventName: 'CatalogLocationAnalyze',
-          message: 'Failed to analyze location with payload',
+          eventId: 'CatalogLocationAnalyze',
           status: 'failed',
-          stage: 'completion',
           errors: [err],
           request: req,
         });
@@ -894,10 +802,8 @@ export async function createRouter(
     router.post('/validate-entity', async (req, res) => {
       try {
         await auditor?.info({
-          eventName: 'CatalogEntityValidate',
-          message: 'Validating entity with payload',
-          status: 'unknown',
-          stage: 'initiation',
+          eventId: 'CatalogEntityValidate',
+          status: 'initiated',
           request: req,
         });
 
@@ -919,10 +825,8 @@ export async function createRouter(
             );
         } catch (err) {
           await auditor?.error({
-            eventName: 'CatalogEntityValidate',
-            message: 'Failed to validate entity with payload',
+            eventId: 'CatalogEntityValidate',
             status: 'failed',
-            stage: 'completion',
             errors: [err],
             request: req,
           });
@@ -958,10 +862,8 @@ export async function createRouter(
           const errors = processingResult.errors.map(e => serializeError(e));
 
           await auditor?.error({
-            eventName: 'CatalogEntityValidate',
-            message: 'Failed to validate entity with payload',
+            eventId: 'CatalogEntityValidate',
             status: 'failed',
-            stage: 'completion',
             errors: errors,
             request: req,
           });
@@ -972,20 +874,16 @@ export async function createRouter(
         }
 
         await auditor?.info({
-          eventName: 'CatalogEntityValidate',
-          message: 'Successfully validated entity with payload',
+          eventId: 'CatalogEntityValidate',
           status: 'succeeded',
-          stage: 'completion',
           request: req,
         });
 
         return res.status(200).end();
       } catch (err) {
         await auditor?.error({
-          eventName: 'CatalogEntityValidate',
-          message: 'Failed to validate entity with payload',
+          eventId: 'CatalogEntityValidate',
           status: 'failed',
-          stage: 'completion',
           errors: [err],
           request: req,
         });
