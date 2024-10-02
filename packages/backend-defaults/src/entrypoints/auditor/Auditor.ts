@@ -15,6 +15,7 @@
  */
 
 import type {
+  AuditorCreateEvent,
   AuditorEventOptions,
   AuditorEventStatus,
   AuditorService,
@@ -159,22 +160,48 @@ export class Auditor implements AuditorService {
   async error<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<void> {
-    const auditEvent = await this.createAuditorEvent(options);
+    const auditEvent = await this.reshapeAuditorEvent(options);
     this.#winstonLogger.error(...auditEvent);
   }
 
   async warn<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<void> {
-    const auditEvent = await this.createAuditorEvent(options);
+    const auditEvent = await this.reshapeAuditorEvent(options);
     this.#winstonLogger.warn(...auditEvent);
   }
 
   async info<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<void> {
-    const auditEvent = await this.createAuditorEvent(options);
+    const auditEvent = await this.reshapeAuditorEvent(options);
     this.#winstonLogger.info(...auditEvent);
+  }
+
+  async createEvent<T extends JsonObject>(
+    options: Parameters<AuditorCreateEvent<T>>[0],
+  ): ReturnType<AuditorCreateEvent<T>> {
+    const { level = 'info', ...rest } = options;
+
+    await this[level]({ ...rest, status: 'initiated' });
+
+    return {
+      success: async params => {
+        await this[params?.level ?? level]({
+          ...rest,
+          meta: { ...options.meta, ...params?.meta },
+          status: 'succeeded',
+        });
+      },
+      fail: async params => {
+        await this.error({
+          ...rest,
+          ...params,
+          meta: { ...options.meta, ...params.meta },
+          status: 'failed',
+        });
+      },
+    };
   }
 
   child(
@@ -227,7 +254,7 @@ export class Auditor implements AuditorService {
     return undefined;
   }
 
-  private async createAuditorEvent<T extends JsonObject>(
+  private async reshapeAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
     const { eventId, actorId, request, ...rest } = options;

@@ -121,16 +121,15 @@ export async function createRouter(
     router.post('/refresh', async (req, res) => {
       const { authorizationToken, ...restBody } = req.body;
 
-      try {
-        await auditor?.info({
-          eventId: 'refresh',
-          status: 'initiated',
-          meta: {
-            entityRef: restBody.entityRef,
-          },
-          request: req,
-        });
+      const auditorEvent = await auditor?.createEvent({
+        eventId: 'refresh',
+        meta: {
+          entityRef: restBody.entityRef,
+        },
+        request: req,
+      });
 
+      try {
         const credentials = authorizationToken
           ? await auth.authenticate(authorizationToken)
           : await httpAuth.credentials(req);
@@ -140,25 +139,10 @@ export async function createRouter(
           credentials,
         });
 
-        await auditor?.info({
-          eventId: 'refresh',
-          status: 'succeeded',
-          meta: {
-            entityRef: restBody.entityRef,
-          },
-          request: req,
-        });
+        await auditorEvent?.success();
         res.status(200).end();
       } catch (err) {
-        await auditor?.error({
-          eventId: 'refresh',
-          status: 'failed',
-          error: err,
-          meta: {
-            entityRef: restBody.entityRef,
-          },
-          request: req,
-        });
+        await auditorEvent?.fail({ error: err });
         throw err;
       }
     });

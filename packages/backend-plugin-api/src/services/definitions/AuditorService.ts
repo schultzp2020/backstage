@@ -18,9 +18,7 @@ import type { ErrorLike } from '@backstage/errors';
 import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 
-/**
- * @public
- */
+/** @public */
 export type AuditorEventStatus<E = ErrorLike> =
   | { status: 'unknown' }
   | { status: 'initiated' }
@@ -52,6 +50,46 @@ export type AuditorEventOptions<T extends JsonObject> = {
   meta?: T;
 } & AuditorEventStatus;
 
+/** @public */
+export type AuditorEventLevels = keyof Omit<
+  AuditorService,
+  'createAuditorEvent'
+>;
+
+/** @public */
+export type AuditorCreateEvent<
+  T extends JsonObject,
+  E = ErrorLike,
+> = (options: {
+  /**
+   * Use kebab-case to name audit events (e.g., "user-login", "file-download").
+   *
+   * The `pluginId` already provides plugin/module context, so avoid redundant prefixes in the `eventId`.
+   */
+  eventId: string;
+
+  level?: Exclude<AuditorEventLevels, 'error'>;
+
+  /** (Optional) The associated HTTP request, if applicable. */
+  request?: Request<any, any, any, any, any>;
+
+  /** (Optional) An identifier for the entity or user who triggered the event. */
+  actorId?: string;
+
+  /** (Optional) Additional metadata relevant to the event, structured as a JSON object. */
+  meta?: T;
+}) => Promise<{
+  success<K extends T>(options?: {
+    level?: Exclude<AuditorEventLevels, 'error'>;
+    meta?: K;
+  }): Promise<void>;
+  fail<K extends T>(
+    options: {
+      meta?: K;
+    } & ({ error: E } | { errors: E[] }),
+  ): Promise<void>;
+}>;
+
 /**
  * A service that provides an auditor facility.
  *
@@ -60,6 +98,9 @@ export type AuditorEventOptions<T extends JsonObject> = {
  * @public
  */
 export interface AuditorService {
+  createEvent<T extends JsonObject>(
+    options: Parameters<AuditorCreateEvent<T>>[0],
+  ): ReturnType<AuditorCreateEvent<T>>;
   /**
    * Records critical failures that affect system integrity, like failed transactions or security breaches, essential for incident response.
    */

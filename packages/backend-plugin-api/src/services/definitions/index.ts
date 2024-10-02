@@ -15,11 +15,10 @@
  */
 
 export type {
-  AuditorEventFailureStatus,
+  AuditorCreateEvent,
+  AuditorEventLevels,
   AuditorEventOptions,
   AuditorEventStatus,
-  AuditorEventSuccessStatus,
-  AuditorEventUnknownStatus,
   AuditorService,
 } from './AuditorService';
 export type {

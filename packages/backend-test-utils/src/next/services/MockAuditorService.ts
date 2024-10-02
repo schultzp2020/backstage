@@ -50,21 +50,21 @@ export class MockAuditorService implements AuditorService {
   async error<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<void> {
-    const auditEvent = await this.createAuditorEvent(options);
+    const auditEvent = await this.reshapeAuditorEvent(options);
     this.log('error', ...auditEvent);
   }
 
   async warn<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<void> {
-    const auditEvent = await this.createAuditorEvent(options);
+    const auditEvent = await this.reshapeAuditorEvent(options);
     this.log('warn', ...auditEvent);
   }
 
   async info<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<void> {
-    const auditEvent = await this.createAuditorEvent(options);
+    const auditEvent = await this.reshapeAuditorEvent(options);
     this.log('info', ...auditEvent);
   }
 
@@ -119,7 +119,7 @@ export class MockAuditorService implements AuditorService {
     return undefined;
   }
 
-  private async createAuditorEvent<T extends JsonObject>(
+  private async reshapeAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
     const { eventId, actorId, request, ...rest } = options;
