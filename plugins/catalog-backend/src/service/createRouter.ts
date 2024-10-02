@@ -123,7 +123,7 @@ export async function createRouter(
 
       try {
         await auditor?.info({
-          eventId: 'CatalogEntityRefresh',
+          eventId: 'refresh',
           status: 'initiated',
           meta: {
             entityRef: restBody.entityRef,
@@ -141,7 +141,7 @@ export async function createRouter(
         });
 
         await auditor?.info({
-          eventId: 'CatalogEntityRefresh',
+          eventId: 'refresh',
           status: 'succeeded',
           meta: {
             entityRef: restBody.entityRef,
@@ -151,7 +151,7 @@ export async function createRouter(
         res.status(200).end();
       } catch (err) {
         await auditor?.error({
-          eventId: 'CatalogEntityRefresh',
+          eventId: 'refresh',
           status: 'failed',
           error: err,
           meta: {
@@ -216,7 +216,7 @@ export async function createRouter(
       .get('/entities/by-query', async (req, res) => {
         try {
           await auditor?.info({
-            eventId: 'CatalogEntityFetchByQuery',
+            eventId: 'fetch-by-query',
             status: 'initiated',
             request: req,
           });
@@ -230,7 +230,7 @@ export async function createRouter(
             });
 
           await auditor?.info({
-            eventId: 'CatalogEntityFetchByQuery',
+            eventId: 'fetch-by-query',
             status: 'succeeded',
             request: req,
             meta: {
@@ -261,7 +261,7 @@ export async function createRouter(
           });
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogEntityFetchByQuery',
+            eventId: 'fetch-by-query',
             status: 'failed',
             request: req,
             error: err,
@@ -274,7 +274,7 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventId: 'CatalogEntityFetchByUid',
+            eventId: 'fetch-by-uid',
             status: 'initiated',
             request: req,
             meta: {
@@ -291,7 +291,7 @@ export async function createRouter(
           }
 
           await auditor?.info({
-            eventId: 'CatalogEntityFetchByUid',
+            eventId: 'fetch-by-uid',
             status: 'succeeded',
             request: req,
             meta: {
@@ -303,7 +303,7 @@ export async function createRouter(
           res.status(200).json(entities.at(0));
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogEntityFetchByUid',
+            eventId: 'fetch-by-uid',
             status: 'failed',
             request: req,
             meta: {
@@ -319,7 +319,7 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventId: 'CatalogEntityDelete',
+            eventId: 'delete',
             status: 'initiated',
             request: req,
             meta: {
@@ -332,7 +332,7 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventId: 'CatalogEntityDelete',
+            eventId: 'delete',
             status: 'succeeded',
             request: req,
             meta: {
@@ -343,7 +343,7 @@ export async function createRouter(
           res.status(204).end();
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogEntityDelete',
+            eventId: 'delete',
             status: 'failed',
             request: req,
             error: err,
@@ -360,7 +360,7 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventId: 'CatalogEntityFetchByName',
+            eventId: 'fetch-by-name',
             status: 'initiated',
             request: req,
             meta: {
@@ -383,7 +383,7 @@ export async function createRouter(
           }
 
           await auditor?.info({
-            eventId: 'CatalogEntityFetchByName',
+            eventId: 'fetch-by-name',
             status: 'succeeded',
             request: req,
             meta: {
@@ -394,7 +394,7 @@ export async function createRouter(
           res.status(200).json(entities.at(0));
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogEntityFetchByName',
+            eventId: 'fetch-by-name',
             status: 'failed',
             request: req,
             meta: {
@@ -413,7 +413,7 @@ export async function createRouter(
 
           try {
             await auditor?.info({
-              eventId: 'CatalogEntityAncestryFetch',
+              eventId: 'ancestry-fetch',
               status: 'initiated',
               request: req,
               meta: {
@@ -426,7 +426,7 @@ export async function createRouter(
             });
 
             await auditor?.info({
-              eventId: 'CatalogEntityAncestryFetch',
+              eventId: 'ancestry-fetch',
               status: 'succeeded',
               request: req,
               meta: {
@@ -443,7 +443,7 @@ export async function createRouter(
             res.status(200).json(response);
           } catch (err) {
             await auditor?.error({
-              eventId: 'CatalogEntityAncestryFetch',
+              eventId: 'ancestry-fetch',
               status: 'failed',
               request: req,
               meta: {
@@ -458,7 +458,7 @@ export async function createRouter(
       .post('/entities/by-refs', async (req, res) => {
         try {
           await auditor?.info({
-            eventId: 'CatalogEntityBatchFetch',
+            eventId: 'batch-fetch',
             status: 'initiated',
             request: req,
           });
@@ -472,7 +472,7 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventId: 'CatalogEntityBatchFetch',
+            eventId: 'batch-fetch',
             status: 'succeeded',
             request: req,
             meta: {
@@ -483,7 +483,7 @@ export async function createRouter(
           res.status(200).json(response);
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogEntityBatchFetch',
+            eventId: 'batch-fetch',
             status: 'failed',
             request: req,
             error: err,
@@ -494,7 +494,7 @@ export async function createRouter(
       .get('/entity-facets', async (req, res) => {
         try {
           await auditor?.info({
-            eventId: 'CatalogEntityFacetFetch',
+            eventId: 'facet-fetch',
             status: 'initiated',
             request: req,
           });
@@ -506,7 +506,7 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventId: 'CatalogEntityFacetFetch',
+            eventId: 'facet-fetch',
             status: 'succeeded',
             request: req,
           });
@@ -514,7 +514,7 @@ export async function createRouter(
           res.status(200).json(response);
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogEntityFacetFetch',
+            eventId: 'facet-fetch',
             status: 'failed',
             request: req,
             error: err,
@@ -532,7 +532,7 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventId: 'CatalogLocationCreate',
+            eventId: 'location-create',
             status: 'initiated',
             meta: {
               location: location,
@@ -556,7 +556,7 @@ export async function createRouter(
           );
 
           await auditor?.info({
-            eventId: 'CatalogLocationCreate',
+            eventId: 'location-create',
             status: 'succeeded',
             meta: {
               location: output.location,
@@ -568,7 +568,7 @@ export async function createRouter(
           res.status(201).json(output);
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogLocationCreate',
+            eventId: 'location-create',
             status: 'failed',
             meta: {
               location: location,
@@ -583,7 +583,7 @@ export async function createRouter(
       .get('/locations', async (req, res) => {
         try {
           await auditor?.info({
-            eventId: 'CatalogLocationFetch',
+            eventId: 'location-fetch',
             status: 'initiated',
             request: req,
           });
@@ -593,7 +593,7 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventId: 'CatalogLocationFetch',
+            eventId: 'location-fetch',
             status: 'succeeded',
             request: req,
           });
@@ -601,7 +601,7 @@ export async function createRouter(
           res.status(200).json(locations.map(l => ({ data: l })));
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogLocationFetch',
+            eventId: 'location-fetch',
             status: 'failed',
             request: req,
             error: err,
@@ -615,7 +615,7 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventId: 'CatalogLocationFetchById',
+            eventId: 'location-fetch-by-id',
             status: 'initiated',
             meta: {
               id: id,
@@ -628,7 +628,7 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventId: 'CatalogLocationFetchById',
+            eventId: 'location-fetch-by-id',
             status: 'succeeded',
             meta: {
               id: id,
@@ -640,7 +640,7 @@ export async function createRouter(
           res.status(200).json(output);
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogLocationFetchById',
+            eventId: 'location-fetch-by-id',
             status: 'failed',
             meta: {
               id: id,
@@ -656,7 +656,7 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventId: 'CatalogLocationDelete',
+            eventId: 'location-delete',
             status: 'initiated',
             meta: {
               id: id,
@@ -671,7 +671,7 @@ export async function createRouter(
           });
 
           await auditor?.info({
-            eventId: 'CatalogLocationDelete',
+            eventId: 'location-delete',
             status: 'succeeded',
             meta: {
               id: id,
@@ -682,7 +682,7 @@ export async function createRouter(
           res.status(204).end();
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogLocationDelete',
+            eventId: 'location-delete',
             status: 'failed',
             meta: {
               id: id,
@@ -699,7 +699,7 @@ export async function createRouter(
 
         try {
           await auditor?.info({
-            eventId: 'CatalogLocationFetchByEntityRef',
+            eventId: 'location-fetch-by-entity-ref',
             status: 'initiated',
             meta: {
               locationRef: locationRef,
@@ -713,7 +713,7 @@ export async function createRouter(
           );
 
           await auditor?.info({
-            eventId: 'CatalogLocationFetchByEntityRef',
+            eventId: 'location-fetch-by-entity-ref',
             status: 'succeeded',
             meta: {
               locationRef: locationRef,
@@ -725,7 +725,7 @@ export async function createRouter(
           res.status(200).json(output);
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogLocationFetchByEntityRef',
+            eventId: 'location-fetch-by-entity-ref',
             status: 'failed',
             meta: {
               locationRef: locationRef,
@@ -742,7 +742,7 @@ export async function createRouter(
     router.post('/analyze-location', async (req, res) => {
       try {
         await auditor?.info({
-          eventId: 'CatalogLocationAnalyze',
+          eventId: 'location-analyze',
           status: 'initiated',
           request: req,
         });
@@ -767,7 +767,7 @@ export async function createRouter(
           );
 
           await auditor?.info({
-            eventId: 'CatalogLocationAnalyze',
+            eventId: 'location-analyze',
             status: 'succeeded',
             request: req,
             meta: {
@@ -788,7 +788,7 @@ export async function createRouter(
         }
       } catch (err) {
         await auditor?.error({
-          eventId: 'CatalogLocationAnalyze',
+          eventId: 'location-analyze',
           status: 'failed',
           error: err,
           request: req,
@@ -802,7 +802,7 @@ export async function createRouter(
     router.post('/validate-entity', async (req, res) => {
       try {
         await auditor?.info({
-          eventId: 'CatalogEntityValidate',
+          eventId: 'validate',
           status: 'initiated',
           request: req,
         });
@@ -825,7 +825,7 @@ export async function createRouter(
             );
         } catch (err) {
           await auditor?.error({
-            eventId: 'CatalogEntityValidate',
+            eventId: 'validate',
             status: 'failed',
             error: err,
             request: req,
@@ -862,7 +862,7 @@ export async function createRouter(
           const errors = processingResult.errors.map(e => serializeError(e));
 
           await auditor?.error({
-            eventId: 'CatalogEntityValidate',
+            eventId: 'validate',
             status: 'failed',
             errors: errors,
             request: req,
@@ -874,7 +874,7 @@ export async function createRouter(
         }
 
         await auditor?.info({
-          eventId: 'CatalogEntityValidate',
+          eventId: 'validate',
           status: 'succeeded',
           request: req,
         });
@@ -882,7 +882,7 @@ export async function createRouter(
         return res.status(200).end();
       } catch (err) {
         await auditor?.error({
-          eventId: 'CatalogEntityValidate',
+          eventId: 'validate',
           status: 'failed',
           error: err,
           request: req,

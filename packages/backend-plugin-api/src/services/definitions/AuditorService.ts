@@ -36,11 +36,9 @@ export type AuditorEventStatus<E = ErrorLike> =
  */
 export type AuditorEventOptions<T extends JsonObject> = {
   /**
-   * The name of the audit event, formatted in PascalCase (e.g., "UserLogin", "FileDownload").
+   * Use kebab-case to name audit events (e.g., "user-login", "file-download").
    *
-   * If applicable, it's required to prefix the `eventName` with the name of the component
-   * responsible for the event (e.g., "ScaffolderTaskRead", "CatalogEntityFetch").
-   * This improves searchability within the central log collector.
+   * The `pluginId` already provides plugin/module context, so avoid redundant prefixes in the `eventId`.
    */
   eventId: string;
 
