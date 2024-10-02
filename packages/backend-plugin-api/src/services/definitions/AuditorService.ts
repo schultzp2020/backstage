@@ -25,10 +25,9 @@ export type AuditorEventStatus<E = ErrorLike> =
   | { status: 'unknown' }
   | { status: 'initiated' }
   | { status: 'succeeded' }
-  | {
+  | ({
       status: 'failed';
-      errors: E[];
-    };
+    } & ({ error: E } | { errors: E[] }));
 
 /**
  * Options for creating an auditor event.

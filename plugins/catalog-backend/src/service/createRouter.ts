@@ -153,7 +153,7 @@ export async function createRouter(
         await auditor?.error({
           eventId: 'CatalogEntityRefresh',
           status: 'failed',
-          errors: [err],
+          error: err,
           meta: {
             entityRef: restBody.entityRef,
           },
@@ -208,7 +208,7 @@ export async function createRouter(
             eventId: 'CatalogEntityFetch',
             status: 'failed',
             request: req,
-            errors: [err],
+            error: err,
           });
           throw err;
         }
@@ -264,7 +264,7 @@ export async function createRouter(
             eventId: 'CatalogEntityFetchByQuery',
             status: 'failed',
             request: req,
-            errors: [err],
+            error: err,
           });
           throw err;
         }
@@ -309,7 +309,7 @@ export async function createRouter(
             meta: {
               uid: uid,
             },
-            errors: [err],
+            error: err,
           });
           throw err;
         }
@@ -346,7 +346,7 @@ export async function createRouter(
             eventId: 'CatalogEntityDelete',
             status: 'failed',
             request: req,
-            errors: [err],
+            error: err,
             meta: {
               uid: uid,
             },
@@ -400,7 +400,7 @@ export async function createRouter(
             meta: {
               entityRef: entityRef,
             },
-            errors: [err],
+            error: err,
           });
           throw err;
         }
@@ -449,7 +449,7 @@ export async function createRouter(
               meta: {
                 entityRef: entityRef,
               },
-              errors: [err],
+              error: err,
             });
             throw err;
           }
@@ -486,7 +486,7 @@ export async function createRouter(
             eventId: 'CatalogEntityBatchFetch',
             status: 'failed',
             request: req,
-            errors: [err],
+            error: err,
           });
           throw err;
         }
@@ -517,7 +517,7 @@ export async function createRouter(
             eventId: 'CatalogEntityFacetFetch',
             status: 'failed',
             request: req,
-            errors: [err],
+            error: err,
           });
           throw err;
         }
@@ -574,7 +574,7 @@ export async function createRouter(
               location: location,
               isDryRun: dryRun,
             },
-            errors: [err],
+            error: err,
             request: req,
           });
           throw err;
@@ -604,7 +604,7 @@ export async function createRouter(
             eventId: 'CatalogLocationFetch',
             status: 'failed',
             request: req,
-            errors: [err],
+            error: err,
           });
           throw err;
         }
@@ -645,7 +645,7 @@ export async function createRouter(
             meta: {
               id: id,
             },
-            errors: [err],
+            error: err,
             request: req,
           });
           throw err;
@@ -687,7 +687,7 @@ export async function createRouter(
             meta: {
               id: id,
             },
-            errors: [err],
+            error: err,
             request: req,
           });
           throw err;
@@ -730,7 +730,7 @@ export async function createRouter(
             meta: {
               locationRef: locationRef,
             },
-            errors: [err],
+            error: err,
             request: req,
           });
           throw err;
@@ -790,7 +790,7 @@ export async function createRouter(
         await auditor?.error({
           eventId: 'CatalogLocationAnalyze',
           status: 'failed',
-          errors: [err],
+          error: err,
           request: req,
         });
         throw err;
@@ -827,7 +827,7 @@ export async function createRouter(
           await auditor?.error({
             eventId: 'CatalogEntityValidate',
             status: 'failed',
-            errors: [err],
+            error: err,
             request: req,
           });
 
@@ -884,7 +884,7 @@ export async function createRouter(
         await auditor?.error({
           eventId: 'CatalogEntityValidate',
           status: 'failed',
-          errors: [err],
+          error: err,
           request: req,
         });
         throw err;
