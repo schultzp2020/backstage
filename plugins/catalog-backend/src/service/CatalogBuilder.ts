@@ -135,12 +135,13 @@ export type CatalogEnvironment = {
   database: DatabaseService;
   config: RootConfigService;
   reader: UrlReaderService;
+  // TODO: Require all services once `backend-legacy` is removed
   permissions: PermissionsService | PermissionAuthorizer;
   scheduler?: SchedulerService;
   discovery?: DiscoveryService;
   auth?: AuthService;
   httpAuth?: HttpAuthService;
-  auditor: AuditorService;
+  auditor?: AuditorService;
 };
 
 /**
