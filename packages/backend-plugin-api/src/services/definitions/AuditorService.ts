@@ -92,13 +92,13 @@ export interface AuditorService {
   /**
    * Records critical failures that affect system integrity, like failed transactions or security breaches, essential for incident response.
    */
-  error<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
+  error<T extends JsonObject>(options: AuditorEventOptions<T>): Promise<void>;
   /**
    * Highlights non-critical issues, such as blocked access attempts or slow performance, which may indicate potential risks.
    */
-  warn<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
+  warn<T extends JsonObject>(options: AuditorEventOptions<T>): Promise<void>;
   /**
    * Logs high-level, significant events such as successful logins or configuration changes, which are key for compliance and routine audits.
    */
-  info<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
+  info<T extends JsonObject>(options: AuditorEventOptions<T>): Promise<void>;
 }
