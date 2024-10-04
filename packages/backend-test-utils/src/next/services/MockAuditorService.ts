@@ -16,67 +16,70 @@
 
 import type { AuditorEvent } from '@backstage/backend-defaults/auditor';
 import type {
+  AuditorCreateEvent,
   AuditorEventOptions,
   AuditorService,
   AuthService,
   BackstageCredentials,
   HttpAuthService,
+  PluginMetadataService,
 } from '@backstage/backend-plugin-api';
-import { AuthenticationError, ForwardedError } from '@backstage/errors';
+import { ForwardedError, ServiceUnavailableError } from '@backstage/errors';
 import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 import type { mockServices } from './mockServices';
-
-const LEVELS = {
-  none: 0,
-  error: 1,
-  warn: 2,
-  info: 3,
-  debug: 4,
-} as const;
 
 export class MockAuditorService implements AuditorService {
   readonly #options: mockServices.auditor.Options;
 
   static create(options?: mockServices.auditor.Options): MockAuditorService {
-    const level = options?.level ?? 'none';
-    if (!(level in LEVELS)) {
-      throw new Error(`Invalid log level '${level}'`);
-    }
-
-    return new MockAuditorService(options ? { ...options, level } : { level });
+    return new MockAuditorService(options ?? {});
   }
 
-  async error<T extends JsonObject>(
-    options: AuditorEventOptions<T>,
+  async log<TMeta extends JsonObject>(
+    options: AuditorEventOptions<TMeta>,
   ): Promise<void> {
     const auditEvent = await this.reshapeAuditorEvent(options);
-    this.log('error', ...auditEvent);
+    this.#log(...auditEvent);
   }
 
-  async warn<T extends JsonObject>(
-    options: AuditorEventOptions<T>,
-  ): Promise<void> {
-    const auditEvent = await this.reshapeAuditorEvent(options);
-    this.log('warn', ...auditEvent);
-  }
+  async createEvent<TMeta extends JsonObject>(
+    options: Parameters<AuditorCreateEvent<TMeta>>[0],
+  ): ReturnType<AuditorCreateEvent<TMeta>> {
+    await this.log({ ...options, status: 'initiated' });
 
-  async info<T extends JsonObject>(
-    options: AuditorEventOptions<T>,
-  ): Promise<void> {
-    const auditEvent = await this.reshapeAuditorEvent(options);
-    this.log('info', ...auditEvent);
+    return {
+      success: async params => {
+        await this.log({
+          ...options,
+          meta: { ...options.meta, ...params?.meta },
+          status: 'succeeded',
+        });
+      },
+      fail: async params => {
+        await this.log({
+          ...options,
+          ...params,
+          meta: { ...options.meta, ...params.meta },
+          status: 'failed',
+        });
+      },
+    };
   }
 
   child(
     meta: JsonObject,
-    auth?: AuthService,
-    httpAuth?: HttpAuthService,
+    deps?: {
+      auth?: AuthService;
+      httpAuth?: HttpAuthService;
+      plugin: PluginMetadataService;
+    },
   ): AuditorService {
     return new MockAuditorService({
       ...this.#options,
-      auth: auth ?? this.#options.auth,
-      httpAuth: httpAuth ?? this.#options.httpAuth,
+      auth: deps?.auth ?? this.#options.auth,
+      httpAuth: deps?.httpAuth ?? this.#options.httpAuth,
+      plugin: deps?.plugin ?? this.#options.plugin,
       meta: {
         ...this.#options.meta,
         ...meta,
@@ -88,13 +91,13 @@ export class MockAuditorService implements AuditorService {
     request: Request<any, any, any, any, any>,
   ): Promise<string | undefined> {
     if (!this.#options.auth) {
-      throw new AuthenticationError(
+      throw new ServiceUnavailableError(
         `The core service 'auth' was not provided during the auditor's instantiation`,
       );
     }
 
     if (!this.#options.httpAuth) {
-      throw new AuthenticationError(
+      throw new ServiceUnavailableError(
         `The core service 'httpAuth' was not provided during the auditor's instantiation`,
       );
     }
@@ -122,7 +125,13 @@ export class MockAuditorService implements AuditorService {
   private async reshapeAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
-    const { eventId, actorId, request, ...rest } = options;
+    const { eventId, level = 'low', request, actorId, ...rest } = options;
+
+    if (!this.#options.plugin) {
+      throw new ServiceUnavailableError(
+        `The core service 'plugin' was not provided during the auditor's instantiation`,
+      );
+    }
 
     const eventRequest = request
       ? {
@@ -135,8 +144,9 @@ export class MockAuditorService implements AuditorService {
       actorId ?? (request ? await this.getActorId(request) : undefined);
 
     const auditEvent: AuditorEvent = [
-      eventId,
+      `${this.#options.plugin.getId()}.${eventId}`,
       {
+        level,
         actor: {
           actorId: eventActorId,
           ip: request?.ip,
@@ -155,15 +165,7 @@ export class MockAuditorService implements AuditorService {
     this.#options = options;
   }
 
-  private log(
-    level: Exclude<keyof typeof LEVELS, 'none'>,
-    message: string,
-    meta?: AuditorEvent[1],
-  ) {
-    const levelValue = LEVELS[level] ?? 0;
-    const outputLevelValue = LEVELS[this.#options.level as keyof typeof LEVELS];
-    if (levelValue <= outputLevelValue) {
-      console[level](message, JSON.stringify(meta));
-    }
+  #log(message: string, meta?: AuditorEvent[1]) {
+    console.log(message, JSON.stringify(meta));
   }
 }

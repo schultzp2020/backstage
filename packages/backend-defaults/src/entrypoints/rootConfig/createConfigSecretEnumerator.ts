@@ -57,8 +57,9 @@ export async function createConfigSecretEnumerator(
       );
     } else if ('auditor' in options) {
       options.auditor
-        .info({
-          eventId: 'RedactSecrets',
+        .log({
+          // Does rootConfig have access to PluginMetadataService?
+          eventId: 'redact-secrets',
           status: 'succeeded',
         })
         .then();

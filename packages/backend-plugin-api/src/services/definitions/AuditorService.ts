@@ -19,26 +19,39 @@ import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 
 /** @public */
-export type AuditorEventStatus<E = ErrorLike> =
+export type AuditorEventStatus<TError extends ErrorLike = ErrorLike> =
   | { status: 'unknown' }
   | { status: 'initiated' }
   | { status: 'succeeded' }
   | ({
       status: 'failed';
-    } & ({ error: E } | { errors: E[] }));
+    } & ({ error: TError } | { errors: TError[] }));
+
+/**
+ * TODO: Rigorously define each level
+ *
+ * low (default): normal usage
+ * medium: accessing write endpoints
+ * high: non-root permission changes
+ * critical: root permission changes
+ * @public
+ */
+export type AuditorEventLevel = 'low' | 'medium' | 'high' | 'critical';
 
 /**
  * Options for creating an auditor event.
  *
  * @public
  */
-export type AuditorEventOptions<T extends JsonObject> = {
+export type AuditorEventOptions<TMeta extends JsonObject> = {
   /**
    * Use kebab-case to name audit events (e.g., "user-login", "file-download").
    *
    * The `pluginId` already provides plugin/module context, so avoid redundant prefixes in the `eventId`.
    */
   eventId: string;
+
+  level?: AuditorEventLevel;
 
   /** (Optional) The associated HTTP request, if applicable. */
   request?: Request<any, any, any, any, any>;
@@ -47,19 +60,13 @@ export type AuditorEventOptions<T extends JsonObject> = {
   actorId?: string;
 
   /** (Optional) Additional metadata relevant to the event, structured as a JSON object. */
-  meta?: T;
+  meta?: TMeta;
 } & AuditorEventStatus;
 
 /** @public */
-export type AuditorEventLevels = keyof Omit<
-  AuditorService,
-  'createAuditorEvent'
->;
-
-/** @public */
 export type AuditorCreateEvent<
-  T extends JsonObject,
-  E = ErrorLike,
+  TRootMeta extends JsonObject,
+  TError extends ErrorLike = ErrorLike,
 > = (options: {
   /**
    * Use kebab-case to name audit events (e.g., "user-login", "file-download").
@@ -68,7 +75,7 @@ export type AuditorCreateEvent<
    */
   eventId: string;
 
-  level?: Exclude<AuditorEventLevels, 'error'>;
+  level?: AuditorEventLevel;
 
   /** (Optional) The associated HTTP request, if applicable. */
   request?: Request<any, any, any, any, any>;
@@ -77,16 +84,13 @@ export type AuditorCreateEvent<
   actorId?: string;
 
   /** (Optional) Additional metadata relevant to the event, structured as a JSON object. */
-  meta?: T;
+  meta?: TRootMeta;
 }) => Promise<{
-  success<K extends T>(options?: {
-    level?: Exclude<AuditorEventLevels, 'error'>;
-    meta?: K;
-  }): Promise<void>;
-  fail<K extends T>(
+  success<TMeta extends TRootMeta>(options?: { meta?: TMeta }): Promise<void>;
+  fail<TMeta extends TRootMeta>(
     options: {
-      meta?: K;
-    } & ({ error: E } | { errors: E[] }),
+      meta?: TMeta;
+    } & ({ error: TError } | { errors: TError[] }),
   ): Promise<void>;
 }>;
 
@@ -98,19 +102,10 @@ export type AuditorCreateEvent<
  * @public
  */
 export interface AuditorService {
-  createEvent<T extends JsonObject>(
-    options: Parameters<AuditorCreateEvent<T>>[0],
-  ): ReturnType<AuditorCreateEvent<T>>;
-  /**
-   * Records critical failures that affect system integrity, like failed transactions or security breaches, essential for incident response.
-   */
-  error<T extends JsonObject>(options: AuditorEventOptions<T>): Promise<void>;
-  /**
-   * Highlights non-critical issues, such as blocked access attempts or slow performance, which may indicate potential risks.
-   */
-  warn<T extends JsonObject>(options: AuditorEventOptions<T>): Promise<void>;
-  /**
-   * Logs high-level, significant events such as successful logins or configuration changes, which are key for compliance and routine audits.
-   */
-  info<T extends JsonObject>(options: AuditorEventOptions<T>): Promise<void>;
+  createEvent<TMeta extends JsonObject>(
+    options: Parameters<AuditorCreateEvent<TMeta>>[0],
+  ): ReturnType<AuditorCreateEvent<TMeta>>;
+  log<TMeta extends JsonObject>(
+    options: AuditorEventOptions<TMeta>,
+  ): Promise<void>;
 }

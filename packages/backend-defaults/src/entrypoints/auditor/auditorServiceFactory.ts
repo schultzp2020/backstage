@@ -80,7 +80,6 @@ export const auditorServiceFactory = createServiceFactory({
       meta: {
         service: 'backstage',
       },
-      level: process.env.LOG_LEVEL ?? 'info',
       format: winston.format.combine(
         auditorFieldFormat,
         process.env.NODE_ENV === 'production'
@@ -102,6 +101,9 @@ export const auditorServiceFactory = createServiceFactory({
     return auditor;
   },
   factory({ plugin, auth, httpAuth }, rootAuditor) {
-    return rootAuditor.child({ plugin: plugin.getId() }, auth, httpAuth);
+    return rootAuditor.child(
+      { plugin: plugin.getId() },
+      { auth, httpAuth, plugin },
+    );
   },
 });

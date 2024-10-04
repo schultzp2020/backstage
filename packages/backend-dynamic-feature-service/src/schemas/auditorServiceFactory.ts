@@ -16,6 +16,7 @@
 
 import {
   Auditor,
+  auditorFieldFormat,
   defaultProdFormat,
 } from '@backstage/backend-defaults/auditor';
 import { createConfigSecretEnumerator } from '@backstage/backend-defaults/rootConfig';
@@ -82,8 +83,12 @@ export const auditorServiceFactory = createServiceFactory({
       meta: {
         service: 'backstage',
       },
-      level: process.env.LOG_LEVEL ?? 'info',
-      format: winston.format.combine(defaultProdFormat, winston.format.json()),
+      format: winston.format.combine(
+        auditorFieldFormat,
+        process.env.NODE_ENV === 'production'
+          ? defaultProdFormat
+          : Auditor.colorFormat(),
+      ),
       transports: [
         ...transports.auditorConsole(auditorConfig),
         ...transports.auditorFile(auditorConfig),
@@ -106,6 +111,9 @@ export const auditorServiceFactory = createServiceFactory({
     return auditor;
   },
   factory({ plugin, auth, httpAuth }, rootAuditor) {
-    return rootAuditor.child({ plugin: plugin.getId() }, auth, httpAuth);
+    return rootAuditor.child(
+      { plugin: plugin.getId() },
+      { auth, httpAuth, plugin },
+    );
   },
 });

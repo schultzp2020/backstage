@@ -189,7 +189,7 @@ export namespace mockServices {
    * Creates a mock implementation of the `AuditorService`.
    */
   export function auditor(
-    options?: auditor.Options & {
+    options?: Omit<auditor.Options, 'plugin'> & {
       pluginId?: string;
     },
   ): AuditorService {
@@ -205,12 +205,18 @@ export namespace mockServices {
       options?.httpAuth ??
       new MockHttpAuthService(pluginId, mockCredentials.user());
 
+    const mockPlugin = {
+      getId: () => pluginId,
+    };
+
     const auditorMock = MockAuditorService.create({
       meta: options?.meta ? { ...options.meta, service } : { service },
-      level: options?.level ?? 'info',
     });
 
-    return auditorMock.child({ pluginId }, mockAuth, mockHttpAuth);
+    return auditorMock.child(
+      { pluginId },
+      { auth: mockAuth, httpAuth: mockHttpAuth, plugin: mockPlugin },
+    );
   }
 
   export namespace auditor {
@@ -229,28 +235,27 @@ export namespace mockServices {
 
           return MockAuditorService.create({
             meta: options?.meta ? { ...options.meta, service } : { service },
-            level: options?.level ?? 'info',
           });
         },
         factory(
-          { plugin, auth: mockAuth, httpAuth: mockHttpAuth },
+          {
+            plugin,
+            auth: mockAuth,
+            httpAuth: mockHttpAuth,
+            plugin: mockPlugin,
+          },
           rootAuditor,
         ) {
           return rootAuditor.child(
             { plugin: plugin.getId() },
-            mockAuth,
-            mockHttpAuth,
+            { auth: mockAuth, httpAuth: mockHttpAuth, plugin: mockPlugin },
           );
         },
       });
 
     export const mock = simpleMock(coreServices.auditor, () => ({
-      child: jest.fn(),
-      getActorId: jest.fn(),
-      debug: jest.fn(),
-      error: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
+      createEvent: jest.fn(),
+      log: jest.fn(),
     }));
   }
 

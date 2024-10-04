@@ -16,14 +16,16 @@
 
 import type {
   AuditorCreateEvent,
+  AuditorEventLevel,
   AuditorEventOptions,
   AuditorEventStatus,
   AuditorService,
   AuthService,
   BackstageCredentials,
   HttpAuthService,
+  PluginMetadataService,
 } from '@backstage/backend-plugin-api';
-import { AuthenticationError, ForwardedError } from '@backstage/errors';
+import { ForwardedError, ServiceUnavailableError } from '@backstage/errors';
 import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 import type { Format } from 'logform';
@@ -54,6 +56,7 @@ export type AuditorEventRequest = {
 export type AuditorEvent = [
   eventId: string,
   meta: {
+    level: AuditorEventLevel;
     actor: AuditorEventActorDetails;
     meta?: JsonObject;
     request?: AuditorEventRequest;
@@ -84,8 +87,8 @@ export const auditorFieldFormat = winston.format(info => {
 export interface AuditorOptions {
   auth?: AuthService;
   httpAuth?: HttpAuthService;
+  plugin?: PluginMetadataService;
   meta?: JsonObject;
-  level?: string;
   format?: Format;
   transports?: winston.transport[];
 }
@@ -99,6 +102,7 @@ export class Auditor implements AuditorService {
   readonly #winstonLogger: winston.Logger;
   readonly #auth?: AuthService;
   readonly #httpAuth?: HttpAuthService;
+  readonly #plugin?: PluginMetadataService;
   readonly #addRedactions?: (redactions: Iterable<string>) => void;
 
   /**
@@ -112,7 +116,7 @@ export class Auditor implements AuditorService {
         : Auditor.colorFormat();
 
     let auditor = winston.createLogger({
-      level: process.env.LOG_LEVEL ?? options.level ?? 'info',
+      level: 'info',
       format: winston.format.combine(
         auditorFieldFormat,
         options.format ?? defaultFormatter,
@@ -124,8 +128,15 @@ export class Auditor implements AuditorService {
     if (options.meta) {
       auditor = auditor.child(options.meta);
     }
-
-    return new Auditor(auditor, options.auth, options.httpAuth, redacter.add);
+    return new Auditor(
+      auditor,
+      {
+        auth: options.auth,
+        httpAuth: options.httpAuth,
+        plugin: options.plugin,
+      },
+      redacter.add,
+    );
   }
 
   /**
@@ -147,55 +158,43 @@ export class Auditor implements AuditorService {
 
   private constructor(
     winstonLogger: winston.Logger,
-    auth?: AuthService,
-    httpAuth?: HttpAuthService,
+    deps?: {
+      auth?: AuthService;
+      httpAuth?: HttpAuthService;
+      plugin?: PluginMetadataService;
+    },
     addRedactions?: (redactions: Iterable<string>) => void,
   ) {
     this.#winstonLogger = winstonLogger;
-    this.#auth = auth;
-    this.#httpAuth = httpAuth;
+    this.#auth = deps?.auth;
+    this.#httpAuth = deps?.httpAuth;
+    this.#plugin = deps?.plugin;
     this.#addRedactions = addRedactions;
   }
 
-  async error<T extends JsonObject>(
-    options: AuditorEventOptions<T>,
-  ): Promise<void> {
-    const auditEvent = await this.reshapeAuditorEvent(options);
-    this.#winstonLogger.error(...auditEvent);
-  }
-
-  async warn<T extends JsonObject>(
-    options: AuditorEventOptions<T>,
-  ): Promise<void> {
-    const auditEvent = await this.reshapeAuditorEvent(options);
-    this.#winstonLogger.warn(...auditEvent);
-  }
-
-  async info<T extends JsonObject>(
-    options: AuditorEventOptions<T>,
+  async log<TMeta extends JsonObject>(
+    options: AuditorEventOptions<TMeta>,
   ): Promise<void> {
     const auditEvent = await this.reshapeAuditorEvent(options);
     this.#winstonLogger.info(...auditEvent);
   }
 
-  async createEvent<T extends JsonObject>(
-    options: Parameters<AuditorCreateEvent<T>>[0],
-  ): ReturnType<AuditorCreateEvent<T>> {
-    const { level = 'info', ...rest } = options;
-
-    await this[level]({ ...rest, status: 'initiated' });
+  async createEvent<TMeta extends JsonObject>(
+    options: Parameters<AuditorCreateEvent<TMeta>>[0],
+  ): ReturnType<AuditorCreateEvent<TMeta>> {
+    await this.log({ ...options, status: 'initiated' });
 
     return {
       success: async params => {
-        await this[params?.level ?? level]({
-          ...rest,
+        await this.log({
+          ...options,
           meta: { ...options.meta, ...params?.meta },
           status: 'succeeded',
         });
       },
       fail: async params => {
-        await this.error({
-          ...rest,
+        await this.log({
+          ...options,
           ...params,
           meta: { ...options.meta, ...params.meta },
           status: 'failed',
@@ -206,14 +205,17 @@ export class Auditor implements AuditorService {
 
   child(
     meta: JsonObject,
-    auth?: AuthService,
-    httpAuth?: HttpAuthService,
+    deps?: {
+      auth?: AuthService;
+      httpAuth?: HttpAuthService;
+      plugin?: PluginMetadataService;
+    },
   ): AuditorService {
-    return new Auditor(
-      this.#winstonLogger.child(meta),
-      auth ?? this.#auth,
-      httpAuth ?? this.#httpAuth,
-    );
+    return new Auditor(this.#winstonLogger.child(meta), {
+      auth: deps?.auth ?? this.#auth,
+      httpAuth: deps?.httpAuth ?? this.#httpAuth,
+      plugin: deps?.plugin ?? this.#plugin,
+    });
   }
 
   addRedactions(redactions: Iterable<string>) {
@@ -224,13 +226,13 @@ export class Auditor implements AuditorService {
     request: Request<any, any, any, any, any>,
   ): Promise<string | undefined> {
     if (!this.#auth) {
-      throw new AuthenticationError(
+      throw new ServiceUnavailableError(
         `The core service 'auth' was not provided during the auditor's instantiation`,
       );
     }
 
     if (!this.#httpAuth) {
-      throw new AuthenticationError(
+      throw new ServiceUnavailableError(
         `The core service 'httpAuth' was not provided during the auditor's instantiation`,
       );
     }
@@ -257,7 +259,13 @@ export class Auditor implements AuditorService {
   private async reshapeAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
-    const { eventId, actorId, request, ...rest } = options;
+    const { eventId, level = 'low', request, actorId, ...rest } = options;
+
+    if (!this.#plugin) {
+      throw new ServiceUnavailableError(
+        `The core service 'plugin' was not provided during the auditor's instantiation`,
+      );
+    }
 
     const eventRequest = request
       ? {
@@ -270,8 +278,9 @@ export class Auditor implements AuditorService {
       actorId ?? (request ? await this.getActorId(request) : undefined);
 
     const auditEvent: AuditorEvent = [
-      eventId,
+      `${this.#plugin.getId()}.${eventId}`,
       {
+        level,
         actor: {
           actorId: eventActorId,
           ip: request?.ip,

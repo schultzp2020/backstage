@@ -16,7 +16,7 @@
 
 export type {
   AuditorCreateEvent,
-  AuditorEventLevels,
+  AuditorEventLevel,
   AuditorEventOptions,
   AuditorEventStatus,
   AuditorService,
