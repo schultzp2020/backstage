@@ -108,7 +108,7 @@ export class Auditor implements AuditorService {
   /**
    * Creates a {@link Auditor} instance.
    */
-  static create(options: AuditorOptions): Auditor {
+  static create(options?: AuditorOptions): Auditor {
     const redacter = Auditor.redacter();
     const defaultFormatter =
       process.env.NODE_ENV === 'production'
@@ -119,21 +119,21 @@ export class Auditor implements AuditorService {
       level: 'info',
       format: winston.format.combine(
         auditorFieldFormat,
-        options.format ?? defaultFormatter,
+        options?.format ?? defaultFormatter,
         redacter.format,
       ),
-      transports: options.transports ?? defaultConsoleTransport,
+      transports: options?.transports ?? defaultConsoleTransport,
     });
 
-    if (options.meta) {
+    if (options?.meta) {
       auditor = auditor.child(options.meta);
     }
     return new Auditor(
       auditor,
       {
-        auth: options.auth,
-        httpAuth: options.httpAuth,
-        plugin: options.plugin,
+        auth: options?.auth,
+        httpAuth: options?.httpAuth,
+        plugin: options?.plugin,
       },
       redacter.add,
     );
@@ -223,7 +223,7 @@ export class Auditor implements AuditorService {
   }
 
   private async getActorId(
-    request: Request<any, any, any, any, any>,
+    request?: Request<any, any, any, any, any>,
   ): Promise<string | undefined> {
     if (!this.#auth) {
       throw new ServiceUnavailableError(
@@ -237,12 +237,15 @@ export class Auditor implements AuditorService {
       );
     }
 
-    let credentials: BackstageCredentials;
+    let credentials: BackstageCredentials =
+      await this.#auth.getOwnServiceCredentials();
 
-    try {
-      credentials = await this.#httpAuth.credentials(request);
-    } catch (error) {
-      throw new ForwardedError('Could not resolve credentials', error);
+    if (request) {
+      try {
+        credentials = await this.#httpAuth.credentials(request);
+      } catch (error) {
+        throw new ForwardedError('Could not resolve credentials', error);
+      }
     }
 
     if (this.#auth.isPrincipal(credentials, 'user')) {
@@ -259,7 +262,7 @@ export class Auditor implements AuditorService {
   private async reshapeAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
-    const { eventId, level = 'low', request, actorId, ...rest } = options;
+    const { eventId, level = 'low', request, ...rest } = options;
 
     if (!this.#plugin) {
       throw new ServiceUnavailableError(
@@ -267,27 +270,22 @@ export class Auditor implements AuditorService {
       );
     }
 
-    const eventRequest = request
-      ? {
-          url: request?.originalUrl,
-          method: request?.method,
-        }
-      : undefined;
-
-    const eventActorId =
-      actorId ?? (request ? await this.getActorId(request) : undefined);
-
     const auditEvent: AuditorEvent = [
       `${this.#plugin.getId()}.${eventId}`,
       {
         level,
         actor: {
-          actorId: eventActorId,
+          actorId: await this.getActorId(request),
           ip: request?.ip,
           hostname: request?.hostname,
           userAgent: request?.get('user-agent'),
         },
-        request: eventRequest,
+        request: request
+          ? {
+              url: request?.originalUrl,
+              method: request?.method,
+            }
+          : undefined,
         ...rest,
       },
     ];

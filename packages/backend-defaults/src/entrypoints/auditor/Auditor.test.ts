@@ -22,40 +22,87 @@ import { Auditor } from './Auditor';
 
 describe('Auditor', () => {
   it('creates a auditor instance with default options', () => {
-    const auditor = Auditor.create({
-      auth: mockServices.auth.mock(),
-      httpAuth: mockServices.httpAuth.mock(),
-    });
+    const auditor = Auditor.create();
     expect(auditor).toBeInstanceOf(Auditor);
   });
 
   it('creates a child logger', () => {
-    const auditor = Auditor.create({
-      auth: mockServices.auth.mock(),
-      httpAuth: mockServices.httpAuth.mock(),
-    });
+    const auditor = Auditor.create();
     const childLogger = auditor.child({ plugin: 'test-plugin' });
     expect(childLogger).toBeInstanceOf(Auditor);
   });
 
-  it('should redact and escape regex', async () => {
+  it('should error without plugin service', async () => {
+    const auditor = Auditor.create();
+    await expect(
+      auditor.log({
+        eventId: 'test-event',
+        status: 'unknown',
+      }),
+    ).rejects.toThrow(
+      `The core service 'plugin' was not provided during the auditor's instantiation`,
+    );
+  });
+
+  it('should error without auth service', async () => {
+    const pluginId = 'test-plugin';
+
+    const auditor = Auditor.create({
+      plugin: {
+        getId: () => pluginId,
+      },
+    });
+
+    await expect(
+      auditor.log({
+        eventId: 'test-event',
+        status: 'unknown',
+      }),
+    ).rejects.toThrow(
+      `The core service 'auth' was not provided during the auditor's instantiation`,
+    );
+  });
+
+  it('should error without httpAuth service', async () => {
+    const pluginId = 'test-plugin';
+
+    const auditor = Auditor.create({
+      plugin: {
+        getId: () => pluginId,
+      },
+      auth: mockServices.auth.mock(),
+    });
+
+    await expect(
+      auditor.log({
+        eventId: 'test-event',
+        status: 'unknown',
+      }),
+    ).rejects.toThrow(
+      `The core service 'httpAuth' was not provided during the auditor's instantiation`,
+    );
+  });
+
+  it('should log', async () => {
     const mockTransport = new Transport({
       log: jest.fn(),
       logv: jest.fn(),
     });
 
+    const pluginId = 'test-plugin';
+
     const auditor = Auditor.create({
       auth: mockServices.auth.mock(),
       httpAuth: mockServices.httpAuth.mock(),
+      plugin: {
+        getId: () => pluginId,
+      },
       format: format.json(),
       transports: [mockTransport],
     });
 
-    auditor.addRedactions(['hello (world']);
-
-    await auditor.error({
-      message: 'hello (world) from this file',
-      eventId: '',
+    await auditor.log({
+      eventId: 'something-went-wrong',
       status: 'unknown',
     });
 
@@ -63,10 +110,9 @@ describe('Auditor', () => {
       expect.objectContaining({
         [MESSAGE]: JSON.stringify({
           actor: {},
-          eventName: '',
           isAuditorEvent: true,
-          level: 'error',
-          message: '***) from this file',
+          level: 'info',
+          message: 'test-plugin.something-went-wrong',
           status: 'unknown',
         }),
       }),
@@ -80,18 +126,22 @@ describe('Auditor', () => {
       logv: jest.fn(),
     });
 
+    const pluginId = 'test-plugin';
+
     const auditor = Auditor.create({
       auth: mockServices.auth.mock(),
       httpAuth: mockServices.httpAuth.mock(),
+      plugin: {
+        getId: () => pluginId,
+      },
       format: format.json(),
       transports: [mockTransport],
     });
 
     auditor.addRedactions(['hello']);
 
-    await auditor.error({
-      message: 'something went wrong',
-      eventId: '',
+    await auditor.log({
+      eventId: 'something-went-wrong',
       status: 'unknown',
       meta: {
         null: null,
@@ -106,10 +156,9 @@ describe('Auditor', () => {
       expect.objectContaining({
         [MESSAGE]: JSON.stringify({
           actor: {},
-          eventName: '',
           isAuditorEvent: true,
-          level: 'error',
-          message: 'something went wrong',
+          level: 'info',
+          message: 'test-plugin.something-went-wrong',
           meta: {
             nested: '*** (world) from nested object',
             null: null,
@@ -118,6 +167,42 @@ describe('Auditor', () => {
             },
           },
           status: 'unknown',
+        }),
+      }),
+      expect.any(Function),
+    );
+  });
+
+  it('should log when creating event', async () => {
+    const mockTransport = new Transport({
+      log: jest.fn(),
+      logv: jest.fn(),
+    });
+
+    const pluginId = 'test-plugin';
+
+    const auditor = Auditor.create({
+      auth: mockServices.auth.mock(),
+      httpAuth: mockServices.httpAuth.mock(),
+      plugin: {
+        getId: () => pluginId,
+      },
+      format: format.json(),
+      transports: [mockTransport],
+    });
+
+    await auditor.createEvent({
+      eventId: 'something-went-wrong',
+    });
+
+    expect(mockTransport.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [MESSAGE]: JSON.stringify({
+          actor: {},
+          isAuditorEvent: true,
+          level: 'info',
+          message: 'test-plugin.something-went-wrong',
+          status: 'initiated',
         }),
       }),
       expect.any(Function),

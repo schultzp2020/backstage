@@ -88,7 +88,7 @@ export class MockAuditorService implements AuditorService {
   }
 
   private async getActorId(
-    request: Request<any, any, any, any, any>,
+    request?: Request<any, any, any, any, any>,
   ): Promise<string | undefined> {
     if (!this.#options.auth) {
       throw new ServiceUnavailableError(
@@ -102,20 +102,22 @@ export class MockAuditorService implements AuditorService {
       );
     }
 
-    const { auth, httpAuth } = this.#options;
-    let credentials: BackstageCredentials;
+    let credentials: BackstageCredentials =
+      await this.#options.auth.getOwnServiceCredentials();
 
-    try {
-      credentials = await httpAuth.credentials(request);
-    } catch (error) {
-      throw new ForwardedError('Could not resolve credentials', error);
+    if (request) {
+      try {
+        credentials = await this.#options.httpAuth.credentials(request);
+      } catch (error) {
+        throw new ForwardedError('Could not resolve credentials', error);
+      }
     }
 
-    if (auth.isPrincipal(credentials, 'user')) {
+    if (this.#options.auth.isPrincipal(credentials, 'user')) {
       return credentials.principal.userEntityRef;
     }
 
-    if (auth.isPrincipal(credentials, 'service')) {
+    if (this.#options.auth.isPrincipal(credentials, 'service')) {
       return credentials.principal.subject;
     }
 
@@ -125,7 +127,7 @@ export class MockAuditorService implements AuditorService {
   private async reshapeAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
-    const { eventId, level = 'low', request, actorId, ...rest } = options;
+    const { eventId, level = 'low', request, ...rest } = options;
 
     if (!this.#options.plugin) {
       throw new ServiceUnavailableError(
@@ -133,27 +135,22 @@ export class MockAuditorService implements AuditorService {
       );
     }
 
-    const eventRequest = request
-      ? {
-          url: request?.originalUrl,
-          method: request?.method,
-        }
-      : undefined;
-
-    const eventActorId =
-      actorId ?? (request ? await this.getActorId(request) : undefined);
-
     const auditEvent: AuditorEvent = [
       `${this.#options.plugin.getId()}.${eventId}`,
       {
         level,
         actor: {
-          actorId: eventActorId,
+          actorId: await this.getActorId(request),
           ip: request?.ip,
           hostname: request?.hostname,
           userAgent: request?.get('user-agent'),
         },
-        request: eventRequest,
+        request: request
+          ? {
+              url: request?.originalUrl,
+              method: request?.method,
+            }
+          : undefined,
         ...rest,
       },
     ];

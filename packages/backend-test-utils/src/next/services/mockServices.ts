@@ -254,7 +254,12 @@ export namespace mockServices {
       });
 
     export const mock = simpleMock(coreServices.auditor, () => ({
-      createEvent: jest.fn(),
+      createEvent: jest.fn(async _ => {
+        return {
+          success: jest.fn(),
+          fail: jest.fn(),
+        };
+      }),
       log: jest.fn(),
     }));
   }

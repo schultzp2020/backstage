@@ -155,13 +155,12 @@ export async function createRouter(
   if (entitiesCatalog) {
     router
       .get('/entities', async (req, res) => {
-        try {
-          await auditor?.info({
-            eventId: 'CatalogEntityFetch',
-            status: 'initiated',
-            request: req,
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'CatalogEntityFetch',
+          request: req,
+        });
 
+        try {
           const { entities, pageInfo } = await entitiesCatalog.entities({
             filter: parseEntityFilterParams(req.query),
             fields: parseEntityTransformParams(req.query),
@@ -178,33 +177,25 @@ export async function createRouter(
             res.setHeader('link', `<${url.pathname}${url.search}>; rel="next"`);
           }
 
-          await auditor?.info({
-            eventId: 'CatalogEntityFetch',
-            status: 'succeeded',
-            request: req,
-            // Let's not log out the entities since this can make the log very big due to it not being paged
-          });
+          // Let's not log out the entities since this can make the log very big due to it not being paged
+          await auditorEvent?.success();
 
           // TODO(freben): encode the pageInfo in the response
           res.json(entities);
         } catch (err) {
-          await auditor?.error({
-            eventId: 'CatalogEntityFetch',
-            status: 'failed',
-            request: req,
+          await auditorEvent?.fail({
             error: err,
           });
           throw err;
         }
       })
       .get('/entities/by-query', async (req, res) => {
-        try {
-          await auditor?.info({
-            eventId: 'fetch-by-query',
-            status: 'initiated',
-            request: req,
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'fetch-by-query',
+          request: req,
+        });
 
+        try {
           const { items, pageInfo, totalItems } =
             await entitiesCatalog.queryEntities({
               limit: req.query.limit,
@@ -213,10 +204,8 @@ export async function createRouter(
               credentials: await httpAuth.credentials(req),
             });
 
-          await auditor?.info({
-            eventId: 'fetch-by-query',
-            status: 'succeeded',
-            request: req,
+          await auditorEvent?.success({
+            // Let's not log out the entities since this can make the log very big
             meta: {
               totalEntities: totalItems,
               pageInfo: {
@@ -228,7 +217,6 @@ export async function createRouter(
                 }),
               },
             },
-            // Let's not log out the entities since this can make the log very big
           });
 
           res.json({
@@ -244,10 +232,7 @@ export async function createRouter(
             },
           });
         } catch (err) {
-          await auditor?.error({
-            eventId: 'fetch-by-query',
-            status: 'failed',
-            request: req,
+          await auditorEvent?.fail({
             error: err,
           });
           throw err;
@@ -256,16 +241,15 @@ export async function createRouter(
       .get('/entities/by-uid/:uid', async (req, res) => {
         const { uid } = req.params;
 
-        try {
-          await auditor?.info({
-            eventId: 'fetch-by-uid',
-            status: 'initiated',
-            request: req,
-            meta: {
-              uid: uid,
-            },
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'fetch-by-uid',
+          request: req,
+          meta: {
+            uid: uid,
+          },
+        });
 
+        try {
           const { entities } = await entitiesCatalog.entities({
             filter: basicEntityFilter({ 'metadata.uid': uid }),
             credentials: await httpAuth.credentials(req),
@@ -274,25 +258,15 @@ export async function createRouter(
             throw new NotFoundError(`No entity with uid ${uid}`);
           }
 
-          await auditor?.info({
-            eventId: 'fetch-by-uid',
-            status: 'succeeded',
-            request: req,
+          await auditorEvent?.success({
             meta: {
-              uid: uid,
               entityRef: entities.map(stringifyEntityRef).at(0),
             },
           });
 
           res.status(200).json(entities.at(0));
         } catch (err) {
-          await auditor?.error({
-            eventId: 'fetch-by-uid',
-            status: 'failed',
-            request: req,
-            meta: {
-              uid: uid,
-            },
+          await auditorEvent?.fail({
             error: err,
           });
           throw err;
@@ -301,39 +275,25 @@ export async function createRouter(
       .delete('/entities/by-uid/:uid', async (req, res) => {
         const { uid } = req.params;
 
-        try {
-          await auditor?.info({
-            eventId: 'delete',
-            status: 'initiated',
-            request: req,
-            meta: {
-              uid: uid,
-            },
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'delete',
+          request: req,
+          meta: {
+            uid: uid,
+          },
+        });
 
+        try {
           await entitiesCatalog.removeEntityByUid(uid, {
             credentials: await httpAuth.credentials(req),
           });
 
-          await auditor?.info({
-            eventId: 'delete',
-            status: 'succeeded',
-            request: req,
-            meta: {
-              uid: uid,
-            },
-          });
+          await auditorEvent?.success();
 
           res.status(204).end();
         } catch (err) {
-          await auditor?.error({
-            eventId: 'delete',
-            status: 'failed',
-            request: req,
+          await auditorEvent?.fail({
             error: err,
-            meta: {
-              uid: uid,
-            },
           });
           throw err;
         }
@@ -342,16 +302,15 @@ export async function createRouter(
         const { kind, namespace, name } = req.params;
         const entityRef = stringifyEntityRef({ kind, namespace, name });
 
-        try {
-          await auditor?.info({
-            eventId: 'fetch-by-name',
-            status: 'initiated',
-            request: req,
-            meta: {
-              entityRef: entityRef,
-            },
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'fetch-by-name',
+          request: req,
+          meta: {
+            entityRef: entityRef,
+          },
+        });
 
+        try {
           const { entities } = await entitiesCatalog.entities({
             filter: basicEntityFilter({
               kind: kind,
@@ -366,24 +325,11 @@ export async function createRouter(
             );
           }
 
-          await auditor?.info({
-            eventId: 'fetch-by-name',
-            status: 'succeeded',
-            request: req,
-            meta: {
-              entityRef: entityRef,
-            },
-          });
+          await auditorEvent?.success();
 
           res.status(200).json(entities.at(0));
         } catch (err) {
-          await auditor?.error({
-            eventId: 'fetch-by-name',
-            status: 'failed',
-            request: req,
-            meta: {
-              entityRef: entityRef,
-            },
+          await auditorEvent?.fail({
             error: err,
           });
           throw err;
@@ -395,24 +341,20 @@ export async function createRouter(
           const { kind, namespace, name } = req.params;
           const entityRef = stringifyEntityRef({ kind, namespace, name });
 
-          try {
-            await auditor?.info({
-              eventId: 'ancestry-fetch',
-              status: 'initiated',
-              request: req,
-              meta: {
-                entityRef: entityRef,
-              },
-            });
+          const auditorEvent = await auditor?.createEvent({
+            eventId: 'ancestry-fetch',
+            request: req,
+            meta: {
+              entityRef: entityRef,
+            },
+          });
 
+          try {
             const response = await entitiesCatalog.entityAncestry(entityRef, {
               credentials: await httpAuth.credentials(req),
             });
 
-            await auditor?.info({
-              eventId: 'ancestry-fetch',
-              status: 'succeeded',
-              request: req,
+            await auditorEvent?.success({
               meta: {
                 rootEntityRef: response.rootEntityRef,
                 ancestry: response.items.map(ancestryLink => {
@@ -426,13 +368,7 @@ export async function createRouter(
 
             res.status(200).json(response);
           } catch (err) {
-            await auditor?.error({
-              eventId: 'ancestry-fetch',
-              status: 'failed',
-              request: req,
-              meta: {
-                entityRef: entityRef,
-              },
+            await auditorEvent?.fail({
               error: err,
             });
             throw err;
@@ -440,13 +376,12 @@ export async function createRouter(
         },
       )
       .post('/entities/by-refs', async (req, res) => {
-        try {
-          await auditor?.info({
-            eventId: 'batch-fetch',
-            status: 'initiated',
-            request: req,
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'batch-fetch',
+          request: req,
+        });
 
+        try {
           const request = entitiesBatchRequest(req);
           const response = await entitiesCatalog.entitiesBatch({
             entityRefs: request.entityRefs,
@@ -455,10 +390,7 @@ export async function createRouter(
             credentials: await httpAuth.credentials(req),
           });
 
-          await auditor?.info({
-            eventId: 'batch-fetch',
-            status: 'succeeded',
-            request: req,
+          await auditorEvent?.success({
             meta: {
               ...request,
             },
@@ -466,41 +398,30 @@ export async function createRouter(
 
           res.status(200).json(response);
         } catch (err) {
-          await auditor?.error({
-            eventId: 'batch-fetch',
-            status: 'failed',
-            request: req,
+          await auditorEvent?.fail({
             error: err,
           });
           throw err;
         }
       })
       .get('/entity-facets', async (req, res) => {
-        try {
-          await auditor?.info({
-            eventId: 'facet-fetch',
-            status: 'initiated',
-            request: req,
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'facet-fetch',
+          request: req,
+        });
 
+        try {
           const response = await entitiesCatalog.facets({
             filter: parseEntityFilterParams(req.query),
             facets: parseEntityFacetParams(req.query),
             credentials: await httpAuth.credentials(req),
           });
 
-          await auditor?.info({
-            eventId: 'facet-fetch',
-            status: 'succeeded',
-            request: req,
-          });
+          await auditorEvent?.success();
 
           res.status(200).json(response);
         } catch (err) {
-          await auditor?.error({
-            eventId: 'facet-fetch',
-            status: 'failed',
-            request: req,
+          await auditorEvent?.fail({
             error: err,
           });
           throw err;
@@ -514,17 +435,16 @@ export async function createRouter(
         const location = await validateRequestBody(req, locationInput);
         const dryRun = yn(req.query.dryRun, { default: false });
 
-        try {
-          await auditor?.info({
-            eventId: 'location-create',
-            status: 'initiated',
-            meta: {
-              location: location,
-              isDryRun: dryRun,
-            },
-            request: req,
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'location-create',
+          request: req,
+          meta: {
+            location: location,
+            isDryRun: dryRun,
+          },
+        });
 
+        try {
           // when in dryRun addLocation is effectively a read operation so we don't
           // need to disallow readonly
           if (!dryRun) {
@@ -539,55 +459,40 @@ export async function createRouter(
             },
           );
 
-          await auditor?.info({
-            eventId: 'location-create',
-            status: 'succeeded',
+          await auditorEvent?.success({
             meta: {
               location: output.location,
-              isDryRun: dryRun,
             },
-            request: req,
           });
 
           res.status(201).json(output);
         } catch (err) {
-          await auditor?.error({
-            eventId: 'location-create',
-            status: 'failed',
+          await auditorEvent?.fail({
+            error: err,
             meta: {
               location: location,
               isDryRun: dryRun,
             },
-            error: err,
-            request: req,
           });
           throw err;
         }
       })
       .get('/locations', async (req, res) => {
-        try {
-          await auditor?.info({
-            eventId: 'location-fetch',
-            status: 'initiated',
-            request: req,
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'location-fetch',
+          request: req,
+        });
 
+        try {
           const locations = await locationService.listLocations({
             credentials: await httpAuth.credentials(req),
           });
 
-          await auditor?.info({
-            eventId: 'location-fetch',
-            status: 'succeeded',
-            request: req,
-          });
+          await auditorEvent?.success();
 
           res.status(200).json(locations.map(l => ({ data: l })));
         } catch (err) {
-          await auditor?.error({
-            eventId: 'location-fetch',
-            status: 'failed',
-            request: req,
+          await auditorEvent?.fail({
             error: err,
           });
           throw err;
@@ -597,40 +502,29 @@ export async function createRouter(
       .get('/locations/:id', async (req, res) => {
         const { id } = req.params;
 
-        try {
-          await auditor?.info({
-            eventId: 'location-fetch-by-id',
-            status: 'initiated',
-            meta: {
-              id: id,
-            },
-            request: req,
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'location-fetch-by-id',
+          request: req,
+          meta: {
+            id: id,
+          },
+        });
 
+        try {
           const output = await locationService.getLocation(id, {
             credentials: await httpAuth.credentials(req),
           });
 
-          await auditor?.info({
-            eventId: 'location-fetch-by-id',
-            status: 'succeeded',
+          await auditorEvent?.success({
             meta: {
-              id: id,
               output: output,
             },
-            request: req,
           });
 
           res.status(200).json(output);
         } catch (err) {
-          await auditor?.error({
-            eventId: 'location-fetch-by-id',
-            status: 'failed',
-            meta: {
-              id: id,
-            },
+          await auditorEvent?.fail({
             error: err,
-            request: req,
           });
           throw err;
         }
@@ -638,41 +532,27 @@ export async function createRouter(
       .delete('/locations/:id', async (req, res) => {
         const { id } = req.params;
 
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'location-delete',
+          request: req,
+          meta: {
+            id: id,
+          },
+        });
+
+        disallowReadonlyMode(readonlyEnabled);
+
         try {
-          await auditor?.info({
-            eventId: 'location-delete',
-            status: 'initiated',
-            meta: {
-              id: id,
-            },
-            request: req,
-          });
-
-          disallowReadonlyMode(readonlyEnabled);
-
           await locationService.deleteLocation(id, {
             credentials: await httpAuth.credentials(req),
           });
 
-          await auditor?.info({
-            eventId: 'location-delete',
-            status: 'succeeded',
-            meta: {
-              id: id,
-            },
-            request: req,
-          });
+          await auditorEvent?.success();
 
           res.status(204).end();
         } catch (err) {
-          await auditor?.error({
-            eventId: 'location-delete',
-            status: 'failed',
-            meta: {
-              id: id,
-            },
+          await auditorEvent?.fail({
             error: err,
-            request: req,
           });
           throw err;
         }
@@ -681,41 +561,30 @@ export async function createRouter(
         const { kind, namespace, name } = req.params;
         const locationRef = `${kind}:${namespace}/${name}`;
 
-        try {
-          await auditor?.info({
-            eventId: 'location-fetch-by-entity-ref',
-            status: 'initiated',
-            meta: {
-              locationRef: locationRef,
-            },
-            request: req,
-          });
+        const auditorEvent = await auditor?.createEvent({
+          eventId: 'location-fetch-by-entity-ref',
+          request: req,
+          meta: {
+            locationRef: locationRef,
+          },
+        });
 
+        try {
           const output = await locationService.getLocationByEntity(
             { kind, namespace, name },
             { credentials: await httpAuth.credentials(req) },
           );
 
-          await auditor?.info({
-            eventId: 'location-fetch-by-entity-ref',
-            status: 'succeeded',
+          await auditorEvent?.success({
             meta: {
-              locationRef: locationRef,
               output: output,
             },
-            request: req,
           });
 
           res.status(200).json(output);
         } catch (err) {
-          await auditor?.error({
-            eventId: 'location-fetch-by-entity-ref',
-            status: 'failed',
-            meta: {
-              locationRef: locationRef,
-            },
+          await auditorEvent?.fail({
             error: err,
-            request: req,
           });
           throw err;
         }
@@ -724,13 +593,12 @@ export async function createRouter(
 
   if (locationAnalyzer) {
     router.post('/analyze-location', async (req, res) => {
-      try {
-        await auditor?.info({
-          eventId: 'location-analyze',
-          status: 'initiated',
-          request: req,
-        });
+      const auditorEvent = await auditor?.createEvent({
+        eventId: 'location-analyze',
+        request: req,
+      });
 
+      try {
         const body = await validateRequestBody(
           req,
           z.object({
@@ -750,10 +618,7 @@ export async function createRouter(
             credentials,
           );
 
-          await auditor?.info({
-            eventId: 'location-analyze',
-            status: 'succeeded',
-            request: req,
+          await auditorEvent?.success({
             meta: {
               output: output,
             },
@@ -771,11 +636,8 @@ export async function createRouter(
           throw err;
         }
       } catch (err) {
-        await auditor?.error({
-          eventId: 'location-analyze',
-          status: 'failed',
+        await auditorEvent?.fail({
           error: err,
-          request: req,
         });
         throw err;
       }
@@ -784,13 +646,12 @@ export async function createRouter(
 
   if (orchestrator) {
     router.post('/validate-entity', async (req, res) => {
-      try {
-        await auditor?.info({
-          eventId: 'validate',
-          status: 'initiated',
-          request: req,
-        });
+      const auditorEvent = await auditor?.createEvent({
+        eventId: 'validate',
+        request: req,
+      });
 
+      try {
         const bodySchema = z.object({
           entity: z.unknown(),
           location: z.string(),
@@ -808,11 +669,8 @@ export async function createRouter(
               `Invalid location ref ${body.location}, only 'url:<target>' is supported, e.g. url:https://host/path`,
             );
         } catch (err) {
-          await auditor?.error({
-            eventId: 'validate',
-            status: 'failed',
+          await auditorEvent?.fail({
             error: err,
-            request: req,
           });
 
           return res.status(400).json({
@@ -845,11 +703,8 @@ export async function createRouter(
         if (!processingResult.ok) {
           const errors = processingResult.errors.map(e => serializeError(e));
 
-          await auditor?.error({
-            eventId: 'validate',
-            status: 'failed',
+          await auditorEvent?.fail({
             errors: errors,
-            request: req,
           });
 
           res.status(400).json({
@@ -857,19 +712,12 @@ export async function createRouter(
           });
         }
 
-        await auditor?.info({
-          eventId: 'validate',
-          status: 'succeeded',
-          request: req,
-        });
+        await auditorEvent?.success();
 
         return res.status(200).end();
       } catch (err) {
-        await auditor?.error({
-          eventId: 'validate',
-          status: 'failed',
+        await auditorEvent?.fail({
           error: err,
-          request: req,
         });
         throw err;
       }

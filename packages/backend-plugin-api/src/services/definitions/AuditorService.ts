@@ -56,18 +56,12 @@ export type AuditorEventOptions<TMeta extends JsonObject> = {
   /** (Optional) The associated HTTP request, if applicable. */
   request?: Request<any, any, any, any, any>;
 
-  /** (Optional) An identifier for the entity or user who triggered the event. */
-  actorId?: string;
-
   /** (Optional) Additional metadata relevant to the event, structured as a JSON object. */
   meta?: TMeta;
 } & AuditorEventStatus;
 
 /** @public */
-export type AuditorCreateEvent<
-  TRootMeta extends JsonObject,
-  TError extends ErrorLike = ErrorLike,
-> = (options: {
+export type AuditorCreateEvent<TRootMeta extends JsonObject> = (options: {
   /**
    * Use kebab-case to name audit events (e.g., "user-login", "file-download").
    *
@@ -80,14 +74,11 @@ export type AuditorCreateEvent<
   /** (Optional) The associated HTTP request, if applicable. */
   request?: Request<any, any, any, any, any>;
 
-  /** (Optional) An identifier for the entity or user who triggered the event. */
-  actorId?: string;
-
   /** (Optional) Additional metadata relevant to the event, structured as a JSON object. */
   meta?: TRootMeta;
 }) => Promise<{
-  success<TMeta extends TRootMeta>(options?: { meta?: TMeta }): Promise<void>;
-  fail<TMeta extends TRootMeta>(
+  success<TMeta extends JsonObject>(options?: { meta?: TMeta }): Promise<void>;
+  fail<TMeta extends Partial<TRootMeta>, TError extends ErrorLike>(
     options: {
       meta?: TMeta;
     } & ({ error: TError } | { errors: TError[] }),

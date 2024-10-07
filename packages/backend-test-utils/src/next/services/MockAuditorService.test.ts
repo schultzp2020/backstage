@@ -14,154 +14,165 @@
  * limitations under the License.
  */
 
+import type { ErrorLike } from '@backstage/errors';
 import { MockAuditorService } from './MockAuditorService';
+import { MockAuthService } from './MockAuthService';
+import { mockCredentials } from './mockCredentials';
+import { MockHttpAuthService } from './MockHttpAuthService';
 
 describe('MockAuditorService', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it('should be silent by default', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'info').mockImplementation(() => {});
-
+  it('should error without plugin service', async () => {
     const auditor = MockAuditorService.create();
-    await auditor.error({
-      eventId: 'error',
-      status: 'unknown',
-    });
-    await auditor.warn({
-      eventId: 'warn',
-      status: 'unknown',
-    });
-    await auditor.info({
-      eventId: 'info',
-      status: 'unknown',
-    });
-
-    expect(console.error).not.toHaveBeenCalled();
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.info).not.toHaveBeenCalled();
+    await expect(
+      auditor.log({
+        eventId: 'test-event',
+        status: 'unknown',
+      }),
+    ).rejects.toThrow(
+      `The core service 'plugin' was not provided during the auditor's instantiation`,
+    );
   });
 
-  it('should be able to set none level', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'info').mockImplementation(() => {});
+  it('should error without auth service', async () => {
+    const pluginId = 'test-plugin';
 
-    const auditor = MockAuditorService.create({ level: 'none' });
-    await auditor.error({
-      eventId: 'error',
-      status: 'unknown',
-    });
-    await auditor.warn({
-      eventId: 'warn',
-      status: 'unknown',
-    });
-    await auditor.info({
-      eventId: 'info',
-      status: 'unknown',
+    const auditor = MockAuditorService.create({
+      plugin: {
+        getId: () => pluginId,
+      },
     });
 
-    expect(console.error).not.toHaveBeenCalled();
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.info).not.toHaveBeenCalled();
+    await expect(
+      auditor.log({
+        eventId: 'test-event',
+        status: 'unknown',
+      }),
+    ).rejects.toThrow(
+      `The core service 'auth' was not provided during the auditor's instantiation`,
+    );
   });
 
-  it('should be able to set error level', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'info').mockImplementation(() => {});
+  it('should error without httpAuth service', async () => {
+    const pluginId = 'test-plugin';
 
-    const auditor = MockAuditorService.create({ level: 'error' });
-    await auditor.error({
-      eventId: 'error',
-      status: 'unknown',
-    });
-    await auditor.warn({
-      eventId: 'warn',
-      status: 'unknown',
-    });
-    await auditor.info({
-      eventId: 'info',
-      status: 'unknown',
+    const auditor = MockAuditorService.create({
+      plugin: {
+        getId: () => pluginId,
+      },
+      auth: new MockAuthService({
+        pluginId,
+        disableDefaultAuthPolicy: false,
+      }),
     });
 
-    expect(console.error).toHaveBeenCalled();
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.info).not.toHaveBeenCalled();
+    await expect(
+      auditor.log({
+        eventId: 'test-event',
+        status: 'unknown',
+      }),
+    ).rejects.toThrow(
+      `The core service 'httpAuth' was not provided during the auditor's instantiation`,
+    );
   });
 
-  it('should be able to set warn level', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'info').mockImplementation(() => {});
+  it('should log', async () => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
 
-    const auditor = MockAuditorService.create({ level: 'warn' });
-    await auditor.error({
-      eventId: 'error',
-      status: 'unknown',
-    });
-    await auditor.warn({
-      eventId: 'warn',
-      status: 'unknown',
-    });
-    await auditor.info({
-      eventId: 'info',
-      status: 'unknown',
+    const pluginId = 'test-plugin';
+
+    const auditor = MockAuditorService.create({
+      plugin: {
+        getId: () => pluginId,
+      },
+      auth: new MockAuthService({
+        pluginId,
+        disableDefaultAuthPolicy: false,
+      }),
+      httpAuth: new MockHttpAuthService(pluginId, mockCredentials.user()),
     });
 
-    expect(console.error).toHaveBeenCalled();
-    expect(console.warn).toHaveBeenCalled();
-    expect(console.info).not.toHaveBeenCalled();
+    await auditor.log({
+      eventId: 'test-event',
+      status: 'unknown',
+    });
+
+    expect(console.log).toHaveBeenCalled();
   });
 
-  it('should be able to set info level', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'info').mockImplementation(() => {});
+  it('should send initiated log with createEvent', async () => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
 
-    const auditor = MockAuditorService.create({ level: 'info' });
-    await auditor.error({
-      eventId: 'error',
-      status: 'unknown',
-    });
-    await auditor.warn({
-      eventId: 'warn',
-      status: 'unknown',
-    });
-    await auditor.info({
-      eventId: 'info',
-      status: 'unknown',
+    const pluginId = 'test-plugin';
+
+    const auditor = MockAuditorService.create({
+      plugin: {
+        getId: () => pluginId,
+      },
+      auth: new MockAuthService({
+        pluginId,
+        disableDefaultAuthPolicy: false,
+      }),
+      httpAuth: new MockHttpAuthService(pluginId, mockCredentials.user()),
     });
 
-    expect(console.error).toHaveBeenCalled();
-    expect(console.warn).toHaveBeenCalled();
-    expect(console.info).toHaveBeenCalled();
+    await auditor.createEvent({
+      eventId: 'test-event',
+    });
+
+    expect(console.log).toHaveBeenCalled();
   });
 
-  it('should be able to set debug level', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'info').mockImplementation(() => {});
+  it('should send succeeded log with createEvent', async () => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
 
-    const auditor = MockAuditorService.create({ level: 'debug' });
-    await auditor.error({
-      eventId: 'error',
-      status: 'unknown',
-    });
-    await auditor.warn({
-      eventId: 'warn',
-      status: 'unknown',
-    });
-    await auditor.info({
-      eventId: 'info',
-      status: 'unknown',
+    const pluginId = 'test-plugin';
+
+    const auditor = MockAuditorService.create({
+      plugin: {
+        getId: () => pluginId,
+      },
+      auth: new MockAuthService({
+        pluginId,
+        disableDefaultAuthPolicy: false,
+      }),
+      httpAuth: new MockHttpAuthService(pluginId, mockCredentials.user()),
     });
 
-    expect(console.error).toHaveBeenCalled();
-    expect(console.warn).toHaveBeenCalled();
-    expect(console.info).toHaveBeenCalled();
+    const auditorEvent = await auditor.createEvent({
+      eventId: 'test-event',
+    });
+
+    await auditorEvent.success();
+
+    expect(console.log).toHaveBeenCalledTimes(2);
+  });
+
+  it('should send failed log with createEvent', async () => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    const pluginId = 'test-plugin';
+
+    const auditor = MockAuditorService.create({
+      plugin: {
+        getId: () => pluginId,
+      },
+      auth: new MockAuthService({
+        pluginId,
+        disableDefaultAuthPolicy: false,
+      }),
+      httpAuth: new MockHttpAuthService(pluginId, mockCredentials.user()),
+    });
+
+    const auditorEvent = await auditor.createEvent({
+      eventId: 'test-event',
+    });
+
+    await auditorEvent.fail({ error: new Error('error') as ErrorLike });
+
+    expect(console.log).toHaveBeenCalledTimes(2);
   });
 });

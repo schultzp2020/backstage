@@ -205,7 +205,7 @@ export type CatalogEnvironment = {
   discovery?: DiscoveryService;
   auth?: AuthService;
   httpAuth?: HttpAuthService;
-  auditor: AuditorService;
+  auditor?: AuditorService;
 };
 
 // @public

@@ -25,43 +25,71 @@ import { Readable } from 'stream';
 import { Request as Request_2 } from 'express';
 import { Response as Response_2 } from 'express';
 
-// @public
-export type AuditorEventFailureStatus<E = ErrorLike> = {
-  status: 'failed';
-  errors: E[];
-};
+// @public (undocumented)
+export type AuditorCreateEvent<TRootMeta extends JsonObject> = (options: {
+  eventId: string;
+  level?: AuditorEventLevel;
+  request?: Request_2<any, any, any, any, any>;
+  meta?: TRootMeta;
+}) => Promise<{
+  success<TMeta extends JsonObject>(options?: { meta?: TMeta }): Promise<void>;
+  fail<TMeta extends Partial<TRootMeta>, TError extends ErrorLike>(
+    options: {
+      meta?: TMeta;
+    } & (
+      | {
+          error: TError;
+        }
+      | {
+          errors: TError[];
+        }
+    ),
+  ): Promise<void>;
+}>;
 
 // @public
-export type AuditorEventOptions<T extends JsonObject> = {
-  eventName: string;
-  message: string;
-  stage: string;
-  request?: Request_2;
-  actorId?: string;
-  meta?: T;
+export type AuditorEventLevel = 'low' | 'medium' | 'high' | 'critical';
+
+// @public
+export type AuditorEventOptions<TMeta extends JsonObject> = {
+  eventId: string;
+  level?: AuditorEventLevel;
+  request?: Request_2<any, any, any, any, any>;
+  meta?: TMeta;
 } & AuditorEventStatus;
 
 // @public (undocumented)
-export type AuditorEventStatus =
-  | AuditorEventSuccessStatus
-  | AuditorEventFailureStatus
-  | AuditorEventUnknownStatus;
-
-// @public
-export type AuditorEventSuccessStatus = {
-  status: 'succeeded';
-};
-
-// @public
-export type AuditorEventUnknownStatus = {
-  status: 'unknown';
-};
+export type AuditorEventStatus<TError extends ErrorLike = ErrorLike> =
+  | {
+      status: 'unknown';
+    }
+  | {
+      status: 'initiated';
+    }
+  | {
+      status: 'succeeded';
+    }
+  | ({
+      status: 'failed';
+    } & (
+      | {
+          error: TError;
+        }
+      | {
+          errors: TError[];
+        }
+    ));
 
 // @public
 export interface AuditorService {
-  error<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
-  info<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
-  warn<T extends JsonObject>(args: AuditorEventOptions<T>): Promise<void>;
+  // (undocumented)
+  createEvent<TMeta extends JsonObject>(
+    options: Parameters<AuditorCreateEvent<TMeta>>[0],
+  ): ReturnType<AuditorCreateEvent<TMeta>>;
+  // (undocumented)
+  log<TMeta extends JsonObject>(
+    options: AuditorEventOptions<TMeta>,
+  ): Promise<void>;
 }
 
 // @public
@@ -779,7 +807,10 @@ export interface UserInfoService {
 
 // Warnings were encountered during analysis:
 //
-// src/services/definitions/AuditorService.d.ts:32:1 - (ae-undocumented) Missing documentation for "AuditorEventStatus".
+// src/services/definitions/AuditorService.d.ts:5:1 - (ae-undocumented) Missing documentation for "AuditorEventStatus".
+// src/services/definitions/AuditorService.d.ts:47:1 - (ae-undocumented) Missing documentation for "AuditorCreateEvent".
+// src/services/definitions/AuditorService.d.ts:79:5 - (ae-undocumented) Missing documentation for "createEvent".
+// src/services/definitions/AuditorService.d.ts:80:5 - (ae-undocumented) Missing documentation for "log".
 // src/services/definitions/HttpRouterService.d.ts:8:5 - (ae-undocumented) Missing documentation for "path".
 // src/services/definitions/HttpRouterService.d.ts:9:5 - (ae-undocumented) Missing documentation for "allow".
 // src/services/definitions/LifecycleService.d.ts:5:1 - (ae-undocumented) Missing documentation for "LifecycleServiceStartupHook".
