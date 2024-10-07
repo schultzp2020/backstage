@@ -28,7 +28,7 @@ import { Response as Response_2 } from 'express';
 // @public (undocumented)
 export type AuditorCreateEvent<TRootMeta extends JsonObject> = (options: {
   eventId: string;
-  level?: AuditorEventLevel;
+  severityLevel?: AuditorEventSeverityLevel;
   request?: Request_2<any, any, any, any, any>;
   meta?: TRootMeta;
 }) => Promise<{
@@ -48,15 +48,15 @@ export type AuditorCreateEvent<TRootMeta extends JsonObject> = (options: {
 }>;
 
 // @public
-export type AuditorEventLevel = 'low' | 'medium' | 'high' | 'critical';
-
-// @public
 export type AuditorEventOptions<TMeta extends JsonObject> = {
   eventId: string;
-  level?: AuditorEventLevel;
+  severityLevel?: AuditorEventSeverityLevel;
   request?: Request_2<any, any, any, any, any>;
   meta?: TMeta;
 } & AuditorEventStatus;
+
+// @public
+export type AuditorEventSeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 
 // @public (undocumented)
 export type AuditorEventStatus<TError extends ErrorLike = ErrorLike> =

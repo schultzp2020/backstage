@@ -16,8 +16,8 @@
 
 import type {
   AuditorCreateEvent,
-  AuditorEventLevel,
   AuditorEventOptions,
+  AuditorEventSeverityLevel,
   AuditorEventStatus,
   AuditorService,
   AuthService,
@@ -56,7 +56,7 @@ export type AuditorEventRequest = {
 export type AuditorEvent = [
   eventId: string,
   meta: {
-    level: AuditorEventLevel;
+    severityLevel: AuditorEventSeverityLevel;
     actor: AuditorEventActorDetails;
     meta?: JsonObject;
     request?: AuditorEventRequest;
@@ -262,7 +262,7 @@ export class Auditor implements AuditorService {
   private async reshapeAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
-    const { eventId, level = 'low', request, ...rest } = options;
+    const { eventId, severityLevel = 'low', request, ...rest } = options;
 
     if (!this.#plugin) {
       throw new ServiceUnavailableError(
@@ -273,7 +273,7 @@ export class Auditor implements AuditorService {
     const auditEvent: AuditorEvent = [
       `${this.#plugin.getId()}.${eventId}`,
       {
-        level,
+        severityLevel,
         actor: {
           actorId: await this.getActorId(request),
           ip: request?.ip,

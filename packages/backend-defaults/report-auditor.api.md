@@ -4,8 +4,8 @@
 
 ```ts
 import type { AuditorCreateEvent } from '@backstage/backend-plugin-api';
-import type { AuditorEventLevel } from '@backstage/backend-plugin-api';
 import type { AuditorEventOptions } from '@backstage/backend-plugin-api';
+import type { AuditorEventSeverityLevel } from '@backstage/backend-plugin-api';
 import type { AuditorEventStatus } from '@backstage/backend-plugin-api';
 import { AuditorService } from '@backstage/backend-plugin-api';
 import type { AuthService } from '@backstage/backend-plugin-api';
@@ -49,7 +49,7 @@ export class Auditor implements AuditorService {
 export type AuditorEvent = [
   eventId: string,
   meta: {
-    level: AuditorEventLevel;
+    severityLevel: AuditorEventSeverityLevel;
     actor: AuditorEventActorDetails;
     meta?: JsonObject;
     request?: AuditorEventRequest;

@@ -127,7 +127,7 @@ export class MockAuditorService implements AuditorService {
   private async reshapeAuditorEvent<T extends JsonObject>(
     options: AuditorEventOptions<T>,
   ): Promise<AuditorEvent> {
-    const { eventId, level = 'low', request, ...rest } = options;
+    const { eventId, severityLevel = 'low', request, ...rest } = options;
 
     if (!this.#options.plugin) {
       throw new ServiceUnavailableError(
@@ -138,7 +138,7 @@ export class MockAuditorService implements AuditorService {
     const auditEvent: AuditorEvent = [
       `${this.#options.plugin.getId()}.${eventId}`,
       {
-        level,
+        severityLevel,
         actor: {
           actorId: await this.getActorId(request),
           ip: request?.ip,

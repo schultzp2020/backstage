@@ -36,7 +36,7 @@ export type AuditorEventStatus<TError extends ErrorLike = ErrorLike> =
  * critical: root permission changes
  * @public
  */
-export type AuditorEventLevel = 'low' | 'medium' | 'high' | 'critical';
+export type AuditorEventSeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 
 /**
  * Options for creating an auditor event.
@@ -51,7 +51,7 @@ export type AuditorEventOptions<TMeta extends JsonObject> = {
    */
   eventId: string;
 
-  level?: AuditorEventLevel;
+  severityLevel?: AuditorEventSeverityLevel;
 
   /** (Optional) The associated HTTP request, if applicable. */
   request?: Request<any, any, any, any, any>;
@@ -69,7 +69,7 @@ export type AuditorCreateEvent<TRootMeta extends JsonObject> = (options: {
    */
   eventId: string;
 
-  level?: AuditorEventLevel;
+  severityLevel?: AuditorEventSeverityLevel;
 
   /** (Optional) The associated HTTP request, if applicable. */
   request?: Request<any, any, any, any, any>;

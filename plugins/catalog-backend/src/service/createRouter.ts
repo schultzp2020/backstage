@@ -277,6 +277,7 @@ export async function createRouter(
 
         const auditorEvent = await auditor?.createEvent({
           eventId: 'delete',
+          severityLevel: 'medium',
           request: req,
           meta: {
             uid: uid,
@@ -437,6 +438,7 @@ export async function createRouter(
 
         const auditorEvent = await auditor?.createEvent({
           eventId: 'location-create',
+          severityLevel: dryRun ? 'low' : 'medium',
           request: req,
           meta: {
             location: location,
@@ -534,6 +536,7 @@ export async function createRouter(
 
         const auditorEvent = await auditor?.createEvent({
           eventId: 'location-delete',
+          severityLevel: 'medium',
           request: req,
           meta: {
             id: id,
