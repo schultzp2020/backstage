@@ -9,7 +9,6 @@ import { AuthorizePermissionRequest } from '@backstage/plugin-permission-common'
 import { AuthorizePermissionResponse } from '@backstage/plugin-permission-common';
 import { Config } from '@backstage/config';
 import { Duration } from 'luxon';
-import type { ErrorLike } from '@backstage/errors';
 import { EvaluatorRequestOptions } from '@backstage/plugin-permission-common';
 import { Handler } from 'express';
 import { HumanDuration } from '@backstage/types';
@@ -33,7 +32,7 @@ export type AuditorCreateEvent<TRootMeta extends JsonObject> = (options: {
   meta?: TRootMeta;
 }) => Promise<{
   success<TMeta extends JsonObject>(options?: { meta?: TMeta }): Promise<void>;
-  fail<TMeta extends Partial<TRootMeta>, TError extends ErrorLike>(
+  fail<TMeta extends Partial<TRootMeta>, TError extends Error>(
     options: {
       meta?: TMeta;
     } & (
@@ -59,7 +58,7 @@ export type AuditorEventOptions<TMeta extends JsonObject> = {
 export type AuditorEventSeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 
 // @public (undocumented)
-export type AuditorEventStatus<TError extends ErrorLike = ErrorLike> =
+export type AuditorEventStatus<TError extends Error = Error> =
   | {
       status: 'unknown';
     }
@@ -807,10 +806,10 @@ export interface UserInfoService {
 
 // Warnings were encountered during analysis:
 //
-// src/services/definitions/AuditorService.d.ts:5:1 - (ae-undocumented) Missing documentation for "AuditorEventStatus".
-// src/services/definitions/AuditorService.d.ts:47:1 - (ae-undocumented) Missing documentation for "AuditorCreateEvent".
-// src/services/definitions/AuditorService.d.ts:79:5 - (ae-undocumented) Missing documentation for "createEvent".
-// src/services/definitions/AuditorService.d.ts:80:5 - (ae-undocumented) Missing documentation for "log".
+// src/services/definitions/AuditorService.d.ts:4:1 - (ae-undocumented) Missing documentation for "AuditorEventStatus".
+// src/services/definitions/AuditorService.d.ts:46:1 - (ae-undocumented) Missing documentation for "AuditorCreateEvent".
+// src/services/definitions/AuditorService.d.ts:78:5 - (ae-undocumented) Missing documentation for "createEvent".
+// src/services/definitions/AuditorService.d.ts:79:5 - (ae-undocumented) Missing documentation for "log".
 // src/services/definitions/HttpRouterService.d.ts:8:5 - (ae-undocumented) Missing documentation for "path".
 // src/services/definitions/HttpRouterService.d.ts:9:5 - (ae-undocumented) Missing documentation for "allow".
 // src/services/definitions/LifecycleService.d.ts:5:1 - (ae-undocumented) Missing documentation for "LifecycleServiceStartupHook".

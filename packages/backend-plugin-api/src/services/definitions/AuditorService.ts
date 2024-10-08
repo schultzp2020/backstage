@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { ErrorLike } from '@backstage/errors';
 import type { JsonObject } from '@backstage/types';
 import type { Request } from 'express';
 
 /** @public */
-export type AuditorEventStatus<TError extends ErrorLike = ErrorLike> =
+export type AuditorEventStatus<TError extends Error = Error> =
   | { status: 'unknown' }
   | { status: 'initiated' }
   | { status: 'succeeded' }
@@ -78,7 +77,7 @@ export type AuditorCreateEvent<TRootMeta extends JsonObject> = (options: {
   meta?: TRootMeta;
 }) => Promise<{
   success<TMeta extends JsonObject>(options?: { meta?: TMeta }): Promise<void>;
-  fail<TMeta extends Partial<TRootMeta>, TError extends ErrorLike>(
+  fail<TMeta extends Partial<TRootMeta>, TError extends Error>(
     options: {
       meta?: TMeta;
     } & ({ error: TError } | { errors: TError[] }),
