@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { wrapInOpenApiTestServer } from '@backstage/backend-openapi-utils';
+import { wrapServer } from '@backstage/backend-openapi-utils';
 import { PermissionsService } from '@backstage/backend-plugin-api';
 import { mockCredentials, mockServices } from '@backstage/backend-test-utils';
 import type { Location } from '@backstage/catalog-client';
@@ -94,7 +94,7 @@ describe('createRouter readonly disabled', () => {
       permissionsService: permissionsService,
       auditor: mockServices.auditor.mock(),
     });
-    app = wrapInOpenApiTestServer(express().use(router));
+    app = await wrapServer(express().use(router));
   });
 
   beforeEach(() => {
