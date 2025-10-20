@@ -36,7 +36,11 @@ export class AzureIntegration implements ScmIntegration {
     );
   };
 
-  constructor(private readonly integrationConfig: AzureIntegrationConfig) {}
+  private readonly integrationConfig: AzureIntegrationConfig;
+
+  constructor(integrationConfig: AzureIntegrationConfig) {
+    this.integrationConfig = integrationConfig;
+  }
 
   get type(): string {
     return 'azure';

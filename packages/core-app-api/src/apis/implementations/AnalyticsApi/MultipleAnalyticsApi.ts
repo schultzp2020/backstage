@@ -36,7 +36,11 @@ import { AnalyticsApi, AnalyticsEvent } from '@backstage/core-plugin-api';
  * ```
  */
 export class MultipleAnalyticsApi implements AnalyticsApi {
-  private constructor(private readonly actualApis: AnalyticsApi[]) {}
+  private readonly actualApis: AnalyticsApi[];
+
+  private constructor(actualApis: AnalyticsApi[]) {
+    this.actualApis = actualApis;
+  }
 
   /**
    * Create an AnalyticsApi implementation from an array of concrete

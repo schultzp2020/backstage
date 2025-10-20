@@ -21,7 +21,11 @@ export interface TimestampStore {
 }
 
 export class DefaultTimestampStore implements TimestampStore {
-  constructor(private readonly key: string) {}
+  private readonly key: string;
+
+  constructor(key: string) {
+    this.key = key;
+  }
 
   save(date: Date): void {
     localStorage.setItem(this.key, date.toJSON());

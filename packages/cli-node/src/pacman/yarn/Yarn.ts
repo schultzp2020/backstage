@@ -26,7 +26,11 @@ import fs from 'fs-extra';
 import { paths, run, execFile, SpawnOptionsPartialEnv } from '../../util';
 
 export class Yarn implements PackageManager {
-  constructor(private readonly yarnVersion: YarnVersion) {}
+  private readonly yarnVersion: YarnVersion;
+
+  constructor(yarnVersion: YarnVersion) {
+    this.yarnVersion = yarnVersion;
+  }
 
   static async create(dir?: string): Promise<Yarn> {
     const yarnVersion = await detectYarnVersion(dir);

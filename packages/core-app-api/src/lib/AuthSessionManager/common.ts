@@ -34,7 +34,11 @@ type ScopeHelperOptions<T> = {
 };
 
 export class SessionScopeHelper<T> {
-  constructor(private readonly options: ScopeHelperOptions<T>) {}
+  private readonly options: ScopeHelperOptions<T>;
+
+  constructor(options: ScopeHelperOptions<T>) {
+    this.options = options;
+  }
 
   sessionExistsAndHasScope(
     session: T | undefined,

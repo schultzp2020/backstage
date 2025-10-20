@@ -32,7 +32,11 @@ export class PluginImpl<
   ExternalRoutes extends AnyExternalRoutes,
 > implements BackstagePlugin<Routes, ExternalRoutes>
 {
-  constructor(private readonly config: PluginConfig<Routes, ExternalRoutes>) {}
+  private readonly config: PluginConfig<Routes, ExternalRoutes>;
+
+  constructor(config: PluginConfig<Routes, ExternalRoutes>) {
+    this.config = config;
+  }
 
   getId(): string {
     return this.config.id;

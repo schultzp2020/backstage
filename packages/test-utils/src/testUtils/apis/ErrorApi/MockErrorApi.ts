@@ -61,7 +61,11 @@ export class MockErrorApi implements ErrorApi {
   private readonly errors = new Array<ErrorWithContext>();
   private readonly waiters = new Set<Waiter>();
 
-  constructor(private readonly options: MockErrorApiOptions = {}) {}
+  private readonly options: MockErrorApiOptions;
+
+  constructor(options: MockErrorApiOptions = {}) {
+    this.options = options;
+  }
 
   post(error: ErrorApiError, context?: ErrorApiErrorContext) {
     if (this.options.collect) {

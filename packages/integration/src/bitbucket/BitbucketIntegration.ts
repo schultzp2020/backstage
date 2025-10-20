@@ -48,7 +48,11 @@ export class BitbucketIntegration implements ScmIntegration {
     );
   };
 
-  constructor(private readonly integrationConfig: BitbucketIntegrationConfig) {}
+  private readonly integrationConfig: BitbucketIntegrationConfig;
+
+  constructor(integrationConfig: BitbucketIntegrationConfig) {
+    this.integrationConfig = integrationConfig;
+  }
 
   get type(): string {
     return 'bitbucket';

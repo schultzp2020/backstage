@@ -34,7 +34,11 @@ type LegacySignInResult = {
 
 /** @internal */
 export class LegacyUserIdentity implements IdentityApi {
-  private constructor(private readonly result: LegacySignInResult) {}
+  private readonly result: LegacySignInResult;
+
+  private constructor(result: LegacySignInResult) {
+    this.result = result;
+  }
 
   getUserId(): string {
     return this.result.userId;

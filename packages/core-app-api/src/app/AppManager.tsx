@@ -137,7 +137,11 @@ function useConfigLoader(
 }
 
 class AppContextImpl implements AppContext {
-  constructor(private readonly app: AppManager) {}
+  private readonly app: AppManager;
+
+  constructor(app: AppManager) {
+    this.app = app;
+  }
 
   getPlugins(): BackstagePlugin[] {
     return this.app.getPlugins();

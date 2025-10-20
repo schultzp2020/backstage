@@ -21,7 +21,10 @@ import {
 
 export class GithubOrgEntityCleanerProvider implements EntityProvider {
   logger: LoggerService;
-  constructor(private readonly options: { id: string; logger: LoggerService }) {
+  private readonly options: { id: string; logger: LoggerService };
+
+  constructor(options: { id: string; logger: LoggerService }) {
+    this.options = options;
     this.logger = options.logger.child({ target: this.getProviderName() });
   }
 

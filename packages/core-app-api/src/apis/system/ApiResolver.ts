@@ -62,8 +62,11 @@ export class ApiResolver implements ApiHolder {
   }
 
   private readonly apis = new Map<string, unknown>();
+  private readonly factories: ApiFactoryHolder;
 
-  constructor(private readonly factories: ApiFactoryHolder) {}
+  constructor(factories: ApiFactoryHolder) {
+    this.factories = factories;
+  }
 
   get<T>(ref: ApiRef<T>): T | undefined {
     return this.load(ref);

@@ -42,7 +42,11 @@ const parseDate = (date: string | Date) => {
 };
 
 export class DatabaseKeyStore implements KeyStore {
-  constructor(private readonly client: Knex) {}
+  private readonly client: Knex;
+
+  constructor(client: Knex) {
+    this.client = client;
+  }
 
   async addKey(key: AnyJWK): Promise<void> {
     await this.client<Row>(TABLE).insert({

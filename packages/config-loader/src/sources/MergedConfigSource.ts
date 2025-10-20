@@ -47,8 +47,10 @@ export class MergedConfigSource implements ConfigSource {
   }
 
   [sourcesSymbol]: ConfigSource[];
+  private readonly sources: ConfigSource[];
 
-  private constructor(private readonly sources: ConfigSource[]) {
+  private constructor(sources: ConfigSource[]) {
+    this.sources = sources;
     this[sourcesSymbol] = this.sources;
   }
 

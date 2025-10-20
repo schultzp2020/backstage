@@ -26,7 +26,11 @@ export class SingleInstanceGitlabCredentialsProvider
     return new SingleInstanceGitlabCredentialsProvider(config.token);
   };
 
-  private constructor(private readonly token?: string) {}
+  private readonly token?: string;
+
+  private constructor(token?: string) {
+    this.token = token;
+  }
 
   async getCredentials(_opts: { url: string }): Promise<GitlabCredentials> {
     if (!this.token) {

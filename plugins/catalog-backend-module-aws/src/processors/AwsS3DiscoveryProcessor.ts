@@ -34,7 +34,11 @@ import limiterFactory from 'p-limit';
  * @deprecated Use the `AwsS3EntityProvider` instead (see https://github.com/backstage/backstage/blob/master/plugins/catalog-backend-module-aws/CHANGELOG.md#014).
  */
 export class AwsS3DiscoveryProcessor implements CatalogProcessor {
-  constructor(private readonly reader: UrlReaderService) {}
+  private readonly reader: UrlReaderService;
+
+  constructor(reader: UrlReaderService) {
+    this.reader = reader;
+  }
 
   getProcessorName(): string {
     return 'AwsS3DiscoveryProcessor';
