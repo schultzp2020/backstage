@@ -28,20 +28,20 @@ export type FeatureFlag = {
 };
 
 /**
- * Enum representing the state of a feature flag (inactive/active).
+ * Const object representing the state of a feature flag (inactive/active).
  *
  * @public
  */
-export enum FeatureFlagState {
+export const FeatureFlagState = {
   /**
    * Feature flag inactive (disabled).
    */
-  None = 0,
+  None: 0,
   /**
    * Feature flag active (enabled).
    */
-  Active = 1,
-}
+  Active: 1,
+} as const;
 
 /**
  * Options to use when saving feature flags.

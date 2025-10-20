@@ -269,16 +269,16 @@ export type ProfileInfo = {
  *
  * @public
  */
-export enum SessionState {
+export const SessionState = {
   /**
    * User signed in.
    */
-  SignedIn = 'SignedIn',
+  SignedIn: 'SignedIn',
   /**
    * User not signed in.
    */
-  SignedOut = 'SignedOut',
-}
+  SignedOut: 'SignedOut',
+} as const;
 
 /**
  * The SessionApi provides basic controls for any auth provider that is tied to a persistent session.
