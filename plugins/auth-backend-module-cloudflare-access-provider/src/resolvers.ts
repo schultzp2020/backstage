@@ -26,41 +26,40 @@ import { z } from 'zod';
  *
  * @public
  */
-export namespace cloudflareAccessSignInResolvers {
+export const cloudflareAccessSignInResolvers = {
   /**
    * Looks up the user by matching their email to the entity email.
    */
-  export const emailMatchingUserEntityProfileEmail =
-    createSignInResolverFactory({
-      optionsSchema: z
-        .object({
-          dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
-        })
-        .optional(),
-      create(options = {}) {
-        return async (info: SignInInfo<CloudflareAccessResult>, ctx) => {
-          const { profile } = info;
+  emailMatchingUserEntityProfileEmail: createSignInResolverFactory({
+    optionsSchema: z
+      .object({
+        dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
+      })
+      .optional(),
+    create(options = {}) {
+      return async (info: SignInInfo<CloudflareAccessResult>, ctx) => {
+        const { profile } = info;
 
-          if (!profile.email) {
-            throw new Error(
-              'Login failed, user profile does not contain an email',
-            );
-          }
-
-          return ctx.signInWithCatalogUser(
-            {
-              filter: {
-                'spec.profile.email': profile.email,
-              },
-            },
-            {
-              dangerousEntityRefFallback:
-                options?.dangerouslyAllowSignInWithoutUserInCatalog
-                  ? { entityRef: { name: profile.email } }
-                  : undefined,
-            },
+        if (!profile.email) {
+          throw new Error(
+            'Login failed, user profile does not contain an email',
           );
-        };
-      },
-    });
-}
+        }
+
+        return ctx.signInWithCatalogUser(
+          {
+            filter: {
+              'spec.profile.email': profile.email,
+            },
+          },
+          {
+            dangerousEntityRefFallback:
+              options?.dangerouslyAllowSignInWithoutUserInCatalog
+                ? { entityRef: { name: profile.email } }
+                : undefined,
+          },
+        );
+      };
+    },
+  }),
+} as const;

@@ -27,11 +27,11 @@ import { z } from 'zod';
  *
  * @public
  */
-export namespace oauth2SignInResolvers {
+export const oauth2SignInResolvers = {
   /**
    * Looks up the user by matching their oauth2 username to the entity name.
    */
-  export const usernameMatchingUserEntityName = createSignInResolverFactory({
+  usernameMatchingUserEntityName: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -62,5 +62,5 @@ export namespace oauth2SignInResolvers {
         );
       };
     },
-  });
-}
+  }),
+} as const;

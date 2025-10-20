@@ -21,18 +21,18 @@ import { commonSignInResolvers } from '@backstage/plugin-auth-node';
  *
  * @public
  */
-export namespace oidcSignInResolvers {
+export const oidcSignInResolvers = {
   /**
    * A oidc resolver that looks up the user using the local part of
    * their email address as the entity name.
    */
-  export const emailLocalPartMatchingUserEntityName =
-    commonSignInResolvers.emailLocalPartMatchingUserEntityName;
+  emailLocalPartMatchingUserEntityName:
+    commonSignInResolvers.emailLocalPartMatchingUserEntityName,
 
   /**
    * A oidc resolver that looks up the user using their email address
    * as email of the entity.
    */
-  export const emailMatchingUserEntityProfileEmail =
-    commonSignInResolvers.emailMatchingUserEntityProfileEmail;
-}
+  emailMatchingUserEntityProfileEmail:
+    commonSignInResolvers.emailMatchingUserEntityProfileEmail,
+} as const;

@@ -26,11 +26,11 @@ import { z } from 'zod';
  *
  * @public
  */
-export namespace gcpIapSignInResolvers {
+export const gcpIapSignInResolvers = {
   /**
    * Looks up the user by matching their email to the `google.com/email` annotation.
    */
-  export const emailMatchingUserEntityAnnotation = createSignInResolverFactory({
+  emailMatchingUserEntityAnnotation: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -59,12 +59,12 @@ export namespace gcpIapSignInResolvers {
         );
       };
     },
-  });
+  }),
 
   /**
    * Looks up the user by matching their user ID to the `google.com/user-id` annotation.
    */
-  export const idMatchingUserEntityAnnotation = createSignInResolverFactory({
+  idMatchingUserEntityAnnotation: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -89,5 +89,5 @@ export namespace gcpIapSignInResolvers {
         );
       };
     },
-  });
-}
+  }),
+} as const;

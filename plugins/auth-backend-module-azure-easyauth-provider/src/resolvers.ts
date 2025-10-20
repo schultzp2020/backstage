@@ -22,8 +22,8 @@ import { AzureEasyAuthResult } from './types';
 import { z } from 'zod';
 
 /** @public */
-export namespace azureEasyAuthSignInResolvers {
-  export const idMatchingUserEntityAnnotation = createSignInResolverFactory({
+export const azureEasyAuthSignInResolvers = {
+  idMatchingUserEntityAnnotation: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -53,5 +53,5 @@ export namespace azureEasyAuthSignInResolvers {
         );
       };
     },
-  });
-}
+  }),
+} as const;

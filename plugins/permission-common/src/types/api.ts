@@ -36,20 +36,20 @@ export type PermissionMessageBatch<T> = {
  * The result of an authorization request.
  * @public
  */
-export enum AuthorizeResult {
+export const AuthorizeResult = {
   /**
    * The authorization request is denied.
    */
-  DENY = 'DENY',
+  DENY: 'DENY',
   /**
    * The authorization request is allowed.
    */
-  ALLOW = 'ALLOW',
+  ALLOW: 'ALLOW',
   /**
    * The authorization request is allowed if the provided conditions are met.
    */
-  CONDITIONAL = 'CONDITIONAL',
-}
+  CONDITIONAL: 'CONDITIONAL',
+} as const;
 
 /**
  * A definitive decision returned by the {@link @backstage/plugin-permission-node#PermissionPolicy}.

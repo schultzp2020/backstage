@@ -20,8 +20,8 @@ import {
   ProfileInfo,
   ProfileInfoApi,
   SessionApi,
-  SessionState,
   BackstageIdentityResponse,
+  SessionState,
 } from '@backstage/core-plugin-api';
 import { Observable } from '@backstage/types';
 import { DirectAuthConnector } from '../../../../lib/AuthConnector';

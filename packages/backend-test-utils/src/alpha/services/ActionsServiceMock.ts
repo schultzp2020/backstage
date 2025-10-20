@@ -24,11 +24,11 @@ import { actionsServiceFactory } from '@backstage/backend-defaults/alpha';
 /**
  * @alpha
  */
-export namespace actionsServiceMock {
-  export const factory = () => actionsServiceFactory;
+export const actionsServiceMock = {
+  factory: () => actionsServiceFactory,
 
-  export const mock = simpleMock<ActionsService>(actionsServiceRef, () => ({
+  mock: simpleMock<ActionsService>(actionsServiceRef, () => ({
     invoke: jest.fn(),
     list: jest.fn(),
-  }));
-}
+  })),
+} as const;
