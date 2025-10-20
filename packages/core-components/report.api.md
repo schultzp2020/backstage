@@ -256,10 +256,12 @@ export type DependencyGraphNodeClassKey = 'node';
 export interface DependencyGraphProps<NodeData, EdgeData>
   extends SVGProps<SVGSVGElement> {
   acyclicer?: 'greedy';
+  // Warning: (ae-unresolved-link) The @link reference could not be resolved: The reference is ambiguous because "Alignment" has more than one declaration; you need to add a TSDoc member reference selector
   align?: DependencyGraphTypes.Alignment;
   allowFullscreen?: boolean;
   curve?: 'curveStepBefore' | 'curveMonotoneX';
   defs?: JSX.Element | JSX.Element[];
+  // Warning: (ae-unresolved-link) The @link reference could not be resolved: The reference is ambiguous because "Direction" has more than one declaration; you need to add a TSDoc member reference selector
   direction?: DependencyGraphTypes.Direction;
   edgeMargin?: number;
   edgeRanks?: number;
@@ -267,11 +269,13 @@ export interface DependencyGraphProps<NodeData, EdgeData>
   edgeWeight?: number;
   fit?: 'grow' | 'contain';
   labelOffset?: number;
+  // Warning: (ae-unresolved-link) The @link reference could not be resolved: The reference is ambiguous because "LabelPosition" has more than one declaration; you need to add a TSDoc member reference selector
   labelPosition?: DependencyGraphTypes.LabelPosition;
   nodeMargin?: number;
   nodes: DependencyGraphTypes.DependencyNode<NodeData>[];
   paddingX?: number;
   paddingY?: number;
+  // Warning: (ae-unresolved-link) The @link reference could not be resolved: The reference is ambiguous because "Ranker" has more than one declaration; you need to add a TSDoc member reference selector
   ranker?: DependencyGraphTypes.Ranker;
   rankMargin?: number;
   renderEdge?: DependencyGraphTypes.RenderEdgeFunction<EdgeData>;
@@ -283,11 +287,18 @@ export interface DependencyGraphProps<NodeData, EdgeData>
 
 // @public
 export namespace DependencyGraphTypes {
-  export enum Alignment {
-    DOWN_LEFT = 'DL',
-    DOWN_RIGHT = 'DR',
-    UP_LEFT = 'UL',
-    UP_RIGHT = 'UR',
+  // (undocumented)
+  export type Alignment = (typeof Alignment)[keyof typeof Alignment];
+  // (undocumented)
+  export namespace Alignment {
+    // (undocumented)
+    export type DOWN_LEFT = typeof Alignment.DOWN_LEFT;
+    // (undocumented)
+    export type DOWN_RIGHT = typeof Alignment.DOWN_RIGHT;
+    // (undocumented)
+    export type UP_LEFT = typeof Alignment.UP_LEFT;
+    // (undocumented)
+    export type UP_RIGHT = typeof Alignment.UP_RIGHT;
   }
   export type DependencyEdge<T = {}> = T & {
     from: string;
@@ -298,25 +309,54 @@ export namespace DependencyGraphTypes {
   export type DependencyNode<T = {}> = T & {
     id: string;
   };
-  export enum Direction {
-    BOTTOM_TOP = 'BT',
-    LEFT_RIGHT = 'LR',
-    RIGHT_LEFT = 'RL',
-    TOP_BOTTOM = 'TB',
-  }
-  export enum LabelPosition {
+  // (undocumented)
+  export type Direction = (typeof Direction)[keyof typeof Direction];
+  // (undocumented)
+  export namespace Direction {
     // (undocumented)
-    CENTER = 'c',
+    export type BOTTOM_TOP = typeof Direction.BOTTOM_TOP;
     // (undocumented)
-    LEFT = 'l',
+    export type LEFT_RIGHT = typeof Direction.LEFT_RIGHT;
     // (undocumented)
-    RIGHT = 'r',
+    export type RIGHT_LEFT = typeof Direction.RIGHT_LEFT;
+    // (undocumented)
+    export type TOP_BOTTOM = typeof Direction.TOP_BOTTOM;
   }
-  export enum Ranker {
-    LONGEST_PATH = 'longest-path',
-    NETWORK_SIMPLEX = 'network-simplex',
-    TIGHT_TREE = 'tight-tree',
+  // (undocumented)
+  export type LabelPosition =
+    (typeof LabelPosition)[keyof typeof LabelPosition];
+  // (undocumented)
+  export namespace LabelPosition {
+    // (undocumented)
+    export type CENTER = typeof LabelPosition.CENTER;
+    // (undocumented)
+    export type LEFT = typeof LabelPosition.LEFT;
+    // (undocumented)
+    export type RIGHT = typeof LabelPosition.RIGHT;
   }
+  const Direction: {
+    readonly TOP_BOTTOM: 'TB';
+    readonly BOTTOM_TOP: 'BT';
+    readonly LEFT_RIGHT: 'LR';
+    readonly RIGHT_LEFT: 'RL';
+  };
+  // (undocumented)
+  export type Ranker = (typeof Ranker)[keyof typeof Ranker];
+  // (undocumented)
+  export namespace Ranker {
+    // (undocumented)
+    export type LONGEST_PATH = typeof Ranker.LONGEST_PATH;
+    // (undocumented)
+    export type NETWORK_SIMPLEX = typeof Ranker.NETWORK_SIMPLEX;
+    // (undocumented)
+    export type TIGHT_TREE = typeof Ranker.TIGHT_TREE;
+  }
+  const Alignment: {
+    readonly UP_LEFT: 'UL';
+    readonly UP_RIGHT: 'UR';
+    readonly DOWN_LEFT: 'DL';
+    readonly DOWN_RIGHT: 'DR';
+  };
   export type RenderEdgeFunction<T = {}> = (
     props: RenderEdgeProps<T>,
   ) => ReactNode;
@@ -344,11 +384,21 @@ export namespace DependencyGraphTypes {
       name?: string | undefined;
     };
   };
+  const Ranker: {
+    readonly NETWORK_SIMPLEX: 'network-simplex';
+    readonly TIGHT_TREE: 'tight-tree';
+    readonly LONGEST_PATH: 'longest-path';
+  };
   export type RenderLabelFunction<T = {}> = (
     props: RenderLabelProps<T>,
   ) => ReactNode;
   export type RenderLabelProps<T = unknown> = {
     edge: DependencyEdge<T>;
+  };
+  const LabelPosition: {
+    readonly LEFT: 'l';
+    readonly RIGHT: 'r';
+    readonly CENTER: 'c';
   };
   export type RenderNodeFunction<T = {}> = (
     props: RenderNodeProps<T>,
