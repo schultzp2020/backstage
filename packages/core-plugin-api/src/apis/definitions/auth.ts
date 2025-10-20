@@ -299,7 +299,7 @@ export type SessionApi = {
   /**
    * Observe the current state of the auth session. Emits the current state on subscription.
    */
-  sessionState$(): Observable<'SignedIn' | 'SignedOut'>;
+  sessionState$(): Observable<SessionState>;
 };
 
 /**

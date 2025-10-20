@@ -21,6 +21,7 @@ import {
   ProfileInfoApi,
   SessionApi,
   BackstageIdentityResponse,
+  SessionState,
 } from '@backstage/core-plugin-api';
 import { Observable } from '@backstage/types';
 import { DirectAuthConnector } from '../../../../lib/AuthConnector';
@@ -77,7 +78,7 @@ export default class SamlAuth
     return new SamlAuth(authSessionStore);
   }
 
-  sessionState$(): Observable<'SignedIn' | 'SignedOut'> {
+  sessionState$(): Observable<SessionState> {
     return this.sessionManager.sessionState$();
   }
 

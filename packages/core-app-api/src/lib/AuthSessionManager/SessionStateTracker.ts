@@ -19,7 +19,7 @@ import { SessionState } from '@backstage/core-plugin-api';
 import { Observable } from '@backstage/types';
 
 export class SessionStateTracker {
-  private readonly subject = new BehaviorSubject<'SignedIn' | 'SignedOut'>(
+  private readonly subject = new BehaviorSubject<SessionState>(
     SessionState.SignedOut,
   );
 
@@ -34,7 +34,7 @@ export class SessionStateTracker {
     }
   }
 
-  sessionState$(): Observable<'SignedIn' | 'SignedOut'> {
+  sessionState$(): Observable<SessionState> {
     return this.subject;
   }
 }

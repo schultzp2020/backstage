@@ -15,6 +15,7 @@
  */
 
 import { Observable } from '@backstage/types';
+import { SessionState } from '@backstage/core-plugin-api';
 
 export type GetSessionOptions = {
   optional?: boolean;
@@ -32,7 +33,7 @@ export type SessionManager<T> = {
 
   removeSession(): Promise<void>;
 
-  sessionState$(): Observable<'SignedIn' | 'SignedOut'>;
+  sessionState$(): Observable<SessionState>;
 };
 
 /**

@@ -15,6 +15,7 @@
  */
 
 import { Observable } from '@backstage/types';
+import { SessionState } from '@backstage/core-plugin-api';
 import {
   SessionManager,
   MutableSessionManager,
@@ -99,7 +100,7 @@ export class OptionalRefreshSessionManagerMux<T> implements SessionManager<T> {
     this.stateTracker.setIsSignedIn(false);
   }
 
-  sessionState$(): Observable<'SignedIn' | 'SignedOut'> {
+  sessionState$(): Observable<SessionState> {
     return this.stateTracker.sessionState$();
   }
 }

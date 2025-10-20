@@ -50,7 +50,7 @@ export function validateFlagName(name: string): void {
  */
 export class LocalStorageFeatureFlags implements FeatureFlagsApi {
   private registeredFeatureFlags: FeatureFlag[] = [];
-  private flags?: Map<string, 0 | 1>;
+  private flags?: Map<string, FeatureFlagState>;
 
   registerFlag(flag: FeatureFlag) {
     validateFlagName(flag.name);
@@ -88,7 +88,7 @@ export class LocalStorageFeatureFlags implements FeatureFlagsApi {
     );
   }
 
-  private load(): Map<string, 0 | 1> {
+  private load(): Map<string, FeatureFlagState> {
     try {
       const jsonStr = window.localStorage.getItem('featureFlags');
       if (!jsonStr) {

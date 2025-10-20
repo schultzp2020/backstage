@@ -27,6 +27,7 @@ import {
   ProfileInfo,
   ProfileInfoApi,
   SessionApi,
+  SessionState,
 } from '@backstage/core-plugin-api';
 import { Observable } from '@backstage/types';
 import {
@@ -175,7 +176,7 @@ export default class OAuth2
     await this.sessionManager.removeSession();
   }
 
-  sessionState$(): Observable<'SignedIn' | 'SignedOut'> {
+  sessionState$(): Observable<SessionState> {
     return this.sessionManager.sessionState$();
   }
 
