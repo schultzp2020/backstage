@@ -250,10 +250,25 @@ Based on analysis, these have few/no instances in current error set.
    yarn tsc --noEmit 2>&1 | grep -E "[pattern-specific-regex]" | wc -l
    ```
 
-2. **Stage All Changes for the Area**:
+2. **Format Changed Files** ⚠️ **MANDATORY**:
 
    ```bash
-   # Review all modified files
+   # Format all modified files with prettier
+   yarn prettier --write $(git diff --name-only)
+
+   # OR format specific files if targeting individual files
+   yarn prettier --write "packages/integration/src/*/*.ts"
+   yarn prettier --write "packages/core-app-api/src/**/*.ts"
+   # etc.
+
+   # OR format single files as you work (recommended approach)
+   yarn prettier --write "path/to/modified/file.ts"
+   ```
+
+3. **Stage All Changes for the Area**:
+
+   ```bash
+   # Review all modified files (including prettier changes)
    git status
 
    # Add all changes (be selective if mixed changes exist)
@@ -265,7 +280,7 @@ Based on analysis, these have few/no instances in current error set.
    # etc.
    ```
 
-3. **Create Descriptive Commit**:
+4. **Create Descriptive Commit**:
 
    ```bash
    git commit -m "fix(erasable-syntax): convert parameter properties to explicit declarations
@@ -361,7 +376,14 @@ After each commit:
    fi
    ```
 
-4. **Update Plan File**:
+4. **Format Plan File**:
+
+   ```bash
+   # Format the plan file if updated
+   yarn prettier --write fix-erasable-syntax-improved.plan.md
+   ```
+
+5. **Update Plan File**:
 
    ```bash
    # Commit the plan updates separately
@@ -369,7 +391,7 @@ After each commit:
    git commit -m "docs: update plan with Area X completion results"
    ```
 
-5. **Final Verification**:
+6. **Final Verification**:
 
    ```bash
    # Ensure everything still compiles after API reports
@@ -377,7 +399,7 @@ After each commit:
    git status  # Should be clean
    ```
 
-6. **Tag for PR Preparation** (Optional):
+7. **Tag for PR Preparation** (Optional):
 
    ```bash
    git tag "erasable-syntax-area-1-complete"
