@@ -28,7 +28,7 @@ import { CatalogServiceMock } from './types';
 
 /** @internal */
 function simpleMock<TService>(
-  ref: ServiceRef<TService, any>,
+  ref: ServiceRef<TService>,
   mockFactory: () => jest.Mocked<TService>,
 ): (partialImpl?: Partial<TService>) => ServiceMock<TService> {
   return partialImpl => {
@@ -53,43 +53,48 @@ function simpleMock<TService>(
 }
 
 /**
- * A collection of mock functionality for the catalog service.
+ * Creates a fake catalog client that handles entities in memory storage. Note
+ * that this client may be severely limited in functionality, and advanced
+ * functions may not be available at all.
  *
  * @public
  */
-export const catalogServiceMock = {
-  /**
-   * Creates a fake catalog client that handles entities in memory storage. Note
-   * that this client may be severely limited in functionality, and advanced
-   * functions may not be available at all.
-   */
-  factory: (options?: { entities?: Entity[] }) =>
-    createServiceFactory({
-      service: catalogServiceRef,
-      deps: {},
-      factory: () => new InMemoryCatalogClient(options),
-    }) as ServiceFactory<CatalogServiceMock, 'plugin', 'singleton'>,
-  /**
-   * Creates a catalog client whose methods are mock functions, possibly with
-   * some of them overloaded by the caller.
-   */
-  mock: simpleMock<CatalogServiceMock>(catalogServiceRef, () => ({
+export function catalogServiceMock(options?: {
+  entities?: Entity[];
+}): CatalogServiceMock {
+  return new InMemoryCatalogClient(options);
+}
+
+/**
+ * Creates a fake catalog client that handles entities in memory storage. Note
+ * that this client may be severely limited in functionality, and advanced
+ * functions may not be available at all.
+ */
+catalogServiceMock.factory = (options?: { entities?: Entity[] }) =>
+  createServiceFactory({
+    service: catalogServiceRef,
+    deps: {},
+    factory: () => new InMemoryCatalogClient(options),
+  }) as ServiceFactory<CatalogServiceMock, 'plugin', 'singleton'>;
+
+/**
+ * Creates a catalog client whose methods are mock functions, possibly with
+ * some of them overloaded by the caller.
+ */
+catalogServiceMock.mock = simpleMock<CatalogServiceMock>(
+  catalogServiceRef,
+  () => ({
     getEntities: jest.fn(),
     getEntitiesByRefs: jest.fn(),
     queryEntities: jest.fn(),
-    getEntityAncestors: jest.fn(),
-    getEntityByRef: jest.fn(),
-    removeEntityByUid: jest.fn(),
-    refreshEntity: jest.fn(),
-    getEntityFacets: jest.fn(),
-    getLocations: jest.fn(),
+    addLocation: jest.fn(),
     getLocationById: jest.fn(),
     getLocationByRef: jest.fn(),
-    addLocation: jest.fn(),
     removeLocationById: jest.fn(),
-    getLocationByEntity: jest.fn(),
+    removeEntityByUid: jest.fn(),
+    refreshEntity: jest.fn(),
+    getEntityAncestors: jest.fn(),
+    getEntityFacets: jest.fn(),
     validateEntity: jest.fn(),
-    analyzeLocation: jest.fn(),
-    streamEntities: jest.fn(),
-  })),
-} as const;
+  }),
+);

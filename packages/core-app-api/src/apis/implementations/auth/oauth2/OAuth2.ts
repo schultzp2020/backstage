@@ -176,7 +176,7 @@ export default class OAuth2
     await this.sessionManager.removeSession();
   }
 
-  sessionState$(): Observable<SessionState> {
+  sessionState$(): Observable<'SignedIn' | 'SignedOut'> {
     return this.sessionManager.sessionState$();
   }
 

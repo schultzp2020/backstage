@@ -33,7 +33,7 @@ export class MockPermissionApi implements PermissionApi {
   constructor(
     private readonly requestHandler: (
       request: EvaluatePermissionRequest,
-    ) => AuthorizeResult.ALLOW | AuthorizeResult.DENY = () =>
+    ) => typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY = () =>
       AuthorizeResult.ALLOW,
   ) {}
 

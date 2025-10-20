@@ -282,5 +282,5 @@ export async function createRouter(
 type InternalEvaluatePermissionResponse =
   | EvaluatePermissionResponse
   | {
-      result: Array<AuthorizeResult.ALLOW | AuthorizeResult.DENY>;
+      result: Array<typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY>;
     };

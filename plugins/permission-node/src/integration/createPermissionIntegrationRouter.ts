@@ -96,7 +96,7 @@ export type ApplyConditionsRequest = {
 export type ApplyConditionsResponseEntry = IdentifiedPermissionMessage<
   | DefinitivePolicyDecision
   | {
-      result: Array<AuthorizeResult.ALLOW | AuthorizeResult.DENY>;
+      result: Array<typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY>;
     }
 >;
 

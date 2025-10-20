@@ -52,46 +52,51 @@ function simpleMock<TApi>(
 }
 
 /**
- * A collection of mock functionality for the catalog service.
+ * Creates a fake catalog client that handles entities in memory storage. Note
+ * that this client may be severely limited in functionality, and advanced
+ * functions may not be available at all.
  *
  * @public
  */
-export const catalogApiMock = {
-  /**
-   * Creates a fake catalog client that handles entities in memory storage. Note
-   * that this client may be severely limited in functionality, and advanced
-   * functions may not be available at all.
-   */
-  factory: (options?: {
-    entities?: Entity[];
-  }): ApiFactory<CatalogApi, CatalogApi, {}> =>
-    createApiFactory({
-      api: catalogApiRef,
-      deps: {},
-      factory: () => new InMemoryCatalogClient(options),
-    }),
-  /**
-   * Creates a catalog client whose methods are mock functions, possibly with
-   * some of them overloaded by the caller.
-   */
-  mock: simpleMock(catalogApiRef, () => ({
-    getEntities: jest.fn(),
-    getEntitiesByRefs: jest.fn(),
-    queryEntities: jest.fn(),
-    getEntityAncestors: jest.fn(),
-    getEntityByRef: jest.fn(),
-    removeEntityByUid: jest.fn(),
-    refreshEntity: jest.fn(),
-    getEntityFacets: jest.fn(),
-    getLocations: jest.fn(),
-    getLocationById: jest.fn(),
-    getLocationByRef: jest.fn(),
-    addLocation: jest.fn(),
-    removeLocationById: jest.fn(),
-    getLocationByEntity: jest.fn(),
-    validateEntity: jest.fn(),
-    analyzeLocation: jest.fn(),
-    streamEntities: jest.fn(),
-    streamEntityPages: jest.fn(),
-  })),
-} as const;
+export function catalogApiMock(options?: { entities?: Entity[] }): CatalogApi {
+  return new InMemoryCatalogClient(options);
+}
+
+/**
+ * Creates a fake catalog client that handles entities in memory storage. Note
+ * that this client may be severely limited in functionality, and advanced
+ * functions may not be available at all.
+ */
+catalogApiMock.factory = (options?: {
+  entities?: Entity[];
+}): ApiFactory<CatalogApi, CatalogApi, {}> =>
+  createApiFactory({
+    api: catalogApiRef,
+    deps: {},
+    factory: () => new InMemoryCatalogClient(options),
+  });
+
+/**
+ * Creates a catalog client whose methods are mock functions, possibly with
+ * some of them overloaded by the caller.
+ */
+catalogApiMock.mock = simpleMock(catalogApiRef, () => ({
+  getEntities: jest.fn(),
+  getEntitiesByRefs: jest.fn(),
+  queryEntities: jest.fn(),
+  getEntityAncestors: jest.fn(),
+  getEntityByRef: jest.fn(),
+  removeEntityByUid: jest.fn(),
+  refreshEntity: jest.fn(),
+  getEntityFacets: jest.fn(),
+  getLocations: jest.fn(),
+  getLocationById: jest.fn(),
+  getLocationByRef: jest.fn(),
+  addLocation: jest.fn(),
+  removeLocationById: jest.fn(),
+  getLocationByEntity: jest.fn(),
+  validateEntity: jest.fn(),
+  analyzeLocation: jest.fn(),
+  streamEntities: jest.fn(),
+  streamEntityPages: jest.fn(),
+}));

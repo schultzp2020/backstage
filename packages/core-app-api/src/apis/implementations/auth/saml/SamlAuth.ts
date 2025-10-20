@@ -78,7 +78,7 @@ export default class SamlAuth
     return new SamlAuth(authSessionStore);
   }
 
-  sessionState$(): Observable<SessionState> {
+  sessionState$(): Observable<'SignedIn' | 'SignedOut'> {
     return this.sessionManager.sessionState$();
   }
 

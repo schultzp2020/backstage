@@ -31,7 +31,7 @@ class MockManager implements MutableSessionManager<string> {
   async removeSession(): Promise<void> {
     delete this.session;
   }
-  sessionState$(): Observable<SessionState> {
+  sessionState$(): Observable<'SignedIn' | 'SignedOut'> {
     throw new Error('Method not implemented.');
   }
 }

@@ -59,7 +59,7 @@ export const ProviderSettingsItem = (props: {
 
     const subscription = api
       .sessionState$()
-      .subscribe((sessionState: SessionState) => {
+      .subscribe((sessionState: 'SignedIn' | 'SignedOut') => {
         if (sessionState !== SessionState.SignedIn) {
           setProfile(emptyProfile);
           setSignedIn(false);

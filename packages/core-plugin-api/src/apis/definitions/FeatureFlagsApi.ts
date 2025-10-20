@@ -52,7 +52,7 @@ export type FeatureFlagsSaveOptions = {
   /**
    * The new feature flag states to save.
    */
-  states: Record<string, FeatureFlagState>;
+  states: Record<string, 0 | 1>;
 
   /**
    * Whether the saves states should be merged into the existing ones, or replace them.

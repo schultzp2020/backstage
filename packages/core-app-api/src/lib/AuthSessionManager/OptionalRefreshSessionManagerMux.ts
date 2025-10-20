@@ -100,7 +100,7 @@ export class OptionalRefreshSessionManagerMux<T> implements SessionManager<T> {
     this.stateTracker.setIsSignedIn(false);
   }
 
-  sessionState$(): Observable<SessionState> {
+  sessionState$(): Observable<'SignedIn' | 'SignedOut'> {
     return this.stateTracker.sessionState$();
   }
 }

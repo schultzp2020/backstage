@@ -33,7 +33,7 @@ export type SessionManager<T> = {
 
   removeSession(): Promise<void>;
 
-  sessionState$(): Observable<SessionState>;
+  sessionState$(): Observable<'SignedIn' | 'SignedOut'>;
 };
 
 /**
