@@ -27,85 +27,80 @@ import { z } from 'zod';
  *
  * @public
  */
-export namespace bitbucketSignInResolvers {
+export const bitbucketSignInResolvers = {
   /**
    * Looks up the user by matching their Bitbucket user ID with the `bitbucket.org/user-id` annotation.
    */
-  export const userIdMatchingUserEntityAnnotation = createSignInResolverFactory(
-    {
-      optionsSchema: z
-        .object({
-          dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
-        })
-        .optional(),
-      create(options = {}) {
-        return async (
-          info: SignInInfo<OAuthAuthenticatorResult<PassportProfile>>,
-          ctx,
-        ) => {
-          const { result } = info;
+  userIdMatchingUserEntityAnnotation: createSignInResolverFactory({
+    optionsSchema: z
+      .object({
+        dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
+      })
+      .optional(),
+    create(options = {}) {
+      return async (
+        info: SignInInfo<OAuthAuthenticatorResult<PassportProfile>>,
+        ctx,
+      ) => {
+        const { result } = info;
 
-          const id = result.fullProfile.id;
-          if (!id) {
-            throw new Error('Bitbucket user profile does not contain an ID');
-          }
+        const id = result.fullProfile.id;
+        if (!id) {
+          throw new Error('Bitbucket user profile does not contain an ID');
+        }
 
-          return ctx.signInWithCatalogUser(
-            {
-              annotations: {
-                'bitbucket.org/user-id': id,
-              },
+        return ctx.signInWithCatalogUser(
+          {
+            annotations: {
+              'bitbucket.org/user-id': id,
             },
-            {
-              dangerousEntityRefFallback:
-                options?.dangerouslyAllowSignInWithoutUserInCatalog
-                  ? { entityRef: { name: id } }
-                  : undefined,
-            },
-          );
-        };
-      },
+          },
+          {
+            dangerousEntityRefFallback:
+              options?.dangerouslyAllowSignInWithoutUserInCatalog
+                ? { entityRef: { name: id } }
+                : undefined,
+          },
+        );
+      };
     },
-  );
+  }),
 
   /**
    * Looks up the user by matching their Bitbucket username with the `bitbucket.org/username` annotation.
    */
-  export const usernameMatchingUserEntityAnnotation =
-    createSignInResolverFactory({
-      optionsSchema: z
-        .object({
-          dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
-        })
-        .optional(),
-      create(options = {}) {
-        return async (
-          info: SignInInfo<OAuthAuthenticatorResult<PassportProfile>>,
-          ctx,
-        ) => {
-          const { result } = info;
+  usernameMatchingUserEntityAnnotation: createSignInResolverFactory({
+    optionsSchema: z
+      .object({
+        dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
+      })
+      .optional(),
+    create(options = {}) {
+      return async (
+        info: SignInInfo<OAuthAuthenticatorResult<PassportProfile>>,
+        ctx,
+      ) => {
+        const { result } = info;
 
-          const username = result.fullProfile.username;
-          if (!username) {
-            throw new Error(
-              'Bitbucket user profile does not contain a Username',
-            );
-          }
+        const username = result.fullProfile.username;
+        if (!username) {
+          throw new Error('Bitbucket user profile does not contain a Username');
+        }
 
-          return ctx.signInWithCatalogUser(
-            {
-              annotations: {
-                'bitbucket.org/username': username,
-              },
+        return ctx.signInWithCatalogUser(
+          {
+            annotations: {
+              'bitbucket.org/username': username,
             },
-            {
-              dangerousEntityRefFallback:
-                options?.dangerouslyAllowSignInWithoutUserInCatalog
-                  ? { entityRef: { name: username } }
-                  : undefined,
-            },
-          );
-        };
-      },
-    });
-}
+          },
+          {
+            dangerousEntityRefFallback:
+              options?.dangerouslyAllowSignInWithoutUserInCatalog
+                ? { entityRef: { name: username } }
+                : undefined,
+          },
+        );
+      };
+    },
+  }),
+} as const;
