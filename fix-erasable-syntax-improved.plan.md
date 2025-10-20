@@ -338,7 +338,30 @@ After each commit:
    yarn tsc --noEmit  # Should show progress (fewer total errors)
    ```
 
-2. **Update Plan File**:
+2. **Run Full Build Validation** ⚠️ **MANDATORY**:
+
+   ```bash
+   # Full TypeScript compilation with increased memory
+   NODE_OPTIONS=--max-old-space-size=8192 yarn run tsc:full
+
+   # Build API reports to catch any breaking changes
+   yarn run build:api-reports:only
+   ```
+
+3. **Commit Any Generated Files**:
+
+   ```bash
+   # Add any updated API reports or generated .md files
+   git add "**/*.api.md" "**/*.d.ts" || true
+   git add "*.md" || true
+
+   # If there are changes, commit them
+   if ! git diff --cached --quiet; then
+     git commit -m "build: update API reports after Area X completion"
+   fi
+   ```
+
+4. **Update Plan File**:
 
    ```bash
    # Commit the plan updates separately
@@ -346,7 +369,15 @@ After each commit:
    git commit -m "docs: update plan with Area X completion results"
    ```
 
-3. **Tag for PR Preparation** (Optional):
+5. **Final Verification**:
+
+   ```bash
+   # Ensure everything still compiles after API reports
+   yarn tsc --noEmit
+   git status  # Should be clean
+   ```
+
+6. **Tag for PR Preparation** (Optional):
 
    ```bash
    git tag "erasable-syntax-area-1-complete"
