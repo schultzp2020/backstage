@@ -456,7 +456,7 @@ export namespace mockServices {
    * {@link @backstage/backend-plugin-api#PermissionsService}.
    */
   export function permissions(options?: {
-    result: typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY;
+    result: AuthorizeResult.ALLOW | AuthorizeResult.DENY;
   }): PermissionsService {
     return new MockPermissionsService(options);
   }
@@ -468,7 +468,7 @@ export namespace mockServices {
      * regular default permissions factory.
      */
     export const factory = (options?: {
-      result: typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY;
+      result: AuthorizeResult.ALLOW | AuthorizeResult.DENY;
     }) =>
       options?.result
         ? createServiceFactory({

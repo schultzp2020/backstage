@@ -300,16 +300,16 @@ export namespace mockApis {
    */
   export function permission(options?: {
     authorize?:
-      | typeof AuthorizeResult.ALLOW
-      | typeof AuthorizeResult.DENY
+      | AuthorizeResult.ALLOW
+      | AuthorizeResult.DENY
       | ((
           request: EvaluatePermissionRequest,
-        ) => typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY);
+        ) => AuthorizeResult.ALLOW | AuthorizeResult.DENY);
   }): PermissionApi {
     const authorizeInput = options?.authorize;
     let authorize: (
       request: EvaluatePermissionRequest,
-    ) => typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY;
+    ) => AuthorizeResult.ALLOW | AuthorizeResult.DENY;
     if (authorizeInput === undefined) {
       authorize = () => AuthorizeResult.ALLOW;
     } else if (typeof authorizeInput === 'function') {

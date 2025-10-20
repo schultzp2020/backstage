@@ -61,7 +61,7 @@ export const AuthorizeResult = {
  * @public
  */
 export type DefinitivePolicyDecision = {
-  result: typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY;
+  result: AuthorizeResult.ALLOW | AuthorizeResult.DENY;
 };
 
 /**
@@ -76,7 +76,7 @@ export type DefinitivePolicyDecision = {
  * @public
  */
 export type ConditionalPolicyDecision = {
-  result: typeof AuthorizeResult.CONDITIONAL;
+  result: AuthorizeResult.CONDITIONAL;
   pluginId: string;
   resourceType: string;
   conditions: PermissionCriteria<PermissionCondition>;
