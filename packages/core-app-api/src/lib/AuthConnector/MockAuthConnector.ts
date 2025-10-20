@@ -31,7 +31,11 @@ const defaultMockSession: MockSession = {
 };
 
 export class MockAuthConnector implements AuthConnector<MockSession> {
-  constructor(private readonly mockSession: MockSession = defaultMockSession) {}
+  private readonly mockSession: MockSession;
+
+  constructor(mockSession: MockSession = defaultMockSession) {
+    this.mockSession = mockSession;
+  }
 
   async createSession() {
     return this.mockSession;

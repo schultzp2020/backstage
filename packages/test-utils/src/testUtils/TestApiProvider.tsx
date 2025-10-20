@@ -71,7 +71,11 @@ export class TestApiRegistry implements ApiHolder {
     );
   }
 
-  private constructor(private readonly apis: Map<string, unknown>) {}
+  private readonly apis: Map<string, unknown>;
+
+  private constructor(apis: Map<string, unknown>) {
+    this.apis = apis;
+  }
 
   /**
    * Returns an implementation of the API.

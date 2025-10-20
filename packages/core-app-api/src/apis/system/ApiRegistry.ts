@@ -62,7 +62,11 @@ export class ApiRegistry implements ApiHolder {
     return new ApiRegistry(new Map([[api.id, impl]]));
   }
 
-  constructor(private readonly apis: Map<string, unknown>) {}
+  private readonly apis: Map<string, unknown>;
+
+  constructor(apis: Map<string, unknown>) {
+    this.apis = apis;
+  }
 
   /**
    * Returns a new ApiRegistry with the provided API added to the existing ones.

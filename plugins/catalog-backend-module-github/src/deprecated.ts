@@ -73,7 +73,11 @@ export class GitHubEntityProvider implements EntityProvider {
     );
   }
 
-  private constructor(private readonly delegate: GithubEntityProvider) {}
+  private readonly delegate: GithubEntityProvider;
+
+  private constructor(delegate: GithubEntityProvider) {
+    this.delegate = delegate;
+  }
 
   connect(connection: EntityProviderConnection): Promise<void> {
     return this.delegate.connect(connection);

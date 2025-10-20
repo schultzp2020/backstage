@@ -34,7 +34,11 @@ export class GiteaIntegration implements ScmIntegration {
     );
   };
 
-  constructor(readonly config: GiteaIntegrationConfig) {}
+  readonly config: GiteaIntegrationConfig;
+
+  constructor(config: GiteaIntegrationConfig) {
+    this.config = config;
+  }
 
   get type(): string {
     return 'gitea';

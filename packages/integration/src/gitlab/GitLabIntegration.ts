@@ -37,7 +37,11 @@ export class GitLabIntegration implements ScmIntegration {
     );
   };
 
-  constructor(private readonly integrationConfig: GitLabIntegrationConfig) {}
+  private readonly integrationConfig: GitLabIntegrationConfig;
+
+  constructor(integrationConfig: GitLabIntegrationConfig) {
+    this.integrationConfig = integrationConfig;
+  }
 
   get type(): string {
     return 'gitlab';

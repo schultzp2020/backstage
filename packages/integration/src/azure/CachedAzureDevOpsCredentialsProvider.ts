@@ -105,7 +105,11 @@ export class CachedAzureDevOpsCredentialsProvider
     );
   }
 
-  private constructor(private readonly credential: TokenCredential | string) {}
+  private readonly credential: TokenCredential | string;
+
+  private constructor(credential: TokenCredential | string) {
+    this.credential = credential;
+  }
 
   async getCredentials(): Promise<AzureDevOpsCredentials> {
     if (

@@ -42,7 +42,11 @@ export class GithubIntegration implements ScmIntegration {
     );
   };
 
-  constructor(private readonly integrationConfig: GithubIntegrationConfig) {}
+  private readonly integrationConfig: GithubIntegrationConfig;
+
+  constructor(integrationConfig: GithubIntegrationConfig) {
+    this.integrationConfig = integrationConfig;
+  }
 
   get type(): string {
     return 'github';

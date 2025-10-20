@@ -64,9 +64,11 @@ export class EnvConfigSource implements ConfigSource {
     return new EnvConfigSource(options?.env ?? process.env);
   }
 
-  private constructor(
-    private readonly env: { [name: string]: string | undefined },
-  ) {}
+  private readonly env: { [name: string]: string | undefined };
+
+  private constructor(env: { [name: string]: string | undefined }) {
+    this.env = env;
+  }
 
   async *readConfigData(): AsyncConfigSourceGenerator {
     const configs = readEnvConfig(this.env);

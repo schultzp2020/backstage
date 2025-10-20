@@ -59,8 +59,11 @@ export class AppThemeSelector implements AppThemeApi {
 
   private activeThemeId: string | undefined;
   private readonly subject = new BehaviorSubject<string | undefined>(undefined);
+  private readonly themes: AppTheme[];
 
-  constructor(private readonly themes: AppTheme[]) {}
+  constructor(themes: AppTheme[]) {
+    this.themes = themes;
+  }
 
   getInstalledThemes(): AppTheme[] {
     return this.themes.slice();

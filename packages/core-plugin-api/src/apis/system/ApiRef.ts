@@ -26,7 +26,10 @@ export type ApiRefConfig = {
 };
 
 class ApiRefImpl<T> implements ApiRef<T> {
-  constructor(private readonly config: ApiRefConfig) {
+  private readonly config: ApiRefConfig;
+
+  constructor(config: ApiRefConfig) {
+    this.config = config;
     const valid = config.id
       .split('.')
       .flatMap(part => part.split('-'))

@@ -38,7 +38,11 @@ export class GerritIntegration implements ScmIntegration {
     );
   };
 
-  constructor(private readonly integrationConfig: GerritIntegrationConfig) {}
+  private readonly integrationConfig: GerritIntegrationConfig;
+
+  constructor(integrationConfig: GerritIntegrationConfig) {
+    this.integrationConfig = integrationConfig;
+  }
 
   get type(): string {
     return 'gerrit';

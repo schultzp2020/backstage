@@ -34,7 +34,11 @@ export class HarnessIntegration implements ScmIntegration {
     );
   };
 
-  constructor(readonly config: HarnessIntegrationConfig) {}
+  readonly config: HarnessIntegrationConfig;
+
+  constructor(config: HarnessIntegrationConfig) {
+    this.config = config;
+  }
 
   get type(): string {
     return 'harness';

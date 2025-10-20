@@ -108,7 +108,11 @@ export type AccessToken = {
  * It manages OIDC clients, authorization codes, and access tokens in the database.
  */
 export class OidcDatabase {
-  private constructor(private readonly db: Knex) {}
+  private readonly db: Knex;
+
+  private constructor(db: Knex) {
+    this.db = db;
+  }
 
   static async create(options: { database: AuthDatabase }) {
     const client = await options.database.get();
