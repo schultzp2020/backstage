@@ -24,33 +24,32 @@ import { z } from 'zod';
 /**
  * @public
  */
-export namespace oauth2ProxySignInResolvers {
-  export const forwardedUserMatchingUserEntityName =
-    createSignInResolverFactory({
-      optionsSchema: z
-        .object({
-          dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
-        })
-        .optional(),
-      create(options = {}) {
-        return async (info: SignInInfo<OAuth2ProxyResult>, ctx) => {
-          const name = info.result.getHeader('x-forwarded-user');
-          if (!name) {
-            throw new Error('Request did not contain a user');
-          }
+export const oauth2ProxySignInResolvers = {
+  forwardedUserMatchingUserEntityName: createSignInResolverFactory({
+    optionsSchema: z
+      .object({
+        dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
+      })
+      .optional(),
+    create(options = {}) {
+      return async (info: SignInInfo<OAuth2ProxyResult>, ctx) => {
+        const name = info.result.getHeader('x-forwarded-user');
+        if (!name) {
+          throw new Error('Request did not contain a user');
+        }
 
-          return ctx.signInWithCatalogUser(
-            {
-              entityRef: { name },
-            },
-            {
-              dangerousEntityRefFallback:
-                options?.dangerouslyAllowSignInWithoutUserInCatalog
-                  ? { entityRef: { name } }
-                  : undefined,
-            },
-          );
-        };
-      },
-    });
-}
+        return ctx.signInWithCatalogUser(
+          {
+            entityRef: { name },
+          },
+          {
+            dangerousEntityRefFallback:
+              options?.dangerouslyAllowSignInWithoutUserInCatalog
+                ? { entityRef: { name } }
+                : undefined,
+          },
+        );
+      };
+    },
+  }),
+} as const;

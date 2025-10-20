@@ -27,8 +27,8 @@ import {
 } from '@backstage/catalog-model';
 import { z } from 'zod';
 
-export namespace openshiftSignInResolvers {
-  export const displayNameMatchingUserEntityName = createSignInResolverFactory({
+export const openshiftSignInResolvers = {
+  displayNameMatchingUserEntityName: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -64,5 +64,5 @@ export namespace openshiftSignInResolvers {
         );
       };
     },
-  });
-}
+  }),
+} as const;
