@@ -27,12 +27,11 @@ import { z } from 'zod';
  *
  * @public
  */
-export namespace oktaSignInResolvers {
+export const oktaSignInResolvers = {
   /**
-   * Looks up the user by matching their Okta   email to the entity email.
+   * Looks up the user by matching their Okta email to the entity email.
    */
-
-  export const emailMatchingUserEntityAnnotation = createSignInResolverFactory({
+  emailMatchingUserEntityAnnotation: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -64,5 +63,5 @@ export namespace oktaSignInResolvers {
         );
       };
     },
-  });
-}
+  }),
+} as const;
