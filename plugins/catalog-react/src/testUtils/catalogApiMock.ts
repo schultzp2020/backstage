@@ -52,40 +52,29 @@ function simpleMock<TApi>(
 }
 
 /**
- * Creates a fake catalog client that handles entities in memory storage. Note
- * that this client may be severely limited in functionality, and advanced
- * functions may not be available at all.
- *
- * @public
- */
-export function catalogApiMock(options?: { entities?: Entity[] }): CatalogApi {
-  return new InMemoryCatalogClient(options);
-}
-
-/**
  * A collection of mock functionality for the catalog service.
  *
  * @public
  */
-export namespace catalogApiMock {
+export const catalogApiMock = {
   /**
    * Creates a fake catalog client that handles entities in memory storage. Note
    * that this client may be severely limited in functionality, and advanced
    * functions may not be available at all.
    */
-  export const factory = (options?: {
+  factory: (options?: {
     entities?: Entity[];
   }): ApiFactory<CatalogApi, CatalogApi, {}> =>
     createApiFactory({
       api: catalogApiRef,
       deps: {},
       factory: () => new InMemoryCatalogClient(options),
-    });
+    }),
   /**
    * Creates a catalog client whose methods are mock functions, possibly with
    * some of them overloaded by the caller.
    */
-  export const mock = simpleMock(catalogApiRef, () => ({
+  mock: simpleMock(catalogApiRef, () => ({
     getEntities: jest.fn(),
     getEntitiesByRefs: jest.fn(),
     queryEntities: jest.fn(),
@@ -104,5 +93,5 @@ export namespace catalogApiMock {
     analyzeLocation: jest.fn(),
     streamEntities: jest.fn(),
     streamEntityPages: jest.fn(),
-  }));
-}
+  })),
+} as const;

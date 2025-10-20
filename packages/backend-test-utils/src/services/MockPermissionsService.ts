@@ -24,10 +24,10 @@ import {
 } from '@backstage/plugin-permission-common';
 
 export class MockPermissionsService implements PermissionsService {
-  readonly #result: AuthorizeResult.ALLOW | AuthorizeResult.DENY;
+  readonly #result: typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY;
 
   constructor(options?: {
-    result: AuthorizeResult.ALLOW | AuthorizeResult.DENY;
+    result: typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY;
   }) {
     this.#result = options?.result ?? AuthorizeResult.ALLOW;
   }
