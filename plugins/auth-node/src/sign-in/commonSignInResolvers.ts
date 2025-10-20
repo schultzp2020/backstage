@@ -28,105 +28,103 @@ const reEmail = /^([^@+]+)(\+[^@]+)?(@.*)$/;
  *
  * @public
  */
-export namespace commonSignInResolvers {
+export const commonSignInResolvers = {
   /**
    * A common sign-in resolver that looks up the user using their email address
    * as email of the entity.
    */
-  export const emailMatchingUserEntityProfileEmail =
-    createSignInResolverFactory({
-      optionsSchema: z
-        .object({
-          allowedDomains: z.array(z.string()).optional(),
-          dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
-        })
-        .optional(),
-      create(options = {}) {
-        return async (info, ctx) => {
-          const { profile } = info;
+  emailMatchingUserEntityProfileEmail: createSignInResolverFactory({
+    optionsSchema: z
+      .object({
+        allowedDomains: z.array(z.string()).optional(),
+        dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
+      })
+      .optional(),
+    create(options = {}) {
+      return async (info, ctx) => {
+        const { profile } = info;
 
-          if (!profile.email) {
-            throw new Error(
-              'Login failed, user profile does not contain an email',
-            );
-          }
+        if (!profile.email) {
+          throw new Error(
+            'Login failed, user profile does not contain an email',
+          );
+        }
 
-          try {
-            return await ctx.signInWithCatalogUser({
-              filter: {
-                'spec.profile.email': profile.email,
-              },
-            });
-          } catch (err) {
-            if (err?.name === 'NotFoundError') {
-              // Try removing the plus addressing from the email address
-              const m = profile.email.match(reEmail);
-              if (m?.length === 4) {
-                const [_, name, _plus, domain] = m;
-                const noPlusEmail = `${name}${domain}`;
+        try {
+          return await ctx.signInWithCatalogUser({
+            filter: {
+              'spec.profile.email': profile.email,
+            },
+          });
+        } catch (err) {
+          if (err?.name === 'NotFoundError') {
+            // Try removing the plus addressing from the email address
+            const m = profile.email.match(reEmail);
+            if (m?.length === 4) {
+              const [_, name, _plus, domain] = m;
+              const noPlusEmail = `${name}${domain}`;
 
-                return ctx.signInWithCatalogUser(
-                  {
-                    filter: {
-                      'spec.profile.email': noPlusEmail,
-                    },
+              return ctx.signInWithCatalogUser(
+                {
+                  filter: {
+                    'spec.profile.email': noPlusEmail,
                   },
-                  {
-                    dangerousEntityRefFallback:
-                      options?.dangerouslyAllowSignInWithoutUserInCatalog
-                        ? { entityRef: { name: noPlusEmail } }
-                        : undefined,
-                  },
-                );
-              }
+                },
+                {
+                  dangerousEntityRefFallback:
+                    options?.dangerouslyAllowSignInWithoutUserInCatalog
+                      ? { entityRef: { name: noPlusEmail } }
+                      : undefined,
+                },
+              );
             }
-            // Email had no plus addressing or is missing in the catalog, forward failure
-            throw err;
           }
-        };
-      },
-    });
+          // Email had no plus addressing or is missing in the catalog, forward failure
+          throw err;
+        }
+      };
+    },
+  }),
 
   /**
    * A common sign-in resolver that looks up the user using the local part of
    * their email address as the entity name.
    */
-  export const emailLocalPartMatchingUserEntityName =
-    createSignInResolverFactory({
-      optionsSchema: z
-        .object({
-          allowedDomains: z.array(z.string()).optional(),
-          dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
-        })
-        .optional(),
-      create(options = {}) {
-        const { allowedDomains } = options;
-        return async (info, ctx) => {
-          const { profile } = info;
+  emailLocalPartMatchingUserEntityName: createSignInResolverFactory({
+    optionsSchema: z
+      .object({
+        allowedDomains: z.array(z.string()).optional(),
+        dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
+      })
+      .optional(),
+    create(options = {}) {
+      const { allowedDomains } = options;
+      return async (info, ctx) => {
+        const { profile } = info;
 
-          if (!profile.email) {
-            throw new Error(
-              'Login failed, user profile does not contain an email',
-            );
-          }
-          const [localPart] = profile.email.split('@');
-          const domain = profile.email.slice(localPart.length + 1);
-
-          if (allowedDomains && !allowedDomains.includes(domain)) {
-            throw new NotAllowedError(
-              'Sign-in user email is not from an allowed domain',
-            );
-          }
-          return ctx.signInWithCatalogUser(
-            { entityRef: { name: localPart } },
-            {
-              dangerousEntityRefFallback:
-                options?.dangerouslyAllowSignInWithoutUserInCatalog
-                  ? { entityRef: { name: localPart } }
-                  : undefined,
-            },
+        if (!profile.email) {
+          throw new Error(
+            'Login failed, user profile does not contain an email',
           );
-        };
-      },
-    });
-}
+        }
+        const [localPart] = profile.email.split('@');
+        const domain = profile.email.slice(localPart.length + 1);
+
+        if (allowedDomains && !allowedDomains.includes(domain)) {
+          throw new NotAllowedError(
+            'Sign-in user email is not from an allowed domain',
+          );
+        }
+        return ctx.signInWithCatalogUser(
+          { entityRef: { name: localPart } },
+          {
+            dangerousEntityRefFallback:
+              options?.dangerouslyAllowSignInWithoutUserInCatalog
+                ? { entityRef: { name: localPart } }
+                : undefined,
+          },
+        );
+      };
+    },
+  }),
+} as const;

@@ -58,7 +58,7 @@ export interface ExtensionBoundaryProps {
 }
 
 /** @public */
-export function ExtensionBoundary(props: ExtensionBoundaryProps) {
+function ExtensionBoundaryComponent(props: ExtensionBoundaryProps) {
   const { node, children } = props;
 
   const hasRoutePathOutput = Boolean(
@@ -87,8 +87,8 @@ export function ExtensionBoundary(props: ExtensionBoundaryProps) {
 }
 
 /** @public */
-export namespace ExtensionBoundary {
-  export function lazy(
+export const ExtensionBoundary = Object.assign(ExtensionBoundaryComponent, {
+  lazy: function lazy(
     appNode: AppNode,
     loader: () => Promise<JSX.Element>,
   ): JSX.Element {
@@ -96,13 +96,13 @@ export namespace ExtensionBoundary {
       loader().then(element => ({ default: () => element })),
     );
     return (
-      <ExtensionBoundary node={appNode}>
+      <ExtensionBoundaryComponent node={appNode}>
         <ExtensionComponent />
-      </ExtensionBoundary>
+      </ExtensionBoundaryComponent>
     );
-  }
+  },
 
-  export function lazyComponent<TProps extends {}>(
+  lazyComponent: function lazyComponent<TProps extends {}>(
     appNode: AppNode,
     loader: () => Promise<(props: TProps) => JSX.Element>,
   ): (props: TProps) => JSX.Element {
@@ -111,9 +111,9 @@ export namespace ExtensionBoundary {
     ) as unknown as React.ComponentType<TProps>;
 
     return (props: TProps) => (
-      <ExtensionBoundary node={appNode}>
+      <ExtensionBoundaryComponent node={appNode}>
         <ExtensionComponent {...props} />
-      </ExtensionBoundary>
+      </ExtensionBoundaryComponent>
     );
-  }
-}
+  },
+});

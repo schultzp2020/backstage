@@ -26,7 +26,7 @@ import { actionsRegistryServiceFactory } from '@backstage/backend-defaults/alpha
 /**
  * @alpha
  */
-export function actionsRegistryServiceMock(options?: {
+function actionsRegistryServiceMockFunction(options?: {
   logger: LoggerService;
 }): MockActionsRegistry {
   return MockActionsRegistry.create({
@@ -37,13 +37,13 @@ export function actionsRegistryServiceMock(options?: {
 /**
  * @alpha
  */
-export namespace actionsRegistryServiceMock {
-  export const factory = () => actionsRegistryServiceFactory;
+export const actionsRegistryServiceMock = Object.assign(
+  actionsRegistryServiceMockFunction,
+  {
+    factory: () => actionsRegistryServiceFactory,
 
-  export const mock = simpleMock<ActionsRegistryService>(
-    actionsRegistryServiceRef,
-    () => ({
+    mock: simpleMock<ActionsRegistryService>(actionsRegistryServiceRef, () => ({
       register: jest.fn(),
-    }),
-  );
-}
+    })),
+  },
+);

@@ -27,11 +27,11 @@ import { z } from 'zod';
  *
  * @public
  */
-export namespace githubSignInResolvers {
+export const githubSignInResolvers = {
   /**
    * Looks up the user by matching their GitHub username to the entity name.
    */
-  export const usernameMatchingUserEntityName = createSignInResolverFactory({
+  usernameMatchingUserEntityName: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -62,5 +62,5 @@ export namespace githubSignInResolvers {
         );
       };
     },
-  });
-}
+  }),
+} as const;

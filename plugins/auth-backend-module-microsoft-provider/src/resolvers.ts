@@ -27,11 +27,11 @@ import { z } from 'zod';
  *
  * @public
  */
-export namespace microsoftSignInResolvers {
+export const microsoftSignInResolvers = {
   /**
    * Looks up the user by matching their Microsoft email to the email entity annotation.
    */
-  export const emailMatchingUserEntityAnnotation = createSignInResolverFactory({
+  emailMatchingUserEntityAnnotation: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -63,45 +63,43 @@ export namespace microsoftSignInResolvers {
         );
       };
     },
-  });
+  }),
   /**
    * Looks up the user by matching their Microsoft user id to the user id entity annotation.
    */
-  export const userIdMatchingUserEntityAnnotation = createSignInResolverFactory(
-    {
-      optionsSchema: z
-        .object({
-          dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
-        })
-        .optional(),
-      create(options = {}) {
-        return async (
-          info: SignInInfo<OAuthAuthenticatorResult<PassportProfile>>,
-          ctx,
-        ) => {
-          const { result } = info;
+  userIdMatchingUserEntityAnnotation: createSignInResolverFactory({
+    optionsSchema: z
+      .object({
+        dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
+      })
+      .optional(),
+    create(options = {}) {
+      return async (
+        info: SignInInfo<OAuthAuthenticatorResult<PassportProfile>>,
+        ctx,
+      ) => {
+        const { result } = info;
 
-          const id = result.fullProfile.id;
+        const id = result.fullProfile.id;
 
-          if (!id) {
-            throw new Error('Microsoft profile contained no id');
-          }
+        if (!id) {
+          throw new Error('Microsoft profile contained no id');
+        }
 
-          return ctx.signInWithCatalogUser(
-            {
-              annotations: {
-                'graph.microsoft.com/user-id': id,
-              },
+        return ctx.signInWithCatalogUser(
+          {
+            annotations: {
+              'graph.microsoft.com/user-id': id,
             },
-            {
-              dangerousEntityRefFallback:
-                options?.dangerouslyAllowSignInWithoutUserInCatalog
-                  ? { entityRef: { name: id } }
-                  : undefined,
-            },
-          );
-        };
-      },
+          },
+          {
+            dangerousEntityRefFallback:
+              options?.dangerouslyAllowSignInWithoutUserInCatalog
+                ? { entityRef: { name: id } }
+                : undefined,
+          },
+        );
+      };
     },
-  );
-}
+  }),
+} as const;

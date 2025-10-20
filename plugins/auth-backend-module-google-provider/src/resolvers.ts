@@ -27,11 +27,11 @@ import { z } from 'zod';
  *
  * @public
  */
-export namespace googleSignInResolvers {
+export const googleSignInResolvers = {
   /**
    * Looks up the user by matching their email to the `google.com/email` annotation.
    */
-  export const emailMatchingUserEntityAnnotation = createSignInResolverFactory({
+  emailMatchingUserEntityAnnotation: createSignInResolverFactory({
     optionsSchema: z
       .object({
         dangerouslyAllowSignInWithoutUserInCatalog: z.boolean().optional(),
@@ -63,5 +63,5 @@ export namespace googleSignInResolvers {
         );
       };
     },
-  });
-}
+  }),
+} as const;
