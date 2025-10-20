@@ -120,18 +120,22 @@ export interface CatalogServiceMock extends CatalogService, CatalogApi {
   ): Promise<ValidateEntityResponse>;
 }
 
+// Warning: (ae-missing-release-tag) "catalogServiceMock" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public
 export function catalogServiceMock(options?: {
   entities?: Entity[];
 }): CatalogServiceMock;
 
-// @public
+// @public (undocumented)
 export namespace catalogServiceMock {
-  const factory: (options?: {
-    entities?: Entity[];
-  }) => ServiceFactory<CatalogServiceMock, 'plugin', 'singleton'>;
-  const mock: (
-    partialImpl?: Partial<CatalogServiceMock> | undefined,
-  ) => ServiceMock<CatalogServiceMock>;
+  var // (undocumented)
+    factory: (options?: {
+      entities?: Entity[];
+    }) => ServiceFactory<CatalogServiceMock, 'plugin', 'singleton'>;
+  var // (undocumented)
+    mock: (
+      partialImpl?: Partial<CatalogServiceMock> | undefined,
+    ) => ServiceMock<CatalogServiceMock>;
 }
 ```

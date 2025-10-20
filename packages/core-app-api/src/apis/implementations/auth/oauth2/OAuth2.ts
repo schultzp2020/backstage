@@ -27,7 +27,6 @@ import {
   ProfileInfo,
   ProfileInfoApi,
   SessionApi,
-  SessionState,
 } from '@backstage/core-plugin-api';
 import { Observable } from '@backstage/types';
 import {

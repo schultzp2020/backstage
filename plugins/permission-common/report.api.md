@@ -37,18 +37,18 @@ export type AuthorizeRequestOptions = {
 };
 
 // @public
-export enum AuthorizeResult {
-  ALLOW = 'ALLOW',
-  CONDITIONAL = 'CONDITIONAL',
-  DENY = 'DENY',
-}
+export const AuthorizeResult: {
+  readonly DENY: 'DENY';
+  readonly ALLOW: 'ALLOW';
+  readonly CONDITIONAL: 'CONDITIONAL';
+};
 
 // @public
 export type BasicPermission = PermissionBase<'basic', {}>;
 
 // @public
 export type ConditionalPolicyDecision = {
-  result: AuthorizeResult.CONDITIONAL;
+  result: typeof AuthorizeResult.CONDITIONAL;
   pluginId: string;
   resourceType: string;
   conditions: PermissionCriteria<PermissionCondition>;
@@ -69,7 +69,7 @@ export function createPermission(input: {
 
 // @public
 export type DefinitivePolicyDecision = {
-  result: AuthorizeResult.ALLOW | AuthorizeResult.DENY;
+  result: typeof AuthorizeResult.ALLOW | typeof AuthorizeResult.DENY;
 };
 
 // @public

@@ -96,5 +96,10 @@ catalogServiceMock.mock = simpleMock<CatalogServiceMock>(
     getEntityAncestors: jest.fn(),
     getEntityFacets: jest.fn(),
     validateEntity: jest.fn(),
+    getEntityByRef: jest.fn(),
+    getLocations: jest.fn(),
+    getLocationByEntity: jest.fn(),
+    analyzeLocation: jest.fn(),
+    streamEntities: jest.fn(),
   }),
 );
