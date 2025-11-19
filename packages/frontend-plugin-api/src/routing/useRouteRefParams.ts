@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { useParams } from 'react-router-dom';
 import { AnyRouteRefParams } from './types';
 import { RouteRef } from './RouteRef';
 import { SubRouteRef } from './SubRouteRef';
+import { useRouting } from './hooks';
 
 /**
  * React hook for retrieving dynamic params from the current URL.
@@ -27,5 +27,6 @@ import { SubRouteRef } from './SubRouteRef';
 export function useRouteRefParams<Params extends AnyRouteRefParams>(
   _routeRef: RouteRef<Params> | SubRouteRef<Params>,
 ): Params {
-  return useParams() as Params;
+  const { params } = useRouting();
+  return params as Params;
 }

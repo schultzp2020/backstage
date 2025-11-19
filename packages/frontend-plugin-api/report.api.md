@@ -28,6 +28,7 @@ import { ComponentType } from 'react';
 import { ConfigApi } from '@backstage/core-plugin-api';
 import { configApiRef } from '@backstage/core-plugin-api';
 import { ConfigurableExtensionDataRef as ConfigurableExtensionDataRef_2 } from '@backstage/frontend-plugin-api';
+import { Context } from 'react';
 import { createApiFactory } from '@backstage/core-plugin-api';
 import { createApiRef } from '@backstage/core-plugin-api';
 import { createTranslationMessages } from '@backstage/core-plugin-api/alpha';
@@ -73,6 +74,7 @@ import { openshiftAuthApiRef } from '@backstage/core-plugin-api';
 import { PendingOAuthRequest } from '@backstage/core-plugin-api';
 import { ProfileInfo } from '@backstage/core-plugin-api';
 import { ProfileInfoApi } from '@backstage/core-plugin-api';
+import { Provider } from 'react';
 import { ReactNode } from 'react';
 import { RouteRef as RouteRef_2 } from '@backstage/frontend-plugin-api';
 import { SessionApi } from '@backstage/core-plugin-api';
@@ -1686,6 +1688,34 @@ export type RouteFunc<TParams extends AnyRouteRefParams> = (
 ) => string;
 
 // @public (undocumented)
+export interface RouteMatch<T extends RouteObject = RouteObject> {
+  // (undocumented)
+  params: Record<string, string | undefined>;
+  // (undocumented)
+  pathname: string;
+  // (undocumented)
+  route: T;
+}
+
+// @public (undocumented)
+export interface RouteObject {
+  // (undocumented)
+  [key: string]: unknown;
+  // (undocumented)
+  appNode?: AppNode;
+  // (undocumented)
+  caseSensitive?: boolean;
+  // (undocumented)
+  children?: RouteObject[];
+  // (undocumented)
+  element?: ReactNode;
+  // (undocumented)
+  path?: string;
+  // (undocumented)
+  routeRefs?: Set<RouteRef<AnyRouteRefParams>>;
+}
+
+// @public (undocumented)
 export const RouterBlueprint: ExtensionBlueprint<{
   kind: 'app-router-component';
   params: {
@@ -1735,6 +1765,56 @@ export interface RouteResolutionApi {
 
 // @public
 export const routeResolutionApiRef: ApiRef<RouteResolutionApi>;
+
+// @public (undocumented)
+export const RoutingContext: Context<RoutingContextType | undefined>;
+
+// @public (undocumented)
+export interface RoutingContextType {
+  // (undocumented)
+  generatePath: (
+    path: string,
+    params?: Record<string, string | undefined>,
+  ) => string;
+  // (undocumented)
+  Link: React.ComponentType<{
+    to: string;
+    children?: ReactNode;
+    className?: string;
+  }>;
+  // (undocumented)
+  location: {
+    pathname: string;
+    search: string;
+    hash: string;
+  };
+  // (undocumented)
+  matchRoutes: <T extends RouteObject = RouteObject>(
+    routes: T[],
+    location: {
+      pathname: string;
+    },
+  ) => RouteMatch<T>[] | null;
+  // (undocumented)
+  navigate: (to: string) => void;
+  // (undocumented)
+  Outlet: React.ComponentType<{}>;
+  // (undocumented)
+  params: Record<string, string | undefined>;
+  // (undocumented)
+  Route: React.ComponentType<{
+    path?: string;
+    element?: ReactNode;
+    children?: ReactNode;
+  }>;
+  // (undocumented)
+  Routes: React.ComponentType<{
+    children?: ReactNode;
+  }>;
+}
+
+// @public (undocumented)
+export const RoutingProvider: Provider<RoutingContextType | undefined>;
 
 export { SessionApi };
 
@@ -1953,6 +2033,9 @@ export function useRouteRef<TParams extends AnyRouteRefParams>(
 export function useRouteRefParams<Params extends AnyRouteRefParams>(
   _routeRef: RouteRef<Params> | SubRouteRef<Params>,
 ): Params;
+
+// @public (undocumented)
+export function useRouting(): RoutingContextType;
 
 export { useTranslationRef };
 

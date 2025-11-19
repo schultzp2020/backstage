@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Backstage Authors
+ * Copyright 2024 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-export { type CreateAppRouteBinder } from './resolveRouteBindings';
-export {
-  ReactRouter6Router,
-  ReactRouter6Provider,
-} from './ReactRouter6Provider';
+import { ReactRouter6Provider } from '@backstage/frontend-app-api';
+import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
+
+/**
+ * A Backstage router and provider for testing that uses MemoryRouter from React Router v6.
+ *
+ * @public
+ */
+export const TestRouterProvider = ({
+  children,
+  ...props
+}: MemoryRouterProps) => {
+  return (
+    <MemoryRouter {...props}>
+      <ReactRouter6Provider>{children}</ReactRouter6Provider>
+    </MemoryRouter>
+  );
+};
