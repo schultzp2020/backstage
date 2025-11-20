@@ -46,7 +46,11 @@ export class AwsS3Integration implements ScmIntegration {
     return this.integrationConfig;
   }
 
-  constructor(private readonly integrationConfig: AwsS3IntegrationConfig) {}
+  private readonly integrationConfig: AwsS3IntegrationConfig;
+
+  constructor(integrationConfig: AwsS3IntegrationConfig) {
+    this.integrationConfig = integrationConfig;
+  }
 
   resolveUrl(options: {
     url: string;

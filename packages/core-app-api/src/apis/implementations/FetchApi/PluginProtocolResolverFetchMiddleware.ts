@@ -30,7 +30,11 @@ function join(left: string, right: string): string {
  * URLs.
  */
 export class PluginProtocolResolverFetchMiddleware implements FetchMiddleware {
-  constructor(private readonly discoveryApi: DiscoveryApi) {}
+  private readonly discoveryApi: DiscoveryApi;
+
+  constructor(discoveryApi: DiscoveryApi) {
+    this.discoveryApi = discoveryApi;
+  }
 
   apply(next: typeof fetch): typeof fetch {
     return async (input, init) => {

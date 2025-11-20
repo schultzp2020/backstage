@@ -33,7 +33,11 @@ type UserInfo = {
 };
 
 export class UserInfoDatabase {
-  private constructor(private readonly client: Knex) {}
+  private readonly client: Knex;
+
+  private constructor(client: Knex) {
+    this.client = client;
+  }
 
   async addUserInfo(userInfo: UserInfo): Promise<void> {
     await this.client<Row>(TABLE)

@@ -18,7 +18,11 @@ import { OAuthApi } from '@backstage/core-plugin-api';
 import { ScmAuth } from './ScmAuth';
 
 class MockOAuthApi implements OAuthApi {
-  constructor(private readonly accessToken: string) {}
+  private readonly accessToken: string;
+
+  constructor(accessToken: string) {
+    this.accessToken = accessToken;
+  }
 
   getAccessToken = jest.fn(async () => {
     return this.accessToken;
