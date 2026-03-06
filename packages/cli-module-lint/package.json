@@ -47,5 +47,17 @@
     "@types/fs-extra": "^11.0.0",
     "@types/shell-quote": "^1.7.5"
   },
+  "peerDependencies": {
+    "oxlint": "^1.51.0",
+    "oxlint-tsgolint": "^0.16.0"
+  },
+  "peerDependenciesMeta": {
+    "oxlint": {
+      "optional": true
+    },
+    "oxlint-tsgolint": {
+      "optional": true
+    }
+  },
   "bin": "bin/backstage-cli-module-lint"
 }

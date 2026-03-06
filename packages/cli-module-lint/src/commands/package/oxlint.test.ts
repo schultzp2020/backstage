@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module.exports = require('@backstage/cli/config/eslint-factory')(__dirname, {
-  ignorePatterns: ['config/**'],
+
+describe('oxlint runner', () => {
+  it('should export a default async function', () => {
+    const mod = require('./oxlint');
+    const runner = mod.default ?? mod;
+    expect(typeof runner).toBe('function');
+  });
 });

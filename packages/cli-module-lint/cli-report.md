@@ -36,6 +36,7 @@ Commands:
 Usage: @backstage/cli-module-lint package lint [directories...]
 
 Options:
+  --engine <string>
   --fix
   --format <string>
   --max-warnings <string>
@@ -62,6 +63,7 @@ Commands:
 Usage: @backstage/cli-module-lint repo lint
 
 Options:
+  --engine <string>
   --fix
   --format <string>
   --max-warnings <string>

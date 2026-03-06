@@ -1,0 +1,11 @@
+{
+  "jsPlugins": [
+    "@backstage/cli/config/oxlint-plugins/restricted-syntax-plugin.js",
+    "@backstage/cli/config/oxlint-plugins/backstage-plugin.js",
+    "@backstage/cli/config/oxlint-plugins/notice-plugin.js"
+  ],
+  "rules": {
+    "notice/notice": "error",
+    "backstage/no-top-level-material-ui-4-imports": "error"
+  }
+}
