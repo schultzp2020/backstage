@@ -30,12 +30,13 @@ import {
   RouteResolutionApi,
   routeResolutionApiRef,
   SubRouteRef,
+  routerApiRef,
   type AnyRouteRefParams,
   type AppNode,
   type ExtensionFactoryMiddleware,
   type IdentityApi,
+  type RouterApi,
 } from '@backstage/frontend-plugin-api';
-import { matchRoutes } from 'react-router-dom';
 // eslint-disable-next-line @backstage/no-relative-monorepo-imports
 import { AppIdentityProxy } from '../../../core-app-api/src/apis/implementations/IdentityApi/AppIdentityProxy';
 import { createRouteAliasResolver } from '../routing/RouteAliasResolver';
@@ -59,10 +60,16 @@ export class AppTreeApiProxy implements AppTreeApi {
   #routeInfo?: RouteInfo;
   private readonly tree: AppTree;
   private readonly appBasePath: string;
+  private readonly matchRoutes: RouterApi['matchRoutes'];
 
-  constructor(tree: AppTree, appBasePath: string) {
+  constructor(
+    tree: AppTree,
+    appBasePath: string,
+    matchRoutes: RouterApi['matchRoutes'],
+  ) {
     this.tree = tree;
     this.appBasePath = appBasePath;
+    this.matchRoutes = matchRoutes;
   }
 
   private checkIfInitialized() {
@@ -93,7 +100,9 @@ export class AppTreeApiProxy implements AppTreeApi {
       path = path.slice(this.appBasePath.length);
     }
 
-    const matchedRoutes = matchRoutes(routeInfo.routeObjects, path);
+    const matchedRoutes = this.matchRoutes(routeInfo.routeObjects, {
+      pathname: path,
+    });
 
     const matchedAppNodes =
       matchedRoutes?.flatMap(routeObj => {
@@ -116,13 +125,19 @@ export class RouteResolutionApiProxy implements RouteResolutionApi {
 
   private readonly routeBindings: Map<ExternalRouteRef, RouteRef | SubRouteRef>;
   private readonly appBasePath: string;
+  private readonly matchRoutes: RouterApi['matchRoutes'];
+  private readonly generatePath: RouterApi['generatePath'];
 
   constructor(
     routeBindings: Map<ExternalRouteRef, RouteRef | SubRouteRef>,
     appBasePath: string,
+    matchRoutes: RouterApi['matchRoutes'],
+    generatePath: RouterApi['generatePath'],
   ) {
     this.routeBindings = routeBindings;
     this.appBasePath = appBasePath;
+    this.matchRoutes = matchRoutes;
+    this.generatePath = generatePath;
   }
 
   resolve<TParams extends AnyRouteRefParams>(
@@ -153,6 +168,8 @@ export class RouteResolutionApiProxy implements RouteResolutionApi {
       this.appBasePath,
       routeInfo.routeAliasResolver,
       routeRefsById,
+      this.matchRoutes,
+      this.generatePath,
     );
     this.#routeObjects = routeInfo.routeObjects;
 
@@ -207,10 +224,40 @@ export function createPhaseApis(options: {
   routeBindings: Map<ExternalRouteRef, RouteRef | SubRouteRef>;
   staticFactories: AnyApiFactory[];
 }) {
-  const appTreeApi = new AppTreeApiProxy(options.tree, options.appBasePath);
+  // Resolve the RouterApi early so we can use its matchRoutes/generatePath.
+  // RouterApi implementations must not declare dependencies, so this is safe.
+  const routerApiResolver = new FrontendApiResolver({
+    secondaryRegistry: options.appApiRegistry,
+    fallbackApis: options.fallbackApis,
+  });
+  const routerApi = routerApiResolver.get(routerApiRef);
+
+  const noRouterApi = (method: string): never => {
+    throw new Error(
+      `No RouterApi implementation found. '${method}' requires a RouterApi. ` +
+        'Make sure a RouterApi factory is registered, ' +
+        'for example by installing @backstage/frontend-module-react-router-v6.',
+    );
+  };
+
+  const matchRoutesFn: RouterApi['matchRoutes'] = routerApi
+    ? routerApi.matchRoutes.bind(routerApi)
+    : () => noRouterApi('matchRoutes');
+
+  const generatePathFn: RouterApi['generatePath'] = routerApi
+    ? routerApi.generatePath.bind(routerApi)
+    : () => noRouterApi('generatePath');
+
+  const appTreeApi = new AppTreeApiProxy(
+    options.tree,
+    options.appBasePath,
+    matchRoutesFn,
+  );
   const routeResolutionApi = new RouteResolutionApiProxy(
     options.routeBindings,
     options.appBasePath,
+    matchRoutesFn,
+    generatePathFn,
   );
   const identityProxy = new PreparedAppIdentityProxy();
   const phaseApiRegistry = new FrontendApiRegistry();

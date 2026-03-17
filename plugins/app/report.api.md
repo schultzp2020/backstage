@@ -121,7 +121,10 @@ const appPlugin: OverridableFrontendPlugin<
       inputs: {
         router: ExtensionInput<
           ConfigurableExtensionDataRef<
-            (props: { children: ReactNode }) => JSX.Element | null,
+            (props: {
+              children: ReactNode;
+              basePath?: string;
+            }) => JSX.Element | null,
             'app.router.wrapper',
             {}
           >,
@@ -634,6 +637,21 @@ const appPlugin: OverridableFrontendPlugin<
       };
       kind: 'api';
       name: 'plugin-wrapper';
+      params: <
+        TApi,
+        TImpl extends TApi,
+        TDeps extends { [name in string]: unknown },
+      >(
+        params: ApiFactory<TApi, TImpl, TDeps>,
+      ) => ExtensionBlueprintParams<AnyApiFactory>;
+    }>;
+    'api:app/router': OverridableExtensionDefinition<{
+      kind: 'api';
+      name: 'router';
+      config: {};
+      configInput: {};
+      output: ExtensionDataRef<AnyApiFactory, 'core.api.factory', {}>;
+      inputs: {};
       params: <
         TApi,
         TImpl extends TApi,

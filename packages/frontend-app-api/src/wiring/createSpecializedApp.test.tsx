@@ -30,6 +30,7 @@ import {
   useApi,
   analyticsApiRef,
   createExtensionDataRef,
+  routerApiRef,
 } from '@backstage/frontend-plugin-api';
 import { act, render, screen } from '@testing-library/react';
 import { createSpecializedApp } from './createSpecializedApp';
@@ -39,13 +40,13 @@ import {
   PreparedSpecializedApp,
 } from './prepareSpecializedApp';
 import { mockApis, TestApiRegistry } from '@backstage/test-utils';
+import { MockMemoryRouterApi } from '@backstage/frontend-test-utils';
 import {
   configApiRef,
   featureFlagsApiRef,
   IdentityApi,
   identityApiRef,
 } from '@backstage/core-plugin-api';
-import { MemoryRouter } from 'react-router-dom';
 import { ApiProvider, ConfigReader } from '@backstage/core-app-api';
 import { ComponentType, Fragment, useEffect, useState } from 'react';
 import appPluginOriginal from '@backstage/plugin-app';
@@ -550,6 +551,14 @@ describe('createSpecializedApp', () => {
         ext: extRouteRef,
       },
       extensions: [
+        ApiBlueprint.make({
+          params: defineParams =>
+            defineParams({
+              api: routerApiRef,
+              deps: {},
+              factory: () => new MockMemoryRouterApi(),
+            }),
+        }),
         createExtension({
           name: 'parent',
           attachTo: { id: 'root', input: 'app' },
@@ -558,16 +567,17 @@ describe('createSpecializedApp', () => {
           },
           output: [coreExtensionData.reactElement],
           factory: ({ apis, inputs }) => {
+            const RouterComponent = apis.get(routerApiRef)!.Router;
             return [
               coreExtensionData.reactElement(
                 <ApiProvider apis={apis}>
-                  <MemoryRouter>
+                  <RouterComponent basePath="">
                     {inputs.children.map(i => (
                       <Fragment key={i.node.spec.id}>
                         {i.get(coreExtensionData.reactElement)}
                       </Fragment>
                     ))}
-                  </MemoryRouter>
+                  </RouterComponent>
                 </ApiProvider>,
               ),
             ];

@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 import { RouterBlueprint } from './RouterBlueprint';
-import { MemoryRouter } from 'react-router-dom';
 import { render, waitFor } from '@testing-library/react';
 import {
   coreExtensionData,
   createExtension,
   createExtensionInput,
 } from '@backstage/frontend-plugin-api';
-import { createExtensionTester } from '@backstage/frontend-test-utils';
+import {
+  createExtensionTester,
+  TestMemoryRouterProvider,
+} from '@backstage/frontend-test-utils';
 
 describe('RouterBlueprint', () => {
   it('should return an extension when calling make with sensible defaults', () => {
@@ -60,9 +62,9 @@ describe('RouterBlueprint', () => {
     const extension = RouterBlueprint.make({
       params: {
         component: ({ children }) => (
-          <MemoryRouter>
+          <TestMemoryRouterProvider>
             <div data-testid="test-router">{children}</div>
-          </MemoryRouter>
+          </TestMemoryRouterProvider>
         ),
       },
     });
@@ -96,13 +98,13 @@ describe('RouterBlueprint', () => {
       *factory(originalFactory, { inputs, config }) {
         yield* originalFactory({
           component: ({ children }) => (
-            <MemoryRouter>
+            <TestMemoryRouterProvider>
               <div
                 data-testid={`test-router-${config.name}-${inputs.children.length}`}
               >
                 {children}
               </div>
-            </MemoryRouter>
+            </TestMemoryRouterProvider>
           ),
         });
       },
