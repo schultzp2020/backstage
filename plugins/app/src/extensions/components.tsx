@@ -19,6 +19,7 @@ import {
   ErrorDisplay as SwappableErrorDisplay,
   PageLayout as SwappablePageLayout,
   type PageLayoutProps,
+  useResolvedPath,
 } from '@backstage/frontend-plugin-api';
 import { SwappableComponentBlueprint } from '@backstage/plugin-app-react';
 import {
@@ -29,7 +30,6 @@ import {
 import { PluginHeader } from '@backstage/ui';
 import Button from '@material-ui/core/Button';
 import { useMemo } from 'react';
-import { useResolvedPath } from 'react-router-dom';
 
 export const Progress = SwappableComponentBlueprint.make({
   name: 'core-progress',

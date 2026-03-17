@@ -15,7 +15,7 @@
  */
 
 import { useCallback } from 'react';
-import { useParams } from 'react-router';
+import { useParams } from '@backstage/frontend-plugin-api';
 
 export const useDownloadLogs = (logs: { [k: string]: string[] }) => {
   const { taskId } = useParams<{ taskId: string }>();

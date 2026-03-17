@@ -18,7 +18,7 @@ import preview from '../../../../../.storybook/preview';
 import type { StoryFn } from '@storybook/react-vite';
 import { Header } from './Header';
 import type { HeaderTab } from '../PluginHeader/types';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import { BUIProvider } from '../../provider';
 import {
   Button,
@@ -88,11 +88,11 @@ const menuItems = [
 ];
 
 const withRouter = (Story: StoryFn) => (
-  <MemoryRouter>
+  <TestMemoryRouterProvider>
     <BUIProvider>
       <Story />
     </BUIProvider>
-  </MemoryRouter>
+  </TestMemoryRouterProvider>
 );
 
 // Extract layout decorator as a reusable constant
@@ -241,7 +241,7 @@ export const WithTabsMatchingStrategies = meta.story({
     ],
   },
   render: args => (
-    <MemoryRouter initialEntries={['/mentorship/events']}>
+    <TestMemoryRouterProvider initialEntries={['/mentorship/events']}>
       <BUIProvider>
         <Header {...args} />
         <Container>
@@ -270,7 +270,7 @@ export const WithTabsMatchingStrategies = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });
 
@@ -296,7 +296,7 @@ export const WithTabsExactMatching = meta.story({
     ],
   },
   render: args => (
-    <MemoryRouter initialEntries={['/mentorship/events']}>
+    <TestMemoryRouterProvider initialEntries={['/mentorship/events']}>
       <BUIProvider>
         <Header {...args} />
         <Container>
@@ -311,7 +311,7 @@ export const WithTabsExactMatching = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });
 
@@ -340,7 +340,7 @@ export const WithTabsPrefixMatchingDeep = meta.story({
     ],
   },
   render: args => (
-    <MemoryRouter initialEntries={['/catalog/users/john/details']}>
+    <TestMemoryRouterProvider initialEntries={['/catalog/users/john/details']}>
       <BUIProvider>
         <Header {...args} />
         <Container>
@@ -371,6 +371,6 @@ export const WithTabsPrefixMatchingDeep = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });

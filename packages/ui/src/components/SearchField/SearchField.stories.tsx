@@ -26,7 +26,7 @@ import { ButtonIcon } from '../ButtonIcon';
 import { RiCactusLine, RiEBike2Line } from '@remixicon/react';
 import { Button } from '../Button';
 import { PluginHeader } from '../PluginHeader';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import { BUIProvider } from '../../provider';
 
 const meta = preview.meta({
@@ -188,11 +188,11 @@ export const StartCollapsedWithValue = meta.story({
 export const InHeader = meta.story({
   decorators: [
     Story => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <BUIProvider>
           <Story />
         </BUIProvider>
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
   render: args => (
@@ -227,11 +227,11 @@ export const StartCollapsedInHeader = meta.story({
   },
   decorators: [
     Story => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <BUIProvider>
           <Story />
         </BUIProvider>
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
   render: args => (

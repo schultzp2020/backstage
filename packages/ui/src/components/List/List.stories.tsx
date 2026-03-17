@@ -30,7 +30,7 @@ import {
   RiEdit2Line,
   RiShareBoxLine,
 } from '@remixicon/react';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 
 const meta = preview.meta({
   title: 'Backstage UI/List',
@@ -41,9 +41,9 @@ const meta = preview.meta({
   },
   decorators: [
     Story => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <Story />
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
 });

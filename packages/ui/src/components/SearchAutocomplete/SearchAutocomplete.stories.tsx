@@ -26,7 +26,7 @@ import { Flex } from '../Flex';
 import { Text } from '../Text';
 import { ButtonIcon } from '../ButtonIcon';
 import { RiCactusLine } from '@remixicon/react';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 
 const meta = preview.meta({
   title: 'Backstage UI/SearchAutocomplete',
@@ -288,9 +288,9 @@ export const InHeader = meta.story({
   },
   decorators: [
     Story => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <Story />
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
   render: function Render(args) {

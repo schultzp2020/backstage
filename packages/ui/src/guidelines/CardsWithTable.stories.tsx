@@ -17,7 +17,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import { BUIProvider } from '../provider';
 import {
   Card,
@@ -265,11 +265,11 @@ const meta = {
   },
   decorators: [
     (Story: () => JSX.Element) => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <BUIProvider>
           <Story />
         </BUIProvider>
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
 } satisfies Meta;

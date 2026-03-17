@@ -20,7 +20,7 @@ import { TagGroup, Tag } from '.';
 import type { Selection } from 'react-aria-components';
 import { Flex } from '../../';
 import { useListData } from 'react-stately';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import { BUIProvider } from '../../provider';
 import {
   RiAccountCircleLine,
@@ -50,11 +50,11 @@ const meta = preview.meta({
   },
   decorators: [
     Story => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <BUIProvider>
           <Story />
         </BUIProvider>
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
 });

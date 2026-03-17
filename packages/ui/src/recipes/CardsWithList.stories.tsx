@@ -16,7 +16,7 @@
 
 import preview from '../../../../.storybook/preview';
 import type { StoryFn } from '@storybook/react-vite';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import {
   Card,
   CardHeader,
@@ -195,9 +195,9 @@ const ServiceListCard = ({
 );
 
 const withRouter = (Story: StoryFn) => (
-  <MemoryRouter>
+  <TestMemoryRouterProvider>
     <Story />
-  </MemoryRouter>
+  </TestMemoryRouterProvider>
 );
 
 const meta = preview.meta({

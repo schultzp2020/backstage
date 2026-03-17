@@ -28,7 +28,7 @@ import {
   Menu,
   MenuItem,
 } from '../../';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import { BUIProvider } from '../../provider';
 import {
   RiHeartLine,
@@ -47,11 +47,11 @@ const meta = preview.meta({
 });
 
 const withRouter = (Story: StoryFn) => (
-  <MemoryRouter>
+  <TestMemoryRouterProvider>
     <BUIProvider>
       <Story />
     </BUIProvider>
-  </MemoryRouter>
+  </TestMemoryRouterProvider>
 );
 
 const tabs: HeaderTab[] = [
@@ -338,7 +338,7 @@ export const WithMockedURLCampaigns = meta.story({
     tabs,
   },
   render: args => (
-    <MemoryRouter initialEntries={['/campaigns']}>
+    <TestMemoryRouterProvider initialEntries={['/campaigns']}>
       <BUIProvider>
         <PluginHeader {...args} />
         <Container>
@@ -351,7 +351,7 @@ export const WithMockedURLCampaigns = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });
 
@@ -360,7 +360,7 @@ export const WithMockedURLIntegrations = meta.story({
     tabs,
   },
   render: args => (
-    <MemoryRouter initialEntries={['/integrations']}>
+    <TestMemoryRouterProvider initialEntries={['/integrations']}>
       <BUIProvider>
         <PluginHeader {...args} />
         <Container>
@@ -373,7 +373,7 @@ export const WithMockedURLIntegrations = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });
 
@@ -382,7 +382,7 @@ export const WithMockedURLNoMatch = meta.story({
     tabs,
   },
   render: args => (
-    <MemoryRouter initialEntries={['/some-other-page']}>
+    <TestMemoryRouterProvider initialEntries={['/some-other-page']}>
       <BUIProvider>
         <PluginHeader {...args} />
         <Container>
@@ -399,7 +399,7 @@ export const WithMockedURLNoMatch = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });
 
@@ -432,7 +432,7 @@ export const WithTabsMatchingStrategies = meta.story({
     ],
   },
   render: args => (
-    <MemoryRouter initialEntries={['/mentorship/events']}>
+    <TestMemoryRouterProvider initialEntries={['/mentorship/events']}>
       <BUIProvider>
         <PluginHeader {...args} />
         <Container>
@@ -461,7 +461,7 @@ export const WithTabsMatchingStrategies = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });
 
@@ -487,7 +487,7 @@ export const WithTabsExactMatching = meta.story({
     ],
   },
   render: args => (
-    <MemoryRouter initialEntries={['/mentorship/events']}>
+    <TestMemoryRouterProvider initialEntries={['/mentorship/events']}>
       <BUIProvider>
         <PluginHeader {...args} />
         <Container>
@@ -502,7 +502,7 @@ export const WithTabsExactMatching = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });
 
@@ -531,7 +531,7 @@ export const WithTabsPrefixMatchingDeep = meta.story({
     ],
   },
   render: args => (
-    <MemoryRouter initialEntries={['/catalog/users/john/details']}>
+    <TestMemoryRouterProvider initialEntries={['/catalog/users/john/details']}>
       <BUIProvider>
         <PluginHeader {...args} />
         <Container>
@@ -562,6 +562,6 @@ export const WithTabsPrefixMatchingDeep = meta.story({
           </Text>
         </Container>
       </BUIProvider>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });

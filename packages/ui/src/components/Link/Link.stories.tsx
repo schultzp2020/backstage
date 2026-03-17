@@ -19,7 +19,7 @@ import type { StoryFn } from '@storybook/react-vite';
 import { Link } from './Link';
 import { Flex } from '../Flex';
 import { Text } from '../Text';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import { BUIProvider } from '../../provider';
 
 const meta = preview.meta({
@@ -30,11 +30,11 @@ const meta = preview.meta({
   },
   decorators: [
     (Story: StoryFn) => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <BUIProvider>
           <Story />
         </BUIProvider>
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
 });

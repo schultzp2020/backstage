@@ -17,7 +17,7 @@ import preview from '../../../../../.storybook/preview';
 import { Checkbox } from './Checkbox';
 import { Flex } from '../Flex';
 import { Link } from '../Link';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 
 const meta = preview.meta({
   title: 'Backstage UI/Checkbox',
@@ -55,9 +55,9 @@ export const WithLongText = Default.extend({
   },
   decorators: [
     Story => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <Story />
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
 });

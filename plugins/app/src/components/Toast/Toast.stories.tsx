@@ -21,7 +21,7 @@ import { Button, Flex, Text } from '../../../../../packages/ui/src';
 import { ToastQueue } from '@react-stately/toast';
 import { ToastContainer } from './index';
 import type { ToastApiMessageContent } from './types';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 
 const toastQueue = new ToastQueue<ToastApiMessageContent>({
   maxVisibleToasts: 4,
@@ -285,7 +285,7 @@ export const NeutralStatus = meta.story({
 
 export const WithLinks = meta.story({
   render: () => (
-    <MemoryRouter>
+    <TestMemoryRouterProvider>
       <ToastContainer queue={toastQueue} />
       <Flex gap="3">
         <Button
@@ -330,7 +330,7 @@ export const WithLinks = meta.story({
           Links without Description
         </Button>
       </Flex>
-    </MemoryRouter>
+    </TestMemoryRouterProvider>
   ),
 });
 

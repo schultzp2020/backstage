@@ -19,7 +19,7 @@ import { MenuTrigger, MenuListBox, MenuListBoxItem } from './index';
 import { Button, Flex, Text } from '../..';
 import { useEffect, useState } from 'react';
 import { Selection } from 'react-aria-components';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import { BUIProvider } from '../../provider';
 
 const meta = preview.meta({
@@ -27,11 +27,11 @@ const meta = preview.meta({
   component: MenuTrigger,
   decorators: [
     Story => (
-      <MemoryRouter>
+      <TestMemoryRouterProvider>
         <BUIProvider>
           <Story />
         </BUIProvider>
-      </MemoryRouter>
+      </TestMemoryRouterProvider>
     ),
   ],
 });

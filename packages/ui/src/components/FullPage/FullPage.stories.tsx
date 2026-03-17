@@ -21,7 +21,7 @@ import { PluginHeader } from '../PluginHeader';
 import { Container } from '../Container';
 import { Text } from '../Text';
 import type { HeaderTab } from '../PluginHeader/types';
-import { MemoryRouter } from 'react-router-dom';
+import { TestMemoryRouterProvider } from '@backstage/frontend-test-utils';
 import { BUIProvider } from '../../provider';
 
 const meta = preview.meta({
@@ -33,11 +33,11 @@ const meta = preview.meta({
 });
 
 const withRouter = (Story: StoryFn) => (
-  <MemoryRouter>
+  <TestMemoryRouterProvider>
     <BUIProvider>
       <Story />
     </BUIProvider>
-  </MemoryRouter>
+  </TestMemoryRouterProvider>
 );
 
 const tabs: HeaderTab[] = [
