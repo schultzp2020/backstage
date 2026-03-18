@@ -3758,6 +3758,7 @@ __metadata:
   dependencies:
     "@backstage/cli": "workspace:^"
     "@backstage/frontend-plugin-api": "workspace:^"
+    "@backstage/version-bridge": "workspace:^"
     "@types/react": "npm:^18.0.0"
     react: "npm:^18.0.2"
     react-dom: "npm:^18.0.2"

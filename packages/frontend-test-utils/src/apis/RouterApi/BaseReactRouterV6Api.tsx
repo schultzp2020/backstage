@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentType, ReactElement, ReactNode } from 'react';
+import { ComponentType, ReactElement, ReactNode, useMemo } from 'react';
 import {
   generatePath as rrGeneratePath,
   Link as RRLink,
@@ -34,6 +34,10 @@ import {
   useRoutes as useRRRoutes,
   useSearchParams as useRRSearchParams,
 } from 'react-router-dom';
+import {
+  createVersionedContext,
+  createVersionedValueMap,
+} from '@backstage/version-bridge';
 import type {
   RouterApi,
   RouteObject,
@@ -43,6 +47,13 @@ import type {
   To,
   NavigateFunction,
 } from '@backstage/frontend-plugin-api';
+
+const BUIRouterContext = createVersionedContext<{
+  1: {
+    useNavigate: () => (to: string) => void;
+    useHref: (to: string) => string;
+  };
+}>('bui-router');
 
 function adaptRouteObjects<T extends RouteObject>(
   routes: T[],
@@ -54,6 +65,29 @@ function adaptRouteMatches<T extends RouteObject>(
   matches: ReturnType<typeof rrMatchRoutes>,
 ): RouteMatch<T>[] | null {
   return matches as unknown as RouteMatch<T>[] | null;
+}
+
+/**
+ * Provides BUI router integration via versioned context.
+ * Must be rendered inside a react-router context.
+ * @internal
+ */
+export function BUIRouterProvider({ children }: { children: ReactNode }) {
+  const value = useMemo(
+    () =>
+      createVersionedValueMap({
+        1: {
+          useNavigate: useRRNavigate,
+          useHref: useRRHref,
+        },
+      }),
+    [],
+  );
+  return (
+    <BUIRouterContext.Provider value={value}>
+      {children}
+    </BUIRouterContext.Provider>
+  );
 }
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentType, ReactElement, ReactNode } from 'react';
+import { ComponentType, ReactElement, ReactNode, useMemo } from 'react';
 import {
   BrowserRouter,
   generatePath as rrGeneratePath,
@@ -35,6 +35,10 @@ import {
   useRoutes as useRRRoutes,
   useSearchParams as useRRSearchParams,
 } from 'react-router-dom';
+import {
+  createVersionedContext,
+  createVersionedValueMap,
+} from '@backstage/version-bridge';
 import type {
   Location,
   NavigateFunction,
@@ -44,6 +48,31 @@ import type {
   RouterApi,
   To,
 } from '@backstage/frontend-plugin-api';
+
+const BUIRouterContext = createVersionedContext<{
+  1: {
+    useNavigate: () => (to: string) => void;
+    useHref: (to: string) => string;
+  };
+}>('bui-router');
+
+function BUIRouterProvider({ children }: { children: ReactNode }) {
+  const value = useMemo(
+    () =>
+      createVersionedValueMap({
+        1: {
+          useNavigate: useRRNavigate,
+          useHref: useRRHref,
+        },
+      }),
+    [],
+  );
+  return (
+    <BUIRouterContext.Provider value={value}>
+      {children}
+    </BUIRouterContext.Provider>
+  );
+}
 
 /**
  * Adapts Backstage RouteObjects to React Router's format.
@@ -83,7 +112,11 @@ export class ReactRouter6RouterApi implements RouterApi {
   Router: ComponentType<{ children: ReactNode; basePath: string }> = ({
     children,
     basePath,
-  }) => <BrowserRouter basename={basePath}>{children}</BrowserRouter>;
+  }) => (
+    <BrowserRouter basename={basePath}>
+      <BUIRouterProvider>{children}</BUIRouterProvider>
+    </BrowserRouter>
+  );
 
   // === Static functions - can be called outside React ===
 

@@ -16,8 +16,10 @@
 
 import { useMemo, type ReactNode } from 'react';
 import { RouterProvider } from 'react-aria-components';
-import { useInRouterContext, useNavigate, useHref } from 'react-router-dom';
-import { createVersionedValueMap } from '@backstage/version-bridge';
+import {
+  createVersionedValueMap,
+  useVersionedContext,
+} from '@backstage/version-bridge';
 import { BUIContext } from '../analytics/useAnalytics';
 import type { UseAnalyticsFn } from '../analytics/types';
 
@@ -60,14 +62,37 @@ export function BUIProvider(props: BUIProviderProps) {
     <BUIContext.Provider value={value}>{children}</BUIContext.Provider>
   );
 
-  if (useInRouterContext()) {
-    return <RoutedContent>{content}</RoutedContent>;
+  const routerCtx = useVersionedContext<{
+    1: {
+      useNavigate: () => (to: string) => void;
+      useHref: (to: string) => string;
+    };
+  }>('bui-router');
+
+  const routerIntegration = routerCtx?.atVersion(1);
+  if (routerIntegration) {
+    return (
+      <RoutedContent
+        useNavigate={routerIntegration.useNavigate}
+        useHref={routerIntegration.useHref}
+      >
+        {content}
+      </RoutedContent>
+    );
   }
 
   return content;
 }
 
-function RoutedContent({ children }: { children: ReactNode }) {
+function RoutedContent({
+  useNavigate,
+  useHref,
+  children,
+}: {
+  useNavigate: () => (to: string) => void;
+  useHref: (to: string) => string;
+  children: ReactNode;
+}) {
   const navigate = useNavigate();
   return (
     <RouterProvider navigate={navigate} useHref={useHref}>

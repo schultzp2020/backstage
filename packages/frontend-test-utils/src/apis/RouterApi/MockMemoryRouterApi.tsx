@@ -16,7 +16,10 @@
 
 import { ComponentType, ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { BaseReactRouterV6Api } from './BaseReactRouterV6Api';
+import {
+  BaseReactRouterV6Api,
+  BUIRouterProvider,
+} from './BaseReactRouterV6Api';
 
 /**
  * Options for creating a MockMemoryRouterApi.
@@ -52,7 +55,7 @@ export class MockMemoryRouterApi extends BaseReactRouterV6Api {
       initialEntries={this.initialEntries}
       initialIndex={this.initialIndex}
     >
-      {children}
+      <BUIRouterProvider>{children}</BUIRouterProvider>
     </MemoryRouter>
   );
 }
