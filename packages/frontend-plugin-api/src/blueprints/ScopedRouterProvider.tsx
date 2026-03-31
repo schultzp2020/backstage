@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import {
   UNSAFE_LocationContext,
   UNSAFE_NavigationContext,
   NavigationType,
 } from 'react-router-dom';
 import type { RoutingContract, RoutingLocation } from '../routing';
-
-const defaultLocation: RoutingLocation = {
-  pathname: '/',
-  search: '',
-  hash: '',
-};
 
 /**
  * Sets up a scoped React Router v6 context from a RoutingContract.
@@ -54,20 +53,58 @@ export function ScopedRouterProvider(props: {
   );
 }
 
+function toPath(
+  to: string | { pathname?: string; search?: string; hash?: string },
+): string {
+  if (typeof to === 'string') {
+    return to;
+  }
+  let path = to.pathname ?? '/';
+  if (to.search) path += to.search;
+  if (to.hash) path += to.hash;
+  return path;
+}
+
 function ScopedRouterProviderInner(props: {
   contract: RoutingContract;
   children: React.ReactNode;
 }) {
   const { contract, children } = props;
 
-  const [location, setLocation] = useState<RoutingLocation>(defaultLocation);
-
-  useEffect(() => {
-    const subscription = contract.location$.subscribe({
-      next: (loc: RoutingLocation) => setLocation(loc),
+  // Get the initial location synchronously from the contract's observable.
+  // NavigationController.location$ emits synchronously on subscribe.
+  const [initialLocation] = React.useState(() => {
+    let initial: RoutingLocation = { pathname: '/', search: '', hash: '' };
+    const sub = contract.location$.subscribe(loc => {
+      initial = loc;
     });
-    return () => subscription.unsubscribe();
-  }, [contract]);
+    sub.unsubscribe();
+    return initial;
+  });
+
+  const locationRef = useRef<RoutingLocation>(initialLocation);
+
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const sub = contract.location$.subscribe(loc => {
+        const prev = locationRef.current;
+        if (
+          prev.pathname !== loc.pathname ||
+          prev.search !== loc.search ||
+          prev.hash !== loc.hash
+        ) {
+          locationRef.current = loc;
+          onStoreChange();
+        }
+      });
+      return () => sub.unsubscribe();
+    },
+    [contract],
+  );
+
+  const getSnapshot = useCallback(() => locationRef.current, []);
+
+  const location = useSyncExternalStore(subscribe, getSnapshot);
 
   const routerLocation = useMemo(
     () => ({
@@ -88,18 +125,16 @@ function ScopedRouterProviderInner(props: {
         if (to.hash) href += to.hash;
         return href;
       },
-      go(_delta: number) {
-        // Not supported via RoutingContract
+      go(delta: number) {
+        window.history.go(delta);
       },
       push(to: string | { pathname?: string; search?: string; hash?: string }) {
-        const path = typeof to === 'string' ? to : to.pathname ?? '/';
-        contract.navigate(path);
+        contract.navigate(toPath(to));
       },
       replace(
         to: string | { pathname?: string; search?: string; hash?: string },
       ) {
-        const path = typeof to === 'string' ? to : to.pathname ?? '/';
-        contract.navigate(path, { replace: true });
+        contract.navigate(toPath(to), { replace: true });
       },
     }),
     [contract],

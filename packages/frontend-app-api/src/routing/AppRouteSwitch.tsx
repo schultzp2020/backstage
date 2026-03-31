@@ -17,6 +17,7 @@
 import {
   type ComponentType,
   type ReactElement,
+  useState,
   useCallback,
   useMemo,
   useRef,
@@ -39,59 +40,53 @@ export interface AppRouteSwitchProps {
   fallback: ReactElement;
 }
 
-function readLocationSnapshot(): RoutingLocation {
-  return {
-    pathname: window.location.pathname,
-    search: window.location.search,
-    hash: window.location.hash,
-  };
-}
-
 /**
  * Subscribes to NavigationController.location$, matches the current pathname
  * via RouteTable, and renders the matched page extension with a scoped
  * RoutingContract provided via context.
+ *
+ * Reads from NavigationController.location$ (basename-stripped) rather than
+ * window.location directly, ensuring correct behavior with app basename.
  *
  * @internal
  */
 export function AppRouteSwitch(props: AppRouteSwitchProps) {
   const { controller, routeTable, pages, contracts, fallback } = props;
 
+  // Get initial location synchronously from the controller's observable.
+  // NavigationController.location$ emits synchronously on subscribe.
+  const [initialLocation] = useState(() => {
+    let initial: RoutingLocation = { pathname: '/', search: '', hash: '' };
+    const sub = controller.location$.subscribe(loc => {
+      initial = loc;
+    });
+    sub.unsubscribe();
+    return initial;
+  });
+
   // Cache the snapshot to satisfy useSyncExternalStore's requirement that
   // getSnapshot returns referentially stable values when nothing changed.
-  const cachedLocation = useRef<RoutingLocation>(readLocationSnapshot());
-
-  const getSnapshot = useCallback((): RoutingLocation => {
-    const current = readLocationSnapshot();
-    const cached = cachedLocation.current;
-    if (
-      cached.pathname === current.pathname &&
-      cached.search === current.search &&
-      cached.hash === current.hash
-    ) {
-      return cached;
-    }
-    cachedLocation.current = current;
-    return current;
-  }, []);
+  const locationRef = useRef<RoutingLocation>(initialLocation);
 
   const subscribe = useCallback(
-    (callback: () => void) => {
-      // NavigationController.location$.subscribe emits synchronously on
-      // subscribe. useSyncExternalStore does not expect the subscribe
-      // function to call the callback synchronously, so we skip the
-      // initial emission.
-      let initialized = false;
-      const sub = controller.location$.subscribe(() => {
-        if (initialized) {
-          callback();
+    (onStoreChange: () => void) => {
+      const sub = controller.location$.subscribe(loc => {
+        const prev = locationRef.current;
+        if (
+          prev.pathname !== loc.pathname ||
+          prev.search !== loc.search ||
+          prev.hash !== loc.hash
+        ) {
+          locationRef.current = loc;
+          onStoreChange();
         }
       });
-      initialized = true;
       return () => sub.unsubscribe();
     },
     [controller],
   );
+
+  const getSnapshot = useCallback(() => locationRef.current, []);
 
   const location = useSyncExternalStore<RoutingLocation>(
     subscribe,
