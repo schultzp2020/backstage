@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Backstage Authors
+ * Copyright 2024 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-export type { AnyRouteRefParams } from './types';
-export { createRouteRef, type RouteRef } from './RouteRef';
-export { createSubRouteRef, type SubRouteRef } from './SubRouteRef';
-export {
-  createExternalRouteRef,
-  type ExternalRouteRef,
-} from './ExternalRouteRef';
-export { useRouteRef } from './useRouteRef';
-export { useRouteRefParams } from './useRouteRefParams';
-export type { RoutingLocation, RoutingContract } from './RoutingContract';
+import { Observable } from '@backstage/types';
+
+/** @public */
+export interface RoutingLocation {
+  pathname: string;
+  search: string;
+  hash: string;
+}
+
+/** @public */
+export interface RoutingContract {
+  readonly basePath: string;
+  readonly location$: Observable<RoutingLocation>;
+  navigate(to: string, options?: { replace?: boolean }): void;
+}
