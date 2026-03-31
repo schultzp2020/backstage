@@ -19,6 +19,8 @@
  *
  * Routes are sorted by length (longest first) so that the most specific
  * prefix wins. The root path `/` acts as a catch-all.
+ *
+ * @internal
  */
 export class RouteTable {
   private readonly paths: string[];

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Backstage Authors
+ * Copyright 2026 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,6 +152,60 @@ describe('NavigationController', () => {
     window.dispatchEvent(new PopStateEvent('popstate'));
 
     expect(locations).toContain('/other/page');
+  });
+
+  it('should use replaceState when replace option is true', () => {
+    const replaceSpy = jest.spyOn(window.history, 'replaceState');
+    controller.navigate('/catalog/foo', { replace: true });
+    expect(replaceSpy).toHaveBeenCalled();
+    expect(window.location.pathname).toBe('/catalog/foo');
+    replaceSpy.mockRestore();
+  });
+
+  it('should forward replace option through contract navigate', () => {
+    const replaceSpy = jest.spyOn(window.history, 'replaceState');
+    const contract = controller.createContract('/catalog');
+    contract.navigate('/entity/foo', { replace: true });
+    expect(replaceSpy).toHaveBeenCalled();
+    expect(window.location.pathname).toBe('/catalog/entity/foo');
+    replaceSpy.mockRestore();
+  });
+
+  it('should throw for absolute URLs', () => {
+    expect(() => controller.navigate('https://evil.com/path')).toThrow(
+      'does not support absolute URLs',
+    );
+  });
+
+  it('should not emit after dispose', () => {
+    const emissions: string[] = [];
+    controller.location$.subscribe(loc => emissions.push(loc.pathname));
+    const countAfterSubscribe = emissions.length;
+    controller.dispose();
+    window.history.pushState(null, '', '/new');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    expect(emissions.length).toBe(countAfterSubscribe);
+  });
+
+  it('should support observer object with next method', () => {
+    const locations: string[] = [];
+    const sub = controller.location$.subscribe({
+      next: loc => locations.push(loc.pathname),
+    });
+    controller.navigate('/test');
+    expect(locations).toContain('/test');
+    sub.unsubscribe();
+  });
+
+  it('should handle subscriber adding new subscriber during emit', () => {
+    const results: string[] = [];
+    const sub = controller.location$.subscribe(loc => {
+      results.push(`first:${loc.pathname}`);
+      controller.location$.subscribe(l => results.push(`nested:${l.pathname}`));
+    });
+    controller.navigate('/test');
+    expect(results.filter(r => r.startsWith('first:')).length).toBe(2);
+    sub.unsubscribe();
   });
 
   it('should handle root basePath', () => {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Backstage Authors
+ * Copyright 2026 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,10 @@ type LocationHandler = (location: RoutingLocation) => void;
 /**
  * NavigationController owns window.history and provides scoped
  * RoutingContract instances to plugins.
+ *
+ * The location$ observable never signals error or complete — it represents
+ * a continuous location stream that lives for the duration of the app.
+ * Calling dispose() stops emissions but does not signal complete to observers.
  *
  * @internal
  */
@@ -86,6 +90,11 @@ export class NavigationController {
 
   /** Navigate to a path (relative to the app root, not basename). */
   navigate(to: string, options?: { replace?: boolean }): void {
+    if (to.includes('://')) {
+      throw new Error(
+        'NavigationController.navigate does not support absolute URLs',
+      );
+    }
     const url = new URL(to, window.location.origin);
     const fullPath = this.basename + url.pathname + url.search + url.hash;
 
@@ -127,7 +136,11 @@ export class NavigationController {
           }
 
           const isRoot = basePath === '/';
-          if (isRoot || loc.pathname.startsWith(basePath)) {
+          if (
+            isRoot ||
+            loc.pathname === basePath ||
+            loc.pathname.startsWith(`${basePath}/`)
+          ) {
             const scopedPathname = isRoot
               ? loc.pathname
               : loc.pathname.slice(basePath.length) || '/';
@@ -170,7 +183,11 @@ export class NavigationController {
 
         // Check if the resolved path is within the basePath scope
         const isRoot = basePath === '/';
-        if (!isRoot && !resolvedPath.startsWith(basePath)) {
+        if (
+          !isRoot &&
+          resolvedPath !== basePath &&
+          !resolvedPath.startsWith(`${basePath}/`)
+        ) {
           // eslint-disable-next-line no-console
           console.warn(
             `[NavigationController] Contract navigate called with path "${to}" ` +
@@ -187,9 +204,10 @@ export class NavigationController {
     };
   }
 
-  /** Stop listening to popstate events. */
+  /** Stop listening to popstate events and clear all subscribers. */
   dispose(): void {
     window.removeEventListener('popstate', this.popstateHandler);
+    this.subscribers.clear();
   }
 
   private getCurrentLocation(): RoutingLocation {
