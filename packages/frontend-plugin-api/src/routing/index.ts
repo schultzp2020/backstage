@@ -33,3 +33,9 @@ export {
   RoutingContractContext,
   useRoutingContract,
 } from './RoutingContractContext';
+export {
+  NestedRoutingContractProvider,
+  useNestedRoutingContract,
+  type NestedRoutingContractProviderProps,
+  type UseNestedRoutingContractOptions,
+} from './NestedRoutingContractProvider';
