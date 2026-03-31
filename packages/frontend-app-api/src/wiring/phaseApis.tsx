@@ -37,7 +37,7 @@ import {
   type IdentityApi,
 } from '@backstage/frontend-plugin-api';
 import { NavigationController } from '../routing/NavigationController';
-import { matchRoutes } from 'react-router-dom';
+import { matchRouteRefs } from '../routing/matchRouteRefs';
 // eslint-disable-next-line @backstage/no-relative-monorepo-imports
 import { AppIdentityProxy } from '../../../core-app-api/src/apis/implementations/IdentityApi/AppIdentityProxy';
 import { createRouteAliasResolver } from '../routing/RouteAliasResolver';
@@ -95,11 +95,11 @@ export class AppTreeApiProxy implements AppTreeApi {
       path = path.slice(this.appBasePath.length);
     }
 
-    const matchedRoutes = matchRoutes(routeInfo.routeObjects, path);
+    const matchedRoutes = matchRouteRefs(routeInfo.routeObjects, path);
 
     const matchedAppNodes =
-      matchedRoutes?.flatMap(routeObj => {
-        const appNode = routeObj.route.appNode;
+      matchedRoutes?.flatMap(match => {
+        const appNode = match.routeObject.appNode;
         return appNode ? [appNode] : [];
       }) || [];
 
