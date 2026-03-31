@@ -24,3 +24,8 @@ export {
 export { useRouteRef } from './useRouteRef';
 export { useRouteRefParams } from './useRouteRefParams';
 export type { RoutingLocation, RoutingContract } from './RoutingContract';
+export type { NavigationControllerApi } from './NavigationControllerApi';
+export { navigationControllerApiRef } from './NavigationControllerApi';
+export { useFrameworkNavigate } from './useFrameworkNavigate';
+export { useFrameworkLocation } from './useFrameworkLocation';
+export { RouteLink, type RouteLinkProps } from './RouteLink';
