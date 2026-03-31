@@ -25,6 +25,7 @@ import {
   createApiFactory,
   ExternalRouteRef,
   identityApiRef,
+  navigationControllerApiRef,
   RouteFunc,
   RouteRef,
   RouteResolutionApi,
@@ -35,6 +36,7 @@ import {
   type ExtensionFactoryMiddleware,
   type IdentityApi,
 } from '@backstage/frontend-plugin-api';
+import { NavigationController } from '../routing/NavigationController';
 import { matchRoutes } from 'react-router-dom';
 // eslint-disable-next-line @backstage/no-relative-monorepo-imports
 import { AppIdentityProxy } from '../../../core-app-api/src/apis/implementations/IdentityApi/AppIdentityProxy';
@@ -213,6 +215,9 @@ export function createPhaseApis(options: {
     options.appBasePath,
   );
   const identityProxy = new PreparedAppIdentityProxy();
+  const navigationController = new NavigationController({
+    basename: options.appBasePath || undefined,
+  });
   const phaseApiRegistry = new FrontendApiRegistry();
   phaseApiRegistry.registerAll([
     createApiFactory(appTreeApiRef, appTreeApi),
@@ -221,6 +226,7 @@ export function createPhaseApis(options: {
       : []),
     createApiFactory(routeResolutionApiRef, routeResolutionApi),
     createApiFactory(identityApiRef, identityProxy),
+    createApiFactory(navigationControllerApiRef, navigationController),
     ...options.staticFactories,
   ]);
 
@@ -235,6 +241,7 @@ export function createPhaseApis(options: {
     routeResolutionApi,
     appTreeApi,
     identityApiProxy: identityProxy,
+    navigationController,
   };
 }
 

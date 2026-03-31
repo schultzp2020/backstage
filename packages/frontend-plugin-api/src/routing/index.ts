@@ -29,3 +29,7 @@ export { navigationControllerApiRef } from './NavigationControllerApi';
 export { useFrameworkNavigate } from './useFrameworkNavigate';
 export { useFrameworkLocation } from './useFrameworkLocation';
 export { RouteLink, type RouteLinkProps } from './RouteLink';
+export {
+  RoutingContractContext,
+  useRoutingContract,
+} from './RoutingContractContext';
