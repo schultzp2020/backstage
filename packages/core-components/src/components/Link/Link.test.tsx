@@ -22,7 +22,13 @@ import {
   renderInTestApp,
 } from '@backstage/test-utils';
 import { analyticsApiRef, configApiRef } from '@backstage/core-plugin-api';
-import { isExternalUri, Link, useResolvedPath } from './Link';
+import {
+  isExternalUri,
+  Link,
+  useResolvedPath,
+  routingContractContext,
+  navigationControllerApiRef,
+} from './Link';
 import { Route, Routes } from 'react-router-dom';
 import { ConfigReader } from '@backstage/config';
 
@@ -201,6 +207,147 @@ describe('<Link />', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Link component rejected javascript: URL as a security precaution"`,
     );
+  });
+
+  describe('cross-plugin navigation', () => {
+    it('should use framework navigate for absolute paths outside basePath', async () => {
+      const navigateFn = jest.fn();
+      const mockNavController = {
+        navigate: navigateFn,
+        location$: { subscribe: jest.fn() },
+      } as any;
+
+      const { container } = await renderInTestApp(
+        <TestApiProvider
+          apis={[[navigationControllerApiRef, mockNavController]]}
+        >
+          <routingContractContext.Provider
+            value={{
+              basePath: '/catalog',
+              navigate: jest.fn(),
+              location$: { subscribe: jest.fn() } as any,
+            }}
+          >
+            <Link to="/scaffolder/templates">Cross Plugin Link</Link>
+          </routingContractContext.Provider>
+        </TestApiProvider>,
+      );
+
+      const link = screen.getByText('Cross Plugin Link');
+      fireEvent.click(link);
+
+      expect(navigateFn).toHaveBeenCalledWith('/scaffolder/templates');
+      // Should render as an anchor, not a react-router Link
+      const anchor = container.querySelector('a[href="/scaffolder/templates"]');
+      expect(anchor).toBeInTheDocument();
+    });
+
+    it('should use plugin router for absolute paths within basePath', async () => {
+      const navigateFn = jest.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockNavController: any = {
+        navigate: navigateFn,
+        location$: { subscribe: jest.fn() },
+      };
+
+      await renderInTestApp(
+        <TestApiProvider
+          apis={[[navigationControllerApiRef, mockNavController]]}
+        >
+          <routingContractContext.Provider
+            value={{
+              basePath: '/catalog',
+              navigate: jest.fn(),
+              location$: { subscribe: jest.fn() } as any,
+            }}
+          >
+            <Link to="/catalog/default/component/foo">Within Plugin</Link>
+          </routingContractContext.Provider>
+        </TestApiProvider>,
+      );
+
+      const link = screen.getByText('Within Plugin');
+      fireEvent.click(link);
+
+      // Should NOT use framework navigate for within-plugin paths
+      expect(navigateFn).not.toHaveBeenCalled();
+    });
+
+    it('should use plugin router for relative paths', async () => {
+      const navigateFn = jest.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockNavController: any = {
+        navigate: navigateFn,
+        location$: { subscribe: jest.fn() },
+      };
+
+      await renderInTestApp(
+        <TestApiProvider
+          apis={[[navigationControllerApiRef, mockNavController]]}
+        >
+          <routingContractContext.Provider
+            value={{
+              basePath: '/catalog',
+              navigate: jest.fn(),
+              location$: { subscribe: jest.fn() } as any,
+            }}
+          >
+            <Link to="entity/foo">Relative Link</Link>
+          </routingContractContext.Provider>
+        </TestApiProvider>,
+      );
+
+      const link = screen.getByText('Relative Link');
+      fireEvent.click(link);
+
+      // Should NOT use framework navigate for relative paths
+      expect(navigateFn).not.toHaveBeenCalled();
+    });
+
+    it('should work in old frontend system without RoutingContractContext', async () => {
+      const testString = 'Old system destination';
+      const linkText = 'Old System Link';
+      await renderInTestApp(
+        <>
+          <Link to="/test-old">{linkText}</Link>
+          <Routes>
+            <Route path="/test-old" element={<p>{testString}</p>} />
+          </Routes>
+        </>,
+      );
+      expect(() => screen.getByText(testString)).toThrow();
+      fireEvent.click(screen.getByText(linkText));
+      await waitFor(() => {
+        expect(screen.getByText(testString)).toBeInTheDocument();
+      });
+    });
+
+    it('should use framework navigate in NFS app chrome (no contract, with NavigationControllerApi)', async () => {
+      const navigateFn = jest.fn();
+      const mockNavController = {
+        navigate: navigateFn,
+        location$: { subscribe: jest.fn() },
+      } as any;
+
+      const { container } = await renderInTestApp(
+        <TestApiProvider
+          apis={[[navigationControllerApiRef, mockNavController]]}
+        >
+          <Link to="/catalog/default/component/foo">App Chrome Link</Link>
+        </TestApiProvider>,
+      );
+
+      const link = screen.getByText('App Chrome Link');
+      fireEvent.click(link);
+
+      // In NFS app chrome (no contract but NavigationControllerApi available),
+      // should use framework navigate
+      expect(navigateFn).toHaveBeenCalledWith('/catalog/default/component/foo');
+      const anchor = container.querySelector(
+        'a[href="/catalog/default/component/foo"]',
+      );
+      expect(anchor).toBeInTheDocument();
+    });
   });
 });
 

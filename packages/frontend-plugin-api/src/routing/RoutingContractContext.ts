@@ -15,12 +15,18 @@
  */
 
 import { createContext, useContext } from 'react';
+import { getOrCreateGlobalSingleton } from '@backstage/version-bridge';
 import type { RoutingContract } from './RoutingContract';
 
-/** @public */
-export const RoutingContractContext = createContext<
-  RoutingContract | undefined
->(undefined);
+/**
+ * A global singleton React context for the routing contract, shared between
+ * frontend-plugin-api and core-components via @backstage/version-bridge.
+ * @public
+ */
+export const RoutingContractContext = getOrCreateGlobalSingleton(
+  'routing-contract-context',
+  () => createContext<RoutingContract | undefined>(undefined),
+);
 
 /** @public */
 export function useRoutingContract(): RoutingContract {

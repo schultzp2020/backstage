@@ -15,6 +15,7 @@
  */
 import {
   configApiRef,
+  createApiRef,
   useAnalytics,
   useApi,
   useApp,
@@ -28,11 +29,13 @@ import Typography from '@material-ui/core/Typography';
 import classnames from 'classnames';
 import { trimEnd } from 'lodash';
 import {
+  createContext,
   ReactNode,
   ReactElement,
   MouseEvent as ReactMouseEvent,
   ElementType,
   forwardRef,
+  useContext,
 } from 'react';
 import {
   createRoutesFromChildren,
@@ -41,6 +44,71 @@ import {
   Route,
 } from 'react-router-dom';
 import OpenInNew from '@material-ui/icons/OpenInNew';
+import { getOrCreateGlobalSingleton } from '@backstage/version-bridge';
+import type { Observable } from '@backstage/types';
+
+/**
+ * Routing contract interface matching the one in @backstage/frontend-plugin-api.
+ * Defined locally to avoid a circular dependency.
+ * @internal
+ */
+interface RoutingContract {
+  readonly basePath: string;
+  readonly location$: Observable<{
+    pathname: string;
+    search: string;
+    hash: string;
+  }>;
+  navigate(to: string, options?: { replace?: boolean }): void;
+}
+
+/**
+ * A global singleton React context for the routing contract, shared between
+ * core-components and frontend-plugin-api via @backstage/version-bridge.
+ * @internal
+ */
+export const routingContractContext = getOrCreateGlobalSingleton(
+  'routing-contract-context',
+  () => createContext<RoutingContract | undefined>(undefined),
+);
+
+/**
+ * Navigation controller API interface matching the one in @backstage/frontend-plugin-api.
+ * @internal
+ */
+interface NavigationControllerApi {
+  navigate(path: string, options?: { replace?: boolean }): void;
+  readonly location$: Observable<{
+    pathname: string;
+    search: string;
+    hash: string;
+  }>;
+}
+
+/**
+ * Local API ref for the navigation controller, using the same id as in
+ * @backstage/frontend-plugin-api so that it resolves to the same API instance.
+ * @internal
+ */
+export const navigationControllerApiRef = createApiRef<NavigationControllerApi>(
+  {
+    id: 'core.navigation-controller',
+  },
+);
+
+/**
+ * Hook to safely get the navigation controller API, returning undefined
+ * when not available (e.g., in the old frontend system).
+ */
+function useOptionalNavigationController():
+  | NavigationControllerApi
+  | undefined {
+  try {
+    return useApi(navigationControllerApiRef);
+  } catch {
+    return undefined;
+  }
+}
 
 export function isReactRouterBeta(): boolean {
   const [obj] = createRoutesFromChildren(<Route index element={<div />} />);
@@ -188,6 +256,8 @@ export const UnstyledLink = forwardRef<any, LinkProps>(
   ({ onClick, noTrack, externalLinkIcon, ...props }, ref) => {
     const classes = useStyles();
     const analytics = useAnalytics();
+    const contract = useContext(routingContractContext);
+    const frameworkNav = useOptionalNavigationController();
 
     // Adding the base path to URLs breaks react-router v6 stable, so we only
     // do it for beta. The react router version won't change at runtime so it is
@@ -210,6 +280,31 @@ export const UnstyledLink = forwardRef<any, LinkProps>(
         analytics.captureEvent('click', linkText, { attributes: { to } });
       }
     };
+
+    // Determine if this is a cross-plugin navigation that should use the
+    // framework's navigation controller instead of react-router.
+    const isAbsolutePath = to.startsWith('/');
+    const isCrossPlugin =
+      isAbsolutePath && contract && !to.startsWith(contract.basePath);
+    const isAppChrome = !contract && !!frameworkNav && isAbsolutePath;
+
+    if (!external && (isCrossPlugin || isAppChrome) && frameworkNav) {
+      // Cross-plugin or NFS app chrome: use framework navigate
+      return (
+        <a
+          {...props}
+          ref={ref}
+          href={to}
+          onClick={(event: ReactMouseEvent<any, MouseEvent>) => {
+            event.preventDefault();
+            handleClick(event);
+            frameworkNav.navigate(to);
+          }}
+        >
+          {props.children}
+        </a>
+      );
+    }
 
     return external ? (
       // External links
