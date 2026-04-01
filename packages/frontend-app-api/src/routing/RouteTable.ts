@@ -23,7 +23,7 @@
  * @internal
  */
 export class RouteTable {
-  private readonly paths: string[];
+  private readonly paths: Array<{ path: string; matcher?: RegExp }>;
 
   constructor(basePaths: string[]) {
     const seen = new Set<string>();
@@ -38,14 +38,41 @@ export class RouteTable {
       seen.add(path);
     }
     // Deduplicate — first registration wins (order preserved before sort)
-    this.paths = [...new Set(basePaths)].sort((a, b) => b.length - a.length);
+    this.paths = [...new Set(basePaths)]
+      .sort((a, b) => b.length - a.length)
+      .map(path => ({
+        path,
+        matcher: path === '/' ? undefined : compileMatcher(path),
+      }));
   }
 
   match(pathname: string): string | undefined {
-    return this.paths.find(base =>
-      base === '/'
+    return this.paths.find(({ path, matcher }) =>
+      path === '/'
         ? true // root catches everything
-        : pathname === base || pathname.startsWith(`${base}/`),
-    );
+        : matcher?.test(pathname),
+    )?.path;
   }
+}
+
+function compileMatcher(path: string): RegExp {
+  const segments = path.split('/').filter(Boolean);
+  let pattern = '^';
+
+  for (const segment of segments) {
+    if (segment === '*') {
+      pattern += '/.+';
+    } else if (segment.startsWith(':')) {
+      pattern += '/[^/]+';
+    } else {
+      pattern += `/${escapeRegExp(segment)}`;
+    }
+  }
+
+  pattern += '(?:/|$)';
+  return new RegExp(pattern);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

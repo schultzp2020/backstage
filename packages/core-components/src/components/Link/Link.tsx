@@ -306,15 +306,15 @@ export const UnstyledLink = forwardRef<any, LinkProps>(
       }
     };
 
-    // Determine if this is a cross-plugin navigation that should use the
-    // framework's navigation controller instead of react-router.
+    // Only links that cross plugin boundaries inside a scoped routing
+    // contract should bypass react-router. App chrome links in the legacy
+    // router still need to use react-router so the mounted route tree updates.
     const isAbsolutePath = to.startsWith('/');
     const isCrossPlugin =
       isAbsolutePath && contract && !to.startsWith(contract.basePath);
-    const isAppChrome = !contract && !!frameworkNav && isAbsolutePath;
 
-    if (!external && (isCrossPlugin || isAppChrome) && frameworkNav) {
-      // Cross-plugin or NFS app chrome: use framework navigate
+    if (!external && isCrossPlugin && frameworkNav) {
+      // Cross-plugin links inside a scoped contract use framework navigation.
       return (
         <a
           {...props}

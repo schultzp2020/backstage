@@ -55,6 +55,48 @@ describe('RouteTable', () => {
     expect(table.match('/catalog/')).toBe('/catalog');
   });
 
+  it('should prefer parameterized entity routes over index routes', () => {
+    const table = new RouteTable([
+      '/catalog',
+      '/catalog/:namespace/:kind/:name',
+    ]);
+
+    expect(table.match('/catalog/default/component/wayback-archive')).toBe(
+      '/catalog/:namespace/:kind/:name',
+    );
+  });
+
+  it('should match nested entity subpaths using parameterized base routes', () => {
+    const table = new RouteTable([
+      '/catalog',
+      '/catalog/:namespace/:kind/:name',
+    ]);
+
+    expect(
+      table.match('/catalog/default/component/wayback-archive/kubernetes'),
+    ).toBe('/catalog/:namespace/:kind/:name');
+  });
+
+  it('should still match the index route for exact /catalog when parameterized route coexists', () => {
+    const table = new RouteTable([
+      '/catalog',
+      '/catalog/:namespace/:kind/:name',
+    ]);
+
+    expect(table.match('/catalog')).toBe('/catalog');
+    expect(table.match('/catalog/')).toBe('/catalog');
+  });
+
+  it('should fall through to the index route for paths with fewer segments than the parameterized route', () => {
+    const table = new RouteTable([
+      '/catalog',
+      '/catalog/:namespace/:kind/:name',
+    ]);
+
+    expect(table.match('/catalog/foo')).toBe('/catalog');
+    expect(table.match('/catalog/foo/bar')).toBe('/catalog');
+  });
+
   it('should warn on duplicate base paths', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
     const table = new RouteTable(['/catalog', '/scaffolder', '/catalog']);

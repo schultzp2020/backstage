@@ -210,6 +210,36 @@ describe('<Link />', () => {
   });
 
   describe('cross-plugin navigation', () => {
+    it('should keep using react-router for internal links without a routing contract', async () => {
+      const testString = 'Internal destination';
+      const linkText = 'Internal Link';
+      const mockNavController = {
+        navigate: jest.fn(),
+        location$: { subscribe: jest.fn() },
+      } as any;
+
+      await renderInTestApp(
+        <TestApiProvider
+          apis={[[navigationControllerApiRef, mockNavController]]}
+        >
+          <>
+            <Link to="/test-internal">{linkText}</Link>
+            <Routes>
+              <Route path="/test-internal" element={<p>{testString}</p>} />
+            </Routes>
+          </>
+        </TestApiProvider>,
+      );
+
+      expect(() => screen.getByText(testString)).toThrow();
+      fireEvent.click(screen.getByText(linkText));
+
+      await waitFor(() => {
+        expect(screen.getByText(testString)).toBeInTheDocument();
+      });
+      expect(mockNavController.navigate).not.toHaveBeenCalled();
+    });
+
     it('should use framework navigate for absolute paths outside basePath', async () => {
       const navigateFn = jest.fn();
       const mockNavController = {
@@ -320,33 +350,6 @@ describe('<Link />', () => {
       await waitFor(() => {
         expect(screen.getByText(testString)).toBeInTheDocument();
       });
-    });
-
-    it('should use framework navigate in NFS app chrome (no contract, with NavigationControllerApi)', async () => {
-      const navigateFn = jest.fn();
-      const mockNavController = {
-        navigate: navigateFn,
-        location$: { subscribe: jest.fn() },
-      } as any;
-
-      const { container } = await renderInTestApp(
-        <TestApiProvider
-          apis={[[navigationControllerApiRef, mockNavController]]}
-        >
-          <Link to="/catalog/default/component/foo">App Chrome Link</Link>
-        </TestApiProvider>,
-      );
-
-      const link = screen.getByText('App Chrome Link');
-      fireEvent.click(link);
-
-      // In NFS app chrome (no contract but NavigationControllerApi available),
-      // should use framework navigate
-      expect(navigateFn).toHaveBeenCalledWith('/catalog/default/component/foo');
-      const anchor = container.querySelector(
-        'a[href="/catalog/default/component/foo"]',
-      );
-      expect(anchor).toBeInTheDocument();
     });
   });
 });
