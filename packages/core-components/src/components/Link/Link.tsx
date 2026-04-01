@@ -20,6 +20,7 @@ import {
   useApi,
   useApp,
 } from '@backstage/core-plugin-api';
+import { NotImplementedError } from '@backstage/errors';
 // eslint-disable-next-line no-restricted-imports
 import MaterialLink, {
   LinkProps as MaterialLinkProps,
@@ -49,7 +50,18 @@ import type { Observable } from '@backstage/types';
 
 /**
  * Routing contract interface matching the one in @backstage/frontend-plugin-api.
- * Defined locally to avoid a circular dependency.
+ *
+ * Defined locally to avoid a circular dependency:
+ * @backstage/core-components cannot depend on @backstage/frontend-plugin-api
+ * because frontend-plugin-api already depends on core-components (transitively
+ * via core-plugin-api). Extracting these types to a shared package (e.g.,
+ * @backstage/types) is a future option but would require a broader refactor.
+ *
+ * The `routingContractContext` and `navigationControllerApiRef` singletons
+ * below use the same string keys as their counterparts in frontend-plugin-api,
+ * so they resolve to the same runtime instances via @backstage/version-bridge
+ * and Backstage's id-based ApiRef resolution respectively.
+ *
  * @internal
  */
 interface RoutingContract {
@@ -98,15 +110,23 @@ export const navigationControllerApiRef = createApiRef<NavigationControllerApi>(
 
 /**
  * Hook to safely get the navigation controller API, returning undefined
- * when not available (e.g., in the old frontend system).
+ * when not available (e.g., in the old frontend system where the API
+ * is not registered).
+ *
+ * Uses try/catch because Backstage's useApi throws when the API is not
+ * found in the ApiHolder, and there is no public useOptionalApi hook.
+ * This matches the pattern used by useBaseUrl in this same file.
  */
 function useOptionalNavigationController():
   | NavigationControllerApi
   | undefined {
   try {
     return useApi(navigationControllerApiRef);
-  } catch {
-    return undefined;
+  } catch (e: unknown) {
+    if (e instanceof NotImplementedError) {
+      return undefined;
+    }
+    throw e;
   }
 }
 

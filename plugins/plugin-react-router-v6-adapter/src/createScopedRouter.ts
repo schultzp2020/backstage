@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import React, { useSyncExternalStore } from 'react';
+import {
+  createElement,
+  useMemo,
+  useSyncExternalStore,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import type { RoutingContract } from '@backstage/frontend-plugin-api';
 import {
   UNSAFE_LocationContext,
@@ -32,13 +38,15 @@ import type { Location, NavigateFunction, To } from 'react-router-dom';
 
 /** @public */
 export interface ScopedRouterResult {
-  Router: React.ComponentType<{ children: React.ReactNode }>;
+  Router: ComponentType<{ children: ReactNode }>;
   useLocation: () => Location;
   useNavigate: () => NavigateFunction;
   useParams: <T extends Record<string, string | undefined>>() => T;
   useSearchParams: (
     ...args: Parameters<typeof useRRSearchParams>
   ) => ReturnType<typeof useRRSearchParams>;
+  /** Unsubscribes from the contract's location$ observable. */
+  dispose: () => void;
 }
 
 /** @public */
@@ -57,8 +65,9 @@ export function createScopedRouter(
   // Set of listener callbacks for useSyncExternalStore
   const listeners = new Set<() => void>();
 
-  // Subscribe to the contract's location$ eagerly so we capture the initial value
-  contract.location$.subscribe(routingLocation => {
+  // Subscribe to the contract's location$ eagerly so we capture the initial value.
+  // The subscription is stored so it can be cleaned up via dispose().
+  const subscription = contract.location$.subscribe(routingLocation => {
     latestLocation = {
       pathname: routingLocation.pathname,
       search: routingLocation.search,
@@ -82,10 +91,10 @@ export function createScopedRouter(
     return latestLocation;
   }
 
-  function ScopedRouter({ children }: { children: React.ReactNode }) {
+  function ScopedRouter({ children }: { children: ReactNode }) {
     const location = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
-    const locationContextValue = React.useMemo(
+    const locationContextValue = useMemo(
       () => ({
         location,
         navigationType: NavigationType.Pop,
@@ -93,7 +102,7 @@ export function createScopedRouter(
       [location],
     );
 
-    const navigator: Navigator = React.useMemo(
+    const navigator: Navigator = useMemo(
       () => ({
         createHref(to: To): string {
           if (typeof to === 'string') {
@@ -119,7 +128,7 @@ export function createScopedRouter(
       [],
     );
 
-    const navigationContextValue = React.useMemo(
+    const navigationContextValue = useMemo(
       () => ({
         basename: '',
         navigator,
@@ -131,10 +140,10 @@ export function createScopedRouter(
       [navigator],
     );
 
-    return React.createElement(
+    return createElement(
       UNSAFE_NavigationContext.Provider,
       { value: navigationContextValue },
-      React.createElement(
+      createElement(
         UNSAFE_LocationContext.Provider,
         { value: locationContextValue },
         children,
@@ -150,6 +159,7 @@ export function createScopedRouter(
       useRRParams() as T,
     useSearchParams: (...args: Parameters<typeof useRRSearchParams>) =>
       useRRSearchParams(...args),
+    dispose: () => subscription.unsubscribe(),
   };
 }
 

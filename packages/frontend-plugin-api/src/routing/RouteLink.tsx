@@ -57,7 +57,10 @@ export function RouteLink(props: RouteLinkProps) {
   const routeFunc = useRouteRef(routeRef);
   const frameworkNavigate = useFrameworkNavigate();
 
-  const href = routeFunc?.(params as any) ?? '#';
+  // RouteLink accepts untyped params since the route ref's param shape isn't
+  // known at the call site. The route function validates params at runtime.
+  const href =
+    routeFunc?.(params as Parameters<NonNullable<typeof routeFunc>>[0]) ?? '#';
 
   const handleClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {

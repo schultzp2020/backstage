@@ -69,7 +69,7 @@ function compilePath(
   }
 
   return {
-    regexp: new RegExp(regexpSource, 'i'),
+    regexp: new RegExp(regexpSource),
     paramNames,
   };
 }

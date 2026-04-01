@@ -39,3 +39,7 @@ export {
   type NestedRoutingContractProviderProps,
   type UseNestedRoutingContractOptions,
 } from './NestedRoutingContractProvider';
+export {
+  useObservableAsState,
+  routingLocationEqual,
+} from './useObservableAsState';

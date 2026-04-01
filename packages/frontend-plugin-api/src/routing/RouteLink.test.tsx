@@ -27,12 +27,24 @@ function createMockNavigationControllerApi() {
   return {
     navigate: jest.fn(),
     location$: {
-      subscribe: () => ({
-        unsubscribe: () => {},
-        get closed() {
-          return false;
-        },
-      }),
+      subscribe: (
+        observerOrNext?:
+          | { next?: (value: any) => void }
+          | ((value: any) => void),
+      ) => {
+        const onNext =
+          typeof observerOrNext === 'function'
+            ? observerOrNext
+            : observerOrNext?.next?.bind(observerOrNext);
+        // Emit synchronously on subscribe (required by useObservableAsState)
+        onNext?.({ pathname: '/', search: '', hash: '' });
+        return {
+          unsubscribe: () => {},
+          get closed() {
+            return false;
+          },
+        };
+      },
       [Symbol.observable]() {
         return this;
       },

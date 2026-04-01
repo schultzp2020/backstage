@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import React, {
-  useCallback,
-  useMemo,
-  useRef,
-  useSyncExternalStore,
-} from 'react';
+import { useMemo, type ReactNode } from 'react';
 import {
   UNSAFE_LocationContext,
   UNSAFE_NavigationContext,
   NavigationType,
 } from 'react-router-dom';
-import type { RoutingContract, RoutingLocation } from '../routing';
+import type { RoutingContract } from '../routing';
+import {
+  useObservableAsState,
+  routingLocationEqual,
+} from '../routing/useObservableAsState';
 
 /**
  * Sets up a scoped React Router v6 context from a RoutingContract.
@@ -38,7 +37,7 @@ import type { RoutingContract, RoutingLocation } from '../routing';
  */
 export function ScopedRouterProvider(props: {
   contract: RoutingContract | undefined;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const { contract, children } = props;
 
@@ -67,44 +66,14 @@ function toPath(
 
 function ScopedRouterProviderInner(props: {
   contract: RoutingContract;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const { contract, children } = props;
 
-  // Get the initial location synchronously from the contract's observable.
-  // NavigationController.location$ emits synchronously on subscribe.
-  const [initialLocation] = React.useState(() => {
-    let initial: RoutingLocation = { pathname: '/', search: '', hash: '' };
-    const sub = contract.location$.subscribe(loc => {
-      initial = loc;
-    });
-    sub.unsubscribe();
-    return initial;
-  });
-
-  const locationRef = useRef<RoutingLocation>(initialLocation);
-
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      const sub = contract.location$.subscribe(loc => {
-        const prev = locationRef.current;
-        if (
-          prev.pathname !== loc.pathname ||
-          prev.search !== loc.search ||
-          prev.hash !== loc.hash
-        ) {
-          locationRef.current = loc;
-          onStoreChange();
-        }
-      });
-      return () => sub.unsubscribe();
-    },
-    [contract],
+  const location = useObservableAsState(
+    contract.location$,
+    routingLocationEqual,
   );
-
-  const getSnapshot = useCallback(() => locationRef.current, []);
-
-  const location = useSyncExternalStore(subscribe, getSnapshot);
 
   const routerLocation = useMemo(
     () => ({

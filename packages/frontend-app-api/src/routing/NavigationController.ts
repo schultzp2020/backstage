@@ -104,8 +104,11 @@ export class NavigationController {
       window.history.pushState(null, '', fullPath);
     }
 
-    // Dispatch popstate to sync BrowserRouter and trigger emission
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    // Emit directly rather than dispatching a synthetic popstate event.
+    // popstate should only fire for real browser back/forward navigation.
+    // Dispatching it synthetically could interfere with other popstate
+    // listeners (e.g., BrowserRouter during Phase A coexistence).
+    this.emit();
   }
 
   /** Create a scoped RoutingContract for a plugin basePath. */

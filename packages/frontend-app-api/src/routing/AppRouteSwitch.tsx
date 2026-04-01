@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-import {
-  type ComponentType,
-  type ReactElement,
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useSyncExternalStore,
-} from 'react';
+import { type ComponentType, type ReactElement, useMemo } from 'react';
 import {
   RoutingContractContext,
   type RoutingContract,
-  type RoutingLocation,
+  useObservableAsState,
+  routingLocationEqual,
 } from '@backstage/frontend-plugin-api';
 import { NavigationController } from './NavigationController';
 import { RouteTable } from './RouteTable';
@@ -53,44 +46,9 @@ export interface AppRouteSwitchProps {
 export function AppRouteSwitch(props: AppRouteSwitchProps) {
   const { controller, routeTable, pages, contracts, fallback } = props;
 
-  // Get initial location synchronously from the controller's observable.
-  // NavigationController.location$ emits synchronously on subscribe.
-  const [initialLocation] = useState(() => {
-    let initial: RoutingLocation = { pathname: '/', search: '', hash: '' };
-    const sub = controller.location$.subscribe(loc => {
-      initial = loc;
-    });
-    sub.unsubscribe();
-    return initial;
-  });
-
-  // Cache the snapshot to satisfy useSyncExternalStore's requirement that
-  // getSnapshot returns referentially stable values when nothing changed.
-  const locationRef = useRef<RoutingLocation>(initialLocation);
-
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      const sub = controller.location$.subscribe(loc => {
-        const prev = locationRef.current;
-        if (
-          prev.pathname !== loc.pathname ||
-          prev.search !== loc.search ||
-          prev.hash !== loc.hash
-        ) {
-          locationRef.current = loc;
-          onStoreChange();
-        }
-      });
-      return () => sub.unsubscribe();
-    },
-    [controller],
-  );
-
-  const getSnapshot = useCallback(() => locationRef.current, []);
-
-  const location = useSyncExternalStore<RoutingLocation>(
-    subscribe,
-    getSnapshot,
+  const location = useObservableAsState(
+    controller.location$,
+    routingLocationEqual,
   );
 
   const matchedBasePath = routeTable.match(location.pathname);

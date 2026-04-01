@@ -123,11 +123,11 @@ describe('NavigationController', () => {
     // But no more emissions will occur from popstate
   });
 
-  it('should dispatch popstate after pushState to sync BrowserRouter', () => {
+  it('should not dispatch popstate on navigate (only emit directly)', () => {
     const popstateSpy = jest.fn();
     window.addEventListener('popstate', popstateSpy);
     controller.navigate('/catalog/foo');
-    expect(popstateSpy).toHaveBeenCalled();
+    expect(popstateSpy).not.toHaveBeenCalled();
     window.removeEventListener('popstate', popstateSpy);
   });
 
@@ -138,7 +138,7 @@ describe('NavigationController', () => {
 
     controller.navigate('/catalog/foo');
 
-    // Exactly one new emission (from the popstate handler), not two
+    // Exactly one new emission (from direct this.emit()), not two
     expect(emissions.length - countBefore).toBe(1);
     expect(emissions[emissions.length - 1]).toBe('/catalog/foo');
   });

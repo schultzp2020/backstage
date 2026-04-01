@@ -14,46 +14,16 @@
  * limitations under the License.
  */
 
-import { useSyncExternalStore, useCallback, useRef, useState } from 'react';
 import { useApi } from '../apis';
 import { navigationControllerApiRef } from './NavigationControllerApi';
 import type { RoutingLocation } from './RoutingContract';
+import {
+  useObservableAsState,
+  routingLocationEqual,
+} from './useObservableAsState';
 
 /** @public */
 export function useFrameworkLocation(): RoutingLocation {
   const nav = useApi(navigationControllerApiRef);
-  // Initialize by synchronously subscribing to get the current value.
-  // NOTE: useRef does NOT support lazy initializers in React 18 (that's React 19+).
-  // Use useState with lazy init to compute the initial value once.
-  const [initialLocation] = useState(() => {
-    let initial: RoutingLocation = { pathname: '/', search: '', hash: '' };
-    const sub = nav.location$.subscribe(loc => {
-      initial = loc;
-    });
-    sub.unsubscribe();
-    return initial;
-  });
-  const locationRef = useRef<RoutingLocation>(initialLocation);
-
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      const sub = nav.location$.subscribe(loc => {
-        const prev = locationRef.current;
-        if (
-          prev.pathname !== loc.pathname ||
-          prev.search !== loc.search ||
-          prev.hash !== loc.hash
-        ) {
-          locationRef.current = loc;
-          onStoreChange();
-        }
-      });
-      return () => sub.unsubscribe();
-    },
-    [nav],
-  );
-
-  const getSnapshot = useCallback(() => locationRef.current, []);
-
-  return useSyncExternalStore(subscribe, getSnapshot);
+  return useObservableAsState(nav.location$, routingLocationEqual);
 }

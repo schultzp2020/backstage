@@ -15,6 +15,7 @@
  */
 
 import { createContext, useContext, type ReactNode } from 'react';
+import { getOrCreateGlobalSingleton } from '@backstage/version-bridge';
 import type { RoutingContract } from './RoutingContract';
 
 /**
@@ -27,9 +28,10 @@ interface NestedRoutingContractContextValue {
   contracts: Map<string, RoutingContract>;
 }
 
-const NestedRoutingContractCtx = createContext<
-  NestedRoutingContractContextValue | undefined
->(undefined);
+const NestedRoutingContractCtx = getOrCreateGlobalSingleton(
+  'nested-routing-contract-context',
+  () => createContext<NestedRoutingContractContextValue | undefined>(undefined),
+);
 
 /**
  * Props for {@link NestedRoutingContractProvider}.

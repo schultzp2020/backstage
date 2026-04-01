@@ -195,6 +195,49 @@ describe('createScopedRouter', () => {
     );
   });
 
+  it('should stop receiving updates after dispose()', () => {
+    const contract = createMockContract({
+      pathname: '/catalog/entity/foo',
+      search: '',
+      hash: '',
+    });
+    const { Router, useLocation, dispose } = createScopedRouter(contract);
+
+    const renderedPathnames: string[] = [];
+
+    function LocationDisplay() {
+      const location = useLocation();
+      renderedPathnames.push(location.pathname);
+      return <div data-testid="pathname">{location.pathname}</div>;
+    }
+
+    render(
+      <Router>
+        <LocationDisplay />
+      </Router>,
+    );
+
+    expect(screen.getByTestId('pathname')).toHaveTextContent(
+      '/catalog/entity/foo',
+    );
+
+    dispose();
+
+    // After dispose, emitting should not update the component
+    act(() => {
+      contract.emit({
+        pathname: '/catalog/entity/after-dispose',
+        search: '',
+        hash: '',
+      });
+    });
+
+    // Should still show the old value
+    expect(screen.getByTestId('pathname')).toHaveTextContent(
+      '/catalog/entity/foo',
+    );
+  });
+
   it('should return useLocation, useNavigate, useParams, useSearchParams', () => {
     const contract = createMockContract();
     const result = createScopedRouter(contract);
