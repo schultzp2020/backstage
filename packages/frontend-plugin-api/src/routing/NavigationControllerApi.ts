@@ -20,7 +20,10 @@ import type { RoutingLocation } from './RoutingContract';
 
 /** @public */
 export interface NavigationControllerApi {
-  navigate(path: string, options?: { replace?: boolean }): void;
+  navigate(
+    path: string,
+    options?: { replace?: boolean; state?: unknown },
+  ): void;
   readonly location$: Observable<RoutingLocation>;
 }
 

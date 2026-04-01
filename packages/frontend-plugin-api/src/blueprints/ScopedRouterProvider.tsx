@@ -54,11 +54,14 @@ export function ScopedRouterProvider(props: {
 
 function toPath(
   to: string | { pathname?: string; search?: string; hash?: string },
+  currentPathname: string,
 ): string {
   if (typeof to === 'string') {
     return to;
   }
-  let path = to.pathname ?? '/';
+  // Use current pathname when To.pathname is undefined (e.g., useSearchParams
+  // updates only search params without specifying a pathname)
+  let path = to.pathname ?? currentPathname;
   if (to.search) path += to.search;
   if (to.hash) path += to.hash;
   return path;
@@ -80,10 +83,10 @@ function ScopedRouterProviderInner(props: {
       pathname: location.pathname,
       search: location.search,
       hash: location.hash,
-      state: null,
+      state: location.state ?? null,
       key: 'default',
     }),
-    [location.pathname, location.search, location.hash],
+    [location.pathname, location.search, location.hash, location.state],
   );
 
   const navigator = useMemo(
@@ -97,16 +100,23 @@ function ScopedRouterProviderInner(props: {
       go(delta: number) {
         window.history.go(delta);
       },
-      push(to: string | { pathname?: string; search?: string; hash?: string }) {
-        contract.navigate(toPath(to));
+      push(
+        to: string | { pathname?: string; search?: string; hash?: string },
+        state?: unknown,
+      ) {
+        contract.navigate(toPath(to, location.pathname), { state });
       },
       replace(
         to: string | { pathname?: string; search?: string; hash?: string },
+        state?: unknown,
       ) {
-        contract.navigate(toPath(to), { replace: true });
+        contract.navigate(toPath(to, location.pathname), {
+          replace: true,
+          state,
+        });
       },
     }),
-    [contract],
+    [contract, location.pathname],
   );
 
   const navigationContextValue = useMemo(

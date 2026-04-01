@@ -72,7 +72,7 @@ export function createScopedRouter(
       pathname: routingLocation.pathname,
       search: routingLocation.search,
       hash: routingLocation.hash,
-      state: null,
+      state: routingLocation.state ?? null,
       key: 'default',
     };
     for (const listener of listeners) {
@@ -116,13 +116,19 @@ export function createScopedRouter(
           // popstate fires and NavigationController catches it
           window.history.go(delta);
         },
-        push(to: To, _state?: any, _opts?: any): void {
-          const path = typeof to === 'string' ? to : createPath(to);
-          contract.navigate(path, { replace: false });
+        push(to: To, state?: any, _opts?: any): void {
+          const path =
+            typeof to === 'string'
+              ? to
+              : createPath(to, latestLocation.pathname);
+          contract.navigate(path, { replace: false, state });
         },
-        replace(to: To, _state?: any, _opts?: any): void {
-          const path = typeof to === 'string' ? to : createPath(to);
-          contract.navigate(path, { replace: true });
+        replace(to: To, state?: any, _opts?: any): void {
+          const path =
+            typeof to === 'string'
+              ? to
+              : createPath(to, latestLocation.pathname);
+          contract.navigate(path, { replace: true, state });
         },
       }),
       [],
@@ -165,7 +171,10 @@ export function createScopedRouter(
 
 function createPath(
   to: Partial<{ pathname: string; search: string; hash: string }>,
+  currentPathname: string,
 ): string {
-  const { pathname = '/', search = '', hash = '' } = to;
+  // Use current pathname when To.pathname is undefined (e.g., useSearchParams
+  // updates only search params without specifying a pathname)
+  const { pathname = currentPathname, search = '', hash = '' } = to;
   return `${pathname}${search}${hash}`;
 }

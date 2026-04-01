@@ -57,6 +57,7 @@ describe('NavigationController', () => {
       pathname: string;
       search: string;
       hash: string;
+      state: unknown;
     }> = [];
     const sub = contract.location$.subscribe(loc => locations.push(loc));
 
@@ -65,6 +66,7 @@ describe('NavigationController', () => {
       pathname: '/entity/foo',
       search: '?filter=active',
       hash: '#details',
+      state: null,
     });
     sub.unsubscribe();
   });
@@ -75,15 +77,38 @@ describe('NavigationController', () => {
     expect(window.location.pathname).toBe('/catalog/entity/bar');
   });
 
-  it('should warn and ignore contract navigate outside basePath in dev mode', () => {
+  it('should warn with actionable message and ignore contract navigate outside basePath', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
     const contract = controller.createContract('/catalog');
     const before = window.location.pathname;
 
     contract.navigate('/../../scaffolder');
     expect(window.location.pathname).toBe(before);
-    expect(warnSpy).toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('useFrameworkNavigate()'),
+    );
     warnSpy.mockRestore();
+  });
+
+  it('should preserve state through navigate and location$', () => {
+    const state = { from: '/login', returnTo: '/dashboard' };
+    controller.navigate('/catalog/entity/foo', { state });
+
+    const locations: Array<{ state: unknown }> = [];
+    const sub = controller.location$.subscribe(loc =>
+      locations.push({ state: loc.state }),
+    );
+
+    expect(locations[locations.length - 1].state).toEqual(state);
+    sub.unsubscribe();
+  });
+
+  it('should pass state through scoped contract navigate', () => {
+    const contract = controller.createContract('/catalog');
+    const state = { wizardStep: 2 };
+    contract.navigate('/entity/bar', { state });
+
+    expect(window.history.state).toEqual(state);
   });
 
   it('should handle search-param-only navigation', () => {

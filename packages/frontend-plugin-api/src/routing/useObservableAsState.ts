@@ -17,6 +17,8 @@
 import { useState, useCallback, useRef, useSyncExternalStore } from 'react';
 import type { Observable } from '@backstage/types';
 
+const UNSET = Symbol('useObservableAsState.unset');
+
 /**
  * Subscribes to a Backstage Observable and returns the latest value as React state.
  *
@@ -39,18 +41,20 @@ export function useObservableAsState<T>(
   isEqual: (a: T, b: T) => boolean = Object.is,
 ): T {
   // Get initial value synchronously. useState lazy init runs once.
+  // Uses a sentinel symbol instead of undefined to correctly handle
+  // observables that legitimately emit undefined as a value.
   const [initialValue] = useState(() => {
-    let initial: T | undefined;
+    let initial: T | typeof UNSET = UNSET;
     const sub = observable$.subscribe(val => {
       initial = val;
     });
     sub.unsubscribe();
-    if (initial === undefined) {
+    if (initial === UNSET) {
       throw new Error(
         'useObservableAsState requires an observable that emits synchronously on subscribe',
       );
     }
-    return initial;
+    return initial as T;
   });
 
   const valueRef = useRef<T>(initialValue);
@@ -75,13 +79,17 @@ export function useObservableAsState<T>(
 
 /**
  * Default equality check for RoutingLocation-shaped objects.
+ * Uses Object.is for state comparison to handle all value types.
  * @internal
  */
 export function routingLocationEqual(
-  a: { pathname: string; search: string; hash: string },
-  b: { pathname: string; search: string; hash: string },
+  a: { pathname: string; search: string; hash: string; state?: unknown },
+  b: { pathname: string; search: string; hash: string; state?: unknown },
 ): boolean {
   return (
-    a.pathname === b.pathname && a.search === b.search && a.hash === b.hash
+    a.pathname === b.pathname &&
+    a.search === b.search &&
+    a.hash === b.hash &&
+    Object.is(a.state, b.state)
   );
 }

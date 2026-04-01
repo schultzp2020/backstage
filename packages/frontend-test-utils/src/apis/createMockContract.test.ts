@@ -31,7 +31,12 @@ describe('createMockContract', () => {
     const locs: RoutingLocation[] = [];
     contract.location$.subscribe(l => locs.push(l));
     expect(locs).toHaveLength(1);
-    expect(locs[0]).toEqual({ pathname: '/foo', search: '', hash: '' });
+    expect(locs[0]).toEqual({
+      pathname: '/foo',
+      search: '',
+      hash: '',
+      state: null,
+    });
   });
 
   it('should default initial location to /', () => {
@@ -39,7 +44,12 @@ describe('createMockContract', () => {
     const locs: RoutingLocation[] = [];
     contract.location$.subscribe(l => locs.push(l));
     expect(locs).toHaveLength(1);
-    expect(locs[0]).toEqual({ pathname: '/', search: '', hash: '' });
+    expect(locs[0]).toEqual({
+      pathname: '/',
+      search: '',
+      hash: '',
+      state: null,
+    });
   });
 
   it('should track navigate calls', () => {
@@ -58,7 +68,12 @@ describe('createMockContract', () => {
     contract.location$.subscribe(l => locs.push(l));
     contract.navigate('/bar');
     expect(locs).toHaveLength(2);
-    expect(locs[1]).toEqual({ pathname: '/bar', search: '', hash: '' });
+    expect(locs[1]).toEqual({
+      pathname: '/bar',
+      search: '',
+      hash: '',
+      state: null,
+    });
   });
 
   it('should parse query and hash correctly', () => {
@@ -72,6 +87,7 @@ describe('createMockContract', () => {
       pathname: '/foo',
       search: '?bar=1',
       hash: '#baz',
+      state: null,
     });
   });
 

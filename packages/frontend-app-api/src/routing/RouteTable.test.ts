@@ -54,4 +54,24 @@ describe('RouteTable', () => {
     const table = new RouteTable(['/catalog']);
     expect(table.match('/catalog/')).toBe('/catalog');
   });
+
+  it('should warn on duplicate base paths', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const table = new RouteTable(['/catalog', '/scaffolder', '/catalog']);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Duplicate base path "/catalog"'),
+    );
+    // Should still work correctly after deduplication
+    expect(table.match('/catalog/foo')).toBe('/catalog');
+    expect(table.match('/scaffolder/bar')).toBe('/scaffolder');
+    warnSpy.mockRestore();
+  });
+
+  it('should not warn when all paths are unique', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const table = new RouteTable(['/catalog', '/scaffolder', '/']);
+    expect(warnSpy).not.toHaveBeenCalled();
+    expect(table.match('/catalog')).toBe('/catalog');
+    warnSpy.mockRestore();
+  });
 });

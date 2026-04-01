@@ -111,7 +111,10 @@ describe('RouteLink', () => {
 
     fireEvent.click(link);
 
-    expect(mockNav.navigate).toHaveBeenCalledWith('/catalog/entity/my-entity');
+    expect(mockNav.navigate).toHaveBeenCalledWith(
+      '/catalog/entity/my-entity',
+      undefined,
+    );
   });
 
   it('should prevent default on plain click', () => {

@@ -21,16 +21,12 @@ import { useCallback } from 'react';
 /** @public */
 export function useFrameworkNavigate(): (
   path: string,
-  options?: { replace?: boolean },
+  options?: { replace?: boolean; state?: unknown },
 ) => void {
   const nav = useApi(navigationControllerApiRef);
   return useCallback(
-    (path: string, options?: { replace?: boolean }) => {
-      if (options) {
-        nav.navigate(path, options);
-      } else {
-        nav.navigate(path);
-      }
+    (path: string, options?: { replace?: boolean; state?: unknown }) => {
+      nav.navigate(path, options);
     },
     [nav],
   );

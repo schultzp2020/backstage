@@ -26,7 +26,19 @@ export class RouteTable {
   private readonly paths: string[];
 
   constructor(basePaths: string[]) {
-    this.paths = [...basePaths].sort((a, b) => b.length - a.length);
+    const seen = new Set<string>();
+    for (const path of basePaths) {
+      if (seen.has(path)) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[RouteTable] Duplicate base path "${path}" registered. ` +
+            `Only one plugin should claim each base path. The first registration wins.`,
+        );
+      }
+      seen.add(path);
+    }
+    // Deduplicate — first registration wins (order preserved before sort)
+    this.paths = [...new Set(basePaths)].sort((a, b) => b.length - a.length);
   }
 
   match(pathname: string): string | undefined {

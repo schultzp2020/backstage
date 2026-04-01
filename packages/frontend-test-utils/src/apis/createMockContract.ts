@@ -36,15 +36,19 @@ export interface MockContractOptions {
  * @public
  */
 export interface MockContract extends RoutingContract {
-  navigateCalls: Array<{ to: string; options?: { replace?: boolean } }>;
+  navigateCalls: Array<{
+    to: string;
+    options?: { replace?: boolean; state?: unknown };
+  }>;
 }
 
-function parseLocation(path: string): RoutingLocation {
+function parseLocation(path: string, state?: unknown): RoutingLocation {
   const url = new URL(path, 'http://localhost');
   return {
     pathname: url.pathname,
     search: url.search,
     hash: url.hash,
+    state: state ?? null,
   };
 }
 
@@ -101,9 +105,9 @@ export function createMockContract(options: MockContractOptions): MockContract {
     basePath,
     location$,
     navigateCalls,
-    navigate(to: string, navOptions?: { replace?: boolean }) {
+    navigate(to: string, navOptions?: { replace?: boolean; state?: unknown }) {
       navigateCalls.push({ to, options: navOptions });
-      currentLocation = parseLocation(to);
+      currentLocation = parseLocation(to, navOptions?.state);
       for (const subscriber of subscribers) {
         subscriber?.(currentLocation);
       }

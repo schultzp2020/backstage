@@ -54,7 +54,10 @@ describe('useFrameworkNavigate', () => {
     );
     const { result } = renderHook(() => useFrameworkNavigate(), { wrapper });
     result.current('/scaffolder/templates/foo');
-    expect(mockNavigate).toHaveBeenCalledWith('/scaffolder/templates/foo');
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/scaffolder/templates/foo',
+      undefined,
+    );
   });
 
   it('should forward options to navigate', () => {

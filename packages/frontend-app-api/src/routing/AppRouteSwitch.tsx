@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { type ComponentType, type ReactElement, useMemo } from 'react';
+import {
+  Component,
+  type ComponentType,
+  type ErrorInfo,
+  type ReactElement,
+  type ReactNode,
+  useMemo,
+} from 'react';
 import {
   RoutingContractContext,
   type RoutingContract,
@@ -23,6 +30,33 @@ import {
 } from '@backstage/frontend-plugin-api';
 import { NavigationController } from './NavigationController';
 import { RouteTable } from './RouteTable';
+
+class PluginErrorBoundary extends Component<
+  { basePath: string; children: ReactNode; fallback: ReactElement },
+  { hasError: boolean; error?: Error }
+> {
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  state = { hasError: false, error: undefined };
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[AppRouteSwitch] Plugin at "${this.props.basePath}" crashed:`,
+      error,
+      info,
+    );
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 /** @internal */
 export interface AppRouteSwitchProps {
@@ -76,7 +110,13 @@ export function AppRouteSwitch(props: AppRouteSwitchProps) {
 
   return (
     <RoutingContractContext.Provider value={contract}>
-      <PageComponent />
+      <PluginErrorBoundary
+        key={matchedBasePath}
+        basePath={matchedBasePath}
+        fallback={fallback}
+      >
+        <PageComponent />
+      </PluginErrorBoundary>
     </RoutingContractContext.Provider>
   );
 }

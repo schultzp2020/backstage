@@ -89,7 +89,7 @@ export class NavigationController {
   };
 
   /** Navigate to a path (relative to the app root, not basename). */
-  navigate(to: string, options?: { replace?: boolean }): void {
+  navigate(to: string, options?: { replace?: boolean; state?: unknown }): void {
     if (to.includes('://')) {
       throw new Error(
         'NavigationController.navigate does not support absolute URLs',
@@ -97,11 +97,12 @@ export class NavigationController {
     }
     const url = new URL(to, window.location.origin);
     const fullPath = this.basename + url.pathname + url.search + url.hash;
+    const historyState = options?.state ?? null;
 
     if (options?.replace) {
-      window.history.replaceState(null, '', fullPath);
+      window.history.replaceState(historyState, '', fullPath);
     } else {
-      window.history.pushState(null, '', fullPath);
+      window.history.pushState(historyState, '', fullPath);
     }
 
     // Emit directly rather than dispatching a synthetic popstate event.
@@ -116,8 +117,10 @@ export class NavigationController {
     const addSubscriber = (h: LocationHandler) => this.subscribers.add(h);
     const removeSubscriber = (h: LocationHandler) => this.subscribers.delete(h);
     const getLocation = () => this.getCurrentLocation();
-    const doNavigate = (to: string, opts?: { replace?: boolean }) =>
-      this.navigate(to, opts);
+    const doNavigate = (
+      to: string,
+      opts?: { replace?: boolean; state?: unknown },
+    ) => this.navigate(to, opts);
 
     const contractLocation$: Observable<RoutingLocation> = {
       subscribe: (
@@ -151,6 +154,7 @@ export class NavigationController {
               pathname: scopedPathname,
               search: loc.search,
               hash: loc.hash,
+              state: loc.state,
             });
           }
         };
@@ -178,7 +182,10 @@ export class NavigationController {
     return {
       basePath,
       location$: contractLocation$,
-      navigate: (to: string, options?: { replace?: boolean }): void => {
+      navigate: (
+        to: string,
+        options?: { replace?: boolean; state?: unknown },
+      ): void => {
         // Join basePath + to, then normalize using URL resolution
         const joined = basePath === '/' ? to : `${basePath}${to}`;
         const resolvedUrl = new URL(joined, window.location.origin);
@@ -194,7 +201,9 @@ export class NavigationController {
           // eslint-disable-next-line no-console
           console.warn(
             `[NavigationController] Contract navigate called with path "${to}" ` +
-              `that resolves outside basePath "${basePath}". Navigation ignored.`,
+              `that resolves outside basePath "${basePath}". Navigation blocked. ` +
+              `For cross-plugin navigation, use <RouteLink> from @backstage/frontend-plugin-api ` +
+              `or useFrameworkNavigate() instead of react-router's <Link> or useNavigate().`,
           );
           return;
         }
@@ -219,6 +228,7 @@ export class NavigationController {
       pathname,
       search: window.location.search,
       hash: window.location.hash,
+      state: window.history.state,
     };
   }
 

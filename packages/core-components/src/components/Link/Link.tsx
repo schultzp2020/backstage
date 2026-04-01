@@ -70,8 +70,9 @@ interface RoutingContract {
     pathname: string;
     search: string;
     hash: string;
+    state: unknown;
   }>;
-  navigate(to: string, options?: { replace?: boolean }): void;
+  navigate(to: string, options?: { replace?: boolean; state?: unknown }): void;
 }
 
 /**
@@ -89,11 +90,15 @@ export const routingContractContext = getOrCreateGlobalSingleton(
  * @internal
  */
 interface NavigationControllerApi {
-  navigate(path: string, options?: { replace?: boolean }): void;
+  navigate(
+    path: string,
+    options?: { replace?: boolean; state?: unknown },
+  ): void;
   readonly location$: Observable<{
     pathname: string;
     search: string;
     hash: string;
+    state: unknown;
   }>;
 }
 

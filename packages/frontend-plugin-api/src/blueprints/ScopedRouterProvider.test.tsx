@@ -24,15 +24,21 @@ function createMockContract(
     pathname: '/',
     search: '',
     hash: '',
+    state: null,
   },
 ): RoutingContract & {
   pushLocation: (loc: RoutingLocation) => void;
-  navigateCalls: Array<{ to: string; options?: { replace?: boolean } }>;
+  navigateCalls: Array<{
+    to: string;
+    options?: { replace?: boolean; state?: unknown };
+  }>;
 } {
   let currentLocation = initialLocation;
   const listeners = new Set<(loc: RoutingLocation) => void>();
-  const navigateCalls: Array<{ to: string; options?: { replace?: boolean } }> =
-    [];
+  const navigateCalls: Array<{
+    to: string;
+    options?: { replace?: boolean; state?: unknown };
+  }> = [];
 
   return {
     basePath: '/test',
@@ -62,7 +68,7 @@ function createMockContract(
         return this;
       },
     },
-    navigate(to: string, options?: { replace?: boolean }) {
+    navigate(to: string, options?: { replace?: boolean; state?: unknown }) {
       navigateCalls.push({ to, options });
     },
     pushLocation(loc: RoutingLocation) {
@@ -79,6 +85,7 @@ describe('ScopedRouterProvider', () => {
       pathname: '/hello',
       search: '',
       hash: '',
+      state: null,
     });
 
     const { getByText } = render(
@@ -98,6 +105,7 @@ describe('ScopedRouterProvider', () => {
       pathname: '/',
       search: '',
       hash: '',
+      state: null,
     });
 
     render(
@@ -118,6 +126,7 @@ describe('ScopedRouterProvider', () => {
       pathname: '/page-a',
       search: '',
       hash: '',
+      state: null,
     });
 
     function LocationDisplay() {
@@ -138,10 +147,36 @@ describe('ScopedRouterProvider', () => {
         pathname: '/page-b',
         search: '',
         hash: '',
+        state: null,
       });
     });
 
     expect(getByTestId('location').textContent).toBe('/page-b');
+  });
+
+  it('should pass state through to useLocation().state', () => {
+    const contract = createMockContract({
+      pathname: '/page',
+      search: '',
+      hash: '',
+      state: { from: '/login', returnTo: '/dashboard' },
+    });
+
+    function StateDisplay() {
+      const location = useLocation();
+      return <div data-testid="state">{JSON.stringify(location.state)}</div>;
+    }
+
+    const { getByTestId } = render(
+      <ScopedRouterProvider contract={contract}>
+        <StateDisplay />
+      </ScopedRouterProvider>,
+    );
+
+    expect(JSON.parse(getByTestId('state').textContent!)).toEqual({
+      from: '/login',
+      returnTo: '/dashboard',
+    });
   });
 
   it('should render children directly when no contract is provided', () => {

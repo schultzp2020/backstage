@@ -21,11 +21,12 @@ export interface RoutingLocation {
   pathname: string;
   search: string;
   hash: string;
+  state: unknown;
 }
 
 /** @public */
 export interface RoutingContract {
   readonly basePath: string;
   readonly location$: Observable<RoutingLocation>;
-  navigate(to: string, options?: { replace?: boolean }): void;
+  navigate(to: string, options?: { replace?: boolean; state?: unknown }): void;
 }
