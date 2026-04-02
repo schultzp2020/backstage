@@ -18,6 +18,7 @@ import { useMemo, type ReactNode } from 'react';
 import {
   UNSAFE_LocationContext,
   UNSAFE_NavigationContext,
+  UNSAFE_RouteContext,
   NavigationType,
 } from 'react-router-dom';
 import type { RoutingContract } from '../routing';
@@ -29,24 +30,26 @@ import {
 /**
  * Sets up a scoped React Router v6 context from a RoutingContract.
  *
- * This uses the UNSAFE_ context APIs from react-router directly
- * instead of `<Router>`, which would throw when nested inside the
- * global `<BrowserRouter>` during Phase A.
+ * Uses the UNSAFE_ context APIs from react-router directly instead of
+ * `<Router>`, which throws when nested inside another router. This
+ * allows multiple independent ScopedRouterProviders (root + per-plugin)
+ * without router nesting conflicts.
  *
  * @internal
  */
 export function ScopedRouterProvider(props: {
   contract: RoutingContract | undefined;
   children: ReactNode;
+  basename?: string;
 }) {
-  const { contract, children } = props;
+  const { contract, children, basename = '' } = props;
 
   if (!contract) {
     return <>{children}</>;
   }
 
   return (
-    <ScopedRouterProviderInner contract={contract}>
+    <ScopedRouterProviderInner contract={contract} basename={basename}>
       {children}
     </ScopedRouterProviderInner>
   );
@@ -67,11 +70,19 @@ function toPath(
   return path;
 }
 
+function stripBasename(path: string, basename: string): string {
+  if (!basename) return path;
+  if (path === basename) return '/';
+  if (path.startsWith(`${basename}/`)) return path.slice(basename.length);
+  return path;
+}
+
 function ScopedRouterProviderInner(props: {
   contract: RoutingContract;
   children: ReactNode;
+  basename: string;
 }) {
-  const { contract, children } = props;
+  const { contract, children, basename } = props;
 
   const location = useObservableAsState(
     contract.location$,
@@ -104,31 +115,33 @@ function ScopedRouterProviderInner(props: {
         to: string | { pathname?: string; search?: string; hash?: string },
         state?: unknown,
       ) {
-        contract.navigate(toPath(to, location.pathname), { state });
+        const path = toPath(to, location.pathname);
+        contract.navigate(stripBasename(path, basename), { state });
       },
       replace(
         to: string | { pathname?: string; search?: string; hash?: string },
         state?: unknown,
       ) {
-        contract.navigate(toPath(to, location.pathname), {
+        const path = toPath(to, location.pathname);
+        contract.navigate(stripBasename(path, basename), {
           replace: true,
           state,
         });
       },
     }),
-    [contract, location.pathname],
+    [contract, location.pathname, basename],
   );
 
   const navigationContextValue = useMemo(
     () => ({
-      basename: '',
+      basename,
       navigator,
       static: false,
       future: {
         v7_relativeSplatPath: false,
       },
     }),
-    [navigator],
+    [basename, navigator],
   );
 
   const locationContextValue = useMemo(
@@ -139,10 +152,21 @@ function ScopedRouterProviderInner(props: {
     [routerLocation],
   );
 
+  const routeContextValue = useMemo(
+    () => ({
+      outlet: null,
+      matches: [],
+      isDataRoute: false,
+    }),
+    [],
+  );
+
   return (
     <UNSAFE_NavigationContext.Provider value={navigationContextValue}>
       <UNSAFE_LocationContext.Provider value={locationContextValue}>
-        {children}
+        <UNSAFE_RouteContext.Provider value={routeContextValue}>
+          {children}
+        </UNSAFE_RouteContext.Provider>
       </UNSAFE_LocationContext.Provider>
     </UNSAFE_NavigationContext.Provider>
   );

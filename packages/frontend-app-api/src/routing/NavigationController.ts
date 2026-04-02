@@ -107,8 +107,6 @@ export class NavigationController {
 
     // Emit directly rather than dispatching a synthetic popstate event.
     // popstate should only fire for real browser back/forward navigation.
-    // Dispatching it synthetically could interfere with other popstate
-    // listeners (e.g., BrowserRouter during Phase A coexistence).
     this.emit();
   }
 
