@@ -44,6 +44,8 @@ export function createScopedRouter(
   // Instance-scoped guard flags to prevent circular updates
   let isUpdatingFromContract = false;
   let isUpdatingFromRouter = false;
+  // Track the last path forwarded to contract to avoid redundant navigations
+  let lastForwardedPath = '';
 
   // Create memory history with initial location from contract.
   // The contract emits synchronously on subscribe, so we capture it.
@@ -54,6 +56,7 @@ export function createScopedRouter(
     initialSearch = loc.search;
   });
   initialSub.unsubscribe();
+  lastForwardedPath = `${initialPathname}${initialSearch}`;
 
   const memoryHistory = createMemoryHistory({
     initialEntries: [`${initialPathname}${initialSearch}`],
@@ -78,7 +81,9 @@ export function createScopedRouter(
     if (newPath !== currentPath) {
       isUpdatingFromContract = true;
       memoryHistory.push(newPath);
-      router.load();
+      router.load().catch(() => {
+        // Route resolution errors are handled by TanStack Router's error boundary
+      });
       isUpdatingFromContract = false;
     }
   });
@@ -88,11 +93,13 @@ export function createScopedRouter(
     if (isUpdatingFromContract) {
       return; // Skip - this was caused by our own contract sync
     }
+    const historyPath = `${memoryHistory.location.pathname}${memoryHistory.location.search}${memoryHistory.location.hash}`;
+    if (historyPath === lastForwardedPath) {
+      return; // Skip - path unchanged (e.g., URL normalization)
+    }
     isUpdatingFromRouter = true;
-    contract.navigate(
-      `${memoryHistory.location.pathname}${memoryHistory.location.search}${memoryHistory.location.hash}`,
-      { replace: false },
-    );
+    lastForwardedPath = historyPath;
+    contract.navigate(historyPath, { replace: false });
     isUpdatingFromRouter = false;
   });
 

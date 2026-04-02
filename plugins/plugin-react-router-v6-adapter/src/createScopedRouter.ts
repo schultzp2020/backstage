@@ -54,6 +54,12 @@ export interface ScopedRouterResult {
 export function createScopedRouter(
   contract: RoutingContract,
 ): ScopedRouterResult {
+  if (!contract) {
+    throw new Error(
+      'createScopedRouter requires a RoutingContract. Ensure this component is rendered inside a PageBlueprint.',
+    );
+  }
+
   // Store for useSyncExternalStore — keeps the latest location from the contract
   let latestLocation: Location = {
     pathname: '/',
