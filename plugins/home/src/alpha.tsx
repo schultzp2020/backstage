@@ -24,7 +24,13 @@
  * @packageDocumentation
  */
 
-import { type ReactNode, lazy as reactLazy, useRef, useEffect } from 'react';
+import {
+  type ReactNode,
+  lazy as reactLazy,
+  useContext,
+  useRef,
+  useEffect,
+} from 'react';
 import {
   createExtensionInput,
   PageBlueprint,
@@ -37,7 +43,7 @@ import {
   errorApiRef,
   ApiBlueprint,
   ExtensionBoundary,
-  useRoutingContract,
+  RoutingContractContext,
 } from '@backstage/frontend-plugin-api';
 import { VisitListener } from './components/';
 import { visitsApiRef, VisitsStorageApi, VisitsWebStorageApi } from './api';
@@ -57,7 +63,7 @@ import {
 const rootRouteRef = createRouteRef();
 
 function HomeAdapterRoot({ children }: { children: ReactNode }) {
-  const contract = useRoutingContract();
+  const contract = useContext(RoutingContractContext);
   const scopedRouterRef = useRef<TanStackScopedRouterResult | null>(null);
 
   useEffect(() => {

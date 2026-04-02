@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { type ReactNode, useRef, useEffect } from 'react';
+import { type ReactNode, useContext, useRef, useEffect } from 'react';
 import {
   coreExtensionData,
   createExtensionInput,
@@ -21,7 +21,7 @@ import {
   PageBlueprint,
   NavItemBlueprint,
   SubPageBlueprint,
-  useRoutingContract,
+  RoutingContractContext,
 } from '@backstage/frontend-plugin-api';
 import {
   createScopedRouter,
@@ -40,7 +40,7 @@ import { userSettingsTranslationRef as _userSettingsTranslationRef } from './tra
 export const userSettingsTranslationRef = _userSettingsTranslationRef;
 
 function SettingsAdapterRoot({ children }: { children: ReactNode }) {
-  const contract = useRoutingContract();
+  const contract = useContext(RoutingContractContext);
   const scopedRouterRef = useRef<ScopedRouterResult | null>(null);
 
   useEffect(() => {
