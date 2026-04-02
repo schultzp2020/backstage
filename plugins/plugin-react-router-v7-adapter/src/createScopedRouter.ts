@@ -1,0 +1,198 @@
+/*
+ * Copyright 2026 The Backstage Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {
+  createElement,
+  useMemo,
+  useSyncExternalStore,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
+import type { RoutingContract } from '@backstage/frontend-plugin-api';
+import {
+  UNSAFE_LocationContext,
+  UNSAFE_NavigationContext,
+  UNSAFE_RouteContext,
+  NavigationType,
+  useLocation as useRRLocation,
+  useNavigate as useRRNavigate,
+  useParams as useRRParams,
+  useSearchParams as useRRSearchParams,
+} from 'react-router';
+import type { Location, NavigateFunction, Navigator, To } from 'react-router';
+
+/** @public */
+export interface ScopedRouterResult {
+  Router: ComponentType<{ children: ReactNode }>;
+  useLocation: () => Location;
+  useNavigate: () => NavigateFunction;
+  useParams: <T extends Record<string, string | undefined>>() => T;
+  useSearchParams: (
+    ...args: Parameters<typeof useRRSearchParams>
+  ) => ReturnType<typeof useRRSearchParams>;
+  /** Unsubscribes from the contract's location$ observable. */
+  dispose: () => void;
+}
+
+/** @public */
+export function createScopedRouter(
+  contract: RoutingContract,
+): ScopedRouterResult {
+  if (!contract) {
+    throw new Error(
+      'createScopedRouter requires a RoutingContract. Ensure this component is rendered inside a PageBlueprint.',
+    );
+  }
+
+  // Store for useSyncExternalStore — keeps the latest location from the contract
+  let latestLocation: Location = {
+    pathname: '/',
+    search: '',
+    hash: '',
+    state: null,
+    key: 'default',
+  };
+
+  // Set of listener callbacks for useSyncExternalStore
+  const listeners = new Set<() => void>();
+
+  // Subscribe to the contract's location$ eagerly so we capture the initial value.
+  // The subscription is stored so it can be cleaned up via dispose().
+  const subscription = contract.location$.subscribe(routingLocation => {
+    latestLocation = {
+      pathname: routingLocation.pathname,
+      search: routingLocation.search,
+      hash: routingLocation.hash,
+      state: routingLocation.state ?? null,
+      key: 'default',
+    };
+    for (const listener of listeners) {
+      listener();
+    }
+  });
+
+  function subscribe(listener: () => void): () => void {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  }
+
+  function getSnapshot(): Location {
+    return latestLocation;
+  }
+
+  function ScopedRouter({ children }: { children: ReactNode }) {
+    const location = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+    const locationContextValue = useMemo(
+      () => ({
+        location,
+        navigationType: NavigationType.Pop,
+      }),
+      [location],
+    );
+
+    const navigator: Navigator = useMemo(
+      () => ({
+        createHref(to: To): string {
+          if (typeof to === 'string') {
+            return to;
+          }
+          const { pathname = '/', search = '', hash = '' } = to;
+          return `${pathname}${search}${hash}`;
+        },
+        go(delta: number): void {
+          // Intentional: delegate to window.history.go()
+          // popstate fires and NavigationController catches it
+          window.history.go(delta);
+        },
+        push(to: To, state?: any, _opts?: any): void {
+          const path =
+            typeof to === 'string'
+              ? to
+              : createPath(to, latestLocation.pathname);
+          contract.navigate(path, { replace: false, state });
+        },
+        replace(to: To, state?: any, _opts?: any): void {
+          const path =
+            typeof to === 'string'
+              ? to
+              : createPath(to, latestLocation.pathname);
+          contract.navigate(path, { replace: true, state });
+        },
+      }),
+      [],
+    );
+
+    // CORRECTION from Phase 1 review: v7 NavigationContextObject requires
+    // future: {} (empty object) and unstable_useTransitions: boolean | undefined
+    const navigationContextValue = useMemo(
+      () => ({
+        basename: '',
+        navigator,
+        static: false,
+        future: {},
+        unstable_useTransitions: undefined,
+      }),
+      [navigator],
+    );
+
+    const routeContextValue = useMemo(
+      () => ({
+        outlet: null,
+        matches: [] as any[],
+        isDataRoute: false,
+      }),
+      [],
+    );
+
+    return createElement(
+      UNSAFE_NavigationContext.Provider,
+      { value: navigationContextValue },
+      createElement(
+        UNSAFE_LocationContext.Provider,
+        { value: locationContextValue },
+        createElement(
+          UNSAFE_RouteContext.Provider,
+          { value: routeContextValue },
+          children,
+        ),
+      ),
+    );
+  }
+
+  return {
+    Router: ScopedRouter,
+    useLocation: (): Location => useRRLocation(),
+    useNavigate: (): NavigateFunction => useRRNavigate(),
+    useParams: <T extends Record<string, string | undefined>>(): T =>
+      useRRParams() as T,
+    useSearchParams: (...args: Parameters<typeof useRRSearchParams>) =>
+      useRRSearchParams(...args),
+    dispose: () => subscription.unsubscribe(),
+  };
+}
+
+function createPath(
+  to: Partial<{ pathname: string; search: string; hash: string }>,
+  currentPathname: string,
+): string {
+  // Use current pathname when To.pathname is undefined (e.g., useSearchParams
+  // updates only search params without specifying a pathname)
+  const { pathname = currentPathname, search = '', hash = '' } = to;
+  return `${pathname}${search}${hash}`;
+}
