@@ -21,6 +21,7 @@ import type {
   RoutingLocation,
 } from '@backstage/frontend-plugin-api';
 import type { Observer, Subscription } from '@backstage/types';
+import { useParams, useOutlet } from 'react-router-dom';
 import { createScopedRouter } from './createScopedRouter';
 
 function createMockContract(
@@ -236,6 +237,33 @@ describe('createScopedRouter', () => {
     expect(screen.getByTestId('pathname')).toHaveTextContent(
       '/catalog/entity/foo',
     );
+  });
+
+  it('should provide UNSAFE_RouteContext with empty defaults', () => {
+    const contract = createMockContract();
+    const { Router } = createScopedRouter(contract);
+
+    function RouteContextInspector() {
+      const params = useParams();
+      const outlet = useOutlet();
+      return (
+        <div>
+          <span data-testid="params">{JSON.stringify(params)}</span>
+          <span data-testid="outlet">
+            {outlet === null ? 'null' : 'present'}
+          </span>
+        </div>
+      );
+    }
+
+    render(
+      <Router>
+        <RouteContextInspector />
+      </Router>,
+    );
+
+    expect(screen.getByTestId('params')).toHaveTextContent('{}');
+    expect(screen.getByTestId('outlet')).toHaveTextContent('null');
   });
 
   it('should return useLocation, useNavigate, useParams, useSearchParams', () => {

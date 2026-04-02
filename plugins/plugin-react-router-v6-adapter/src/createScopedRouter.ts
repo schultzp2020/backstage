@@ -25,6 +25,7 @@ import type { RoutingContract } from '@backstage/frontend-plugin-api';
 import {
   UNSAFE_LocationContext,
   UNSAFE_NavigationContext,
+  UNSAFE_RouteContext,
   NavigationType,
 } from 'react-router';
 import type { Navigator } from 'react-router';
@@ -146,13 +147,26 @@ export function createScopedRouter(
       [navigator],
     );
 
+    const routeContextValue = useMemo(
+      () => ({
+        outlet: null,
+        matches: [] as any[],
+        isDataRoute: false,
+      }),
+      [],
+    );
+
     return createElement(
       UNSAFE_NavigationContext.Provider,
       { value: navigationContextValue },
       createElement(
         UNSAFE_LocationContext.Provider,
         { value: locationContextValue },
-        children,
+        createElement(
+          UNSAFE_RouteContext.Provider,
+          { value: routeContextValue },
+          children,
+        ),
       ),
     );
   }
