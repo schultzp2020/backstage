@@ -5480,6 +5480,7 @@ __metadata:
     "@backstage/plugin-catalog-react": "workspace:^"
     "@backstage/plugin-permission-common": "workspace:^"
     "@backstage/plugin-permission-react": "workspace:^"
+    "@backstage/plugin-react-router-v6-adapter": "workspace:^"
     "@backstage/plugin-scaffolder-common": "workspace:^"
     "@backstage/plugin-search-common": "workspace:^"
     "@backstage/plugin-search-react": "workspace:^"
@@ -5914,6 +5915,7 @@ __metadata:
     "@backstage/plugin-catalog": "workspace:^"
     "@backstage/plugin-catalog-react": "workspace:^"
     "@backstage/plugin-home-react": "workspace:^"
+    "@backstage/plugin-tanstack-router-adapter": "workspace:^"
     "@backstage/test-utils": "workspace:^"
     "@backstage/theme": "workspace:^"
     "@material-ui/core": "npm:^4.12.2"
@@ -5923,6 +5925,7 @@ __metadata:
     "@rjsf/material-ui": "npm:5.24.13"
     "@rjsf/utils": "npm:5.24.13"
     "@rjsf/validator-ajv8": "npm:5.24.13"
+    "@tanstack/react-router": "npm:^1.0.0"
     "@testing-library/dom": "npm:^10.0.0"
     "@testing-library/jest-dom": "npm:^6.0.0"
     "@testing-library/react": "npm:^16.0.0"
@@ -5939,6 +5942,7 @@ __metadata:
     react-use: "npm:^17.2.4"
     zod: "npm:^3.25.76 || ^4.0.0"
   peerDependencies:
+    "@tanstack/react-router": ^1.0.0
     "@types/react": ^17.0.0 || ^18.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
@@ -6574,7 +6578,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@backstage/plugin-react-router-v6-adapter@workspace:plugins/plugin-react-router-v6-adapter":
+"@backstage/plugin-react-router-v6-adapter@workspace:^, @backstage/plugin-react-router-v6-adapter@workspace:plugins/plugin-react-router-v6-adapter":
   version: 0.0.0-use.local
   resolution: "@backstage/plugin-react-router-v6-adapter@workspace:plugins/plugin-react-router-v6-adapter"
   dependencies:
@@ -6600,7 +6604,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@backstage/plugin-react-router-v7-adapter@workspace:plugins/plugin-react-router-v7-adapter":
+"@backstage/plugin-react-router-v7-adapter@workspace:^, @backstage/plugin-react-router-v7-adapter@workspace:plugins/plugin-react-router-v7-adapter":
   version: 0.0.0-use.local
   resolution: "@backstage/plugin-react-router-v7-adapter@workspace:plugins/plugin-react-router-v7-adapter"
   dependencies:
@@ -7539,7 +7543,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@backstage/plugin-tanstack-router-adapter@workspace:plugins/plugin-tanstack-router-adapter":
+"@backstage/plugin-tanstack-router-adapter@workspace:^, @backstage/plugin-tanstack-router-adapter@workspace:plugins/plugin-tanstack-router-adapter":
   version: 0.0.0-use.local
   resolution: "@backstage/plugin-tanstack-router-adapter@workspace:plugins/plugin-tanstack-router-adapter"
   dependencies:
@@ -7854,6 +7858,7 @@ __metadata:
     "@backstage/frontend-plugin-api": "workspace:^"
     "@backstage/plugin-catalog": "workspace:^"
     "@backstage/plugin-catalog-react": "workspace:^"
+    "@backstage/plugin-react-router-v7-adapter": "workspace:^"
     "@backstage/plugin-signals-react": "workspace:^"
     "@backstage/plugin-user-settings-common": "workspace:^"
     "@backstage/test-utils": "workspace:^"
@@ -7872,6 +7877,7 @@ __metadata:
     msw: "npm:^1.0.0"
     react: "npm:^18.0.2"
     react-dom: "npm:^18.0.2"
+    react-router: "npm:^7.0.0"
     react-router-dom: "npm:^6.30.2"
     react-use: "npm:^17.2.4"
     zen-observable: "npm:^0.10.0"
@@ -7879,6 +7885,7 @@ __metadata:
     "@types/react": ^17.0.0 || ^18.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
+    react-router: ^7.0.0
     react-router-dom: ^6.30.2
   peerDependenciesMeta:
     "@types/react":

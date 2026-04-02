@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import { lazy as reactLazy } from 'react';
+import { type ReactNode, lazy as reactLazy, useRef, useEffect } from 'react';
 import {
   createExtensionInput,
   PageBlueprint,
@@ -37,6 +37,7 @@ import {
   errorApiRef,
   ApiBlueprint,
   ExtensionBoundary,
+  useRoutingContract,
 } from '@backstage/frontend-plugin-api';
 import { VisitListener } from './components/';
 import { visitsApiRef, VisitsStorageApi, VisitsWebStorageApi } from './api';
@@ -48,8 +49,42 @@ import {
   HomePageWidgetBlueprint,
   type HomePageLayoutProps,
 } from '@backstage/plugin-home-react/alpha';
+import {
+  createScopedRouter,
+  type TanStackScopedRouterResult,
+} from '@backstage/plugin-tanstack-router-adapter';
 
 const rootRouteRef = createRouteRef();
+
+function HomeAdapterRoot({ children }: { children: ReactNode }) {
+  const contract = useRoutingContract();
+  const scopedRouterRef = useRef<TanStackScopedRouterResult | null>(null);
+
+  useEffect(() => {
+    return () => {
+      scopedRouterRef.current?.dispose();
+      scopedRouterRef.current = null;
+    };
+  }, [contract]);
+
+  if (!contract) {
+    return <>{children}</>;
+  }
+
+  if (!scopedRouterRef.current) {
+    scopedRouterRef.current = createScopedRouter(contract);
+  }
+
+  // TanStack RouterProvider renders its route tree internally and does not
+  // accept children. For the home plugin (no TanStack routes, proof-of-concept),
+  // render the provider alongside children.
+  return (
+    <>
+      <scopedRouterRef.current.RouterProvider />
+      {children}
+    </>
+  );
+}
 
 const homePage = PageBlueprint.makeWithOverrides({
   inputs: {
@@ -87,7 +122,11 @@ const homePage = PageBlueprint.makeWithOverrides({
           node: widget.node,
         }));
 
-        return <Layout widgets={widgets} />;
+        return (
+          <HomeAdapterRoot>
+            <Layout widgets={widgets} />
+          </HomeAdapterRoot>
+        );
       },
     });
   },
