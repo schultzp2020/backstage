@@ -116,4 +116,70 @@ describe('RouteTable', () => {
     expect(table.match('/catalog')).toBe('/catalog');
     warnSpy.mockRestore();
   });
+
+  describe('root catch-all dev warning', () => {
+    const env = process.env as Record<string, string | undefined>;
+    const originalEnv = env.NODE_ENV;
+
+    afterEach(() => {
+      env.NODE_ENV = originalEnv;
+    });
+
+    it('should warn when a multi-segment path falls through to root', () => {
+      env.NODE_ENV = 'development';
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const table = new RouteTable(['/', '/catalog']);
+
+      table.match('/unknown/deep/path');
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('fell through to the root "/" catch-all'),
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('should not warn for single-segment paths falling through to root', () => {
+      env.NODE_ENV = 'development';
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const table = new RouteTable(['/', '/catalog']);
+
+      table.match('/unknown');
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('should not warn when a non-root route matches', () => {
+      env.NODE_ENV = 'development';
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const table = new RouteTable(['/', '/catalog']);
+
+      table.match('/catalog/foo/bar');
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('should not warn for the root path itself', () => {
+      env.NODE_ENV = 'development';
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const table = new RouteTable(['/']);
+
+      table.match('/');
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('should not warn in production', () => {
+      env.NODE_ENV = 'production';
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const table = new RouteTable(['/', '/catalog']);
+
+      table.match('/unknown/deep/path');
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+  });
 });

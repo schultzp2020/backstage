@@ -62,6 +62,15 @@ import {
 
 const rootRouteRef = createRouteRef();
 
+/**
+ * Adapter root for TanStack Router integration.
+ *
+ * Uses the TanStack adapter's `Router` component which renders children inside
+ * the TanStack router context via a root route component. This allows children
+ * to use TanStack routing hooks (useNavigate, useParams, etc.).
+ *
+ * @internal
+ */
 function HomeAdapterRoot({ children }: { children: ReactNode }) {
   const contract = useContext(RoutingContractContext);
   const scopedRouterRef = useRef<TanStackScopedRouterResult | null>(null);
@@ -81,14 +90,8 @@ function HomeAdapterRoot({ children }: { children: ReactNode }) {
     scopedRouterRef.current = createScopedRouter(contract);
   }
 
-  // TanStack RouterProvider renders its route tree internally and does not
-  // accept children. For the home plugin (no TanStack routes, proof-of-concept),
-  // render the provider alongside children.
   return (
-    <>
-      <scopedRouterRef.current.RouterProvider />
-      {children}
-    </>
+    <scopedRouterRef.current.Router>{children}</scopedRouterRef.current.Router>
   );
 }
 

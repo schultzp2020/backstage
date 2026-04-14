@@ -27,6 +27,14 @@ export interface RoutingLocation {
 /** @public */
 export interface RoutingContract {
   readonly basePath: string;
+  /**
+   * Observable stream of the current location within this contract's scope.
+   *
+   * **Invariant:** Implementations MUST emit the current location synchronously
+   * upon subscription. Router adapters depend on this behavior to capture the
+   * initial location without a render cycle delay. An async-emitting implementation
+   * will cause adapters to briefly display the wrong route on mount.
+   */
   readonly location$: Observable<RoutingLocation>;
   navigate(to: string, options?: { replace?: boolean; state?: unknown }): void;
 }

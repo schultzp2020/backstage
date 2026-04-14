@@ -21,6 +21,10 @@ import {
   useApp,
 } from '@backstage/core-plugin-api';
 import { NotImplementedError } from '@backstage/errors';
+import type {
+  NavigationControllerApi,
+  RoutingContract,
+} from '@backstage/frontend-plugin-api';
 // eslint-disable-next-line no-restricted-imports
 import MaterialLink, {
   LinkProps as MaterialLinkProps,
@@ -46,61 +50,20 @@ import {
 } from 'react-router-dom';
 import OpenInNew from '@material-ui/icons/OpenInNew';
 import { getOrCreateGlobalSingleton } from '@backstage/version-bridge';
-import type { Observable } from '@backstage/types';
-
-/**
- * Routing contract interface matching the one in @backstage/frontend-plugin-api.
- *
- * Defined locally to avoid a circular dependency:
- * @backstage/core-components cannot depend on @backstage/frontend-plugin-api
- * because frontend-plugin-api already depends on core-components (transitively
- * via core-plugin-api). Extracting these types to a shared package (e.g.,
- * @backstage/types) is a future option but would require a broader refactor.
- *
- * The `routingContractContext` and `navigationControllerApiRef` singletons
- * below use the same string keys as their counterparts in frontend-plugin-api,
- * so they resolve to the same runtime instances via @backstage/version-bridge
- * and Backstage's id-based ApiRef resolution respectively.
- *
- * @internal
- */
-interface RoutingContract {
-  readonly basePath: string;
-  readonly location$: Observable<{
-    pathname: string;
-    search: string;
-    hash: string;
-    state: unknown;
-  }>;
-  navigate(to: string, options?: { replace?: boolean; state?: unknown }): void;
-}
 
 /**
  * A global singleton React context for the routing contract, shared between
  * core-components and frontend-plugin-api via @backstage/version-bridge.
+ *
+ * The runtime value stays local so both packages can resolve the same
+ * singleton without importing each other's concrete context value.
+ *
  * @internal
  */
 export const routingContractContext = getOrCreateGlobalSingleton(
   'routing-contract-context',
   () => createContext<RoutingContract | undefined>(undefined),
 );
-
-/**
- * Navigation controller API interface matching the one in @backstage/frontend-plugin-api.
- * @internal
- */
-interface NavigationControllerApi {
-  navigate(
-    path: string,
-    options?: { replace?: boolean; state?: unknown },
-  ): void;
-  readonly location$: Observable<{
-    pathname: string;
-    search: string;
-    hash: string;
-    state: unknown;
-  }>;
-}
 
 /**
  * Local API ref for the navigation controller, using the same id as in
