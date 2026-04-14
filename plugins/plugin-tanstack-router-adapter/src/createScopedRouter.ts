@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import React, { type ComponentType } from 'react';
+import {
+  createContext,
+  createElement,
+  Fragment,
+  useContext,
+  useEffect,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import type { RoutingContract } from '@backstage/frontend-plugin-api';
 import {
   createMemoryHistory,
@@ -24,8 +32,16 @@ import {
   type AnyRouter,
 } from '@tanstack/react-router';
 
+const ChildrenContext = createContext<ReactNode>(null);
+
 /** @public */
 export interface TanStackScopedRouterResult {
+  /** Wraps children inside the TanStack router context so they can use TanStack hooks. */
+  Router: ComponentType<{ children: ReactNode }>;
+  /**
+   * Standalone router provider without children support.
+   * Prefer `Router` for rendering plugin content.
+   */
   RouterProvider: ComponentType;
   router: AnyRouter;
   dispose: () => void;
@@ -62,57 +78,92 @@ export function createScopedRouter(
     initialEntries: [`${initialPathname}${initialSearch}`],
   });
 
-  // Catch-all root route
-  const rootRoute = createRootRoute();
+  // Root route renders children passed via ChildrenContext, so plugin content
+  // lives inside the TanStack router context and can use TanStack hooks.
+  function RootComponent() {
+    return createElement(Fragment, null, useContext(ChildrenContext));
+  }
+  const rootRoute = createRootRoute({ component: RootComponent });
 
   const router = createRouter({
     routeTree: rootRoute,
     history: memoryHistory,
   });
 
-  // Contract -> TanStack sync: when contract emits, update memory history
-  const contractSubscription = contract.location$.subscribe(loc => {
-    if (isUpdatingFromRouter) {
-      return; // Skip - this emission was caused by our own navigate
-    }
-    const newPath = `${loc.pathname}${loc.search}${loc.hash}`;
-    const currentPath = `${memoryHistory.location.pathname}${memoryHistory.location.search}${memoryHistory.location.hash}`;
+  // Subscription references — managed by RouterProvider's useEffect lifecycle
+  let contractSubscription: { unsubscribe(): void } | undefined;
+  let historyUnsubscribe: (() => void) | undefined;
 
-    if (newPath !== currentPath) {
-      isUpdatingFromContract = true;
-      memoryHistory.push(newPath);
-      router.load().catch(() => {
-        // Route resolution errors are handled by TanStack Router's error boundary
-      });
-      isUpdatingFromContract = false;
-    }
-  });
+  function subscribeToContract(): void {
+    if (contractSubscription || historyUnsubscribe) return;
 
-  // TanStack -> Contract sync: when router navigates, forward to contract
-  const historyUnsubscribe = memoryHistory.subscribe(() => {
-    if (isUpdatingFromContract) {
-      return; // Skip - this was caused by our own contract sync
-    }
-    const historyPath = `${memoryHistory.location.pathname}${memoryHistory.location.search}${memoryHistory.location.hash}`;
-    if (historyPath === lastForwardedPath) {
-      return; // Skip - path unchanged (e.g., URL normalization)
-    }
-    isUpdatingFromRouter = true;
-    lastForwardedPath = historyPath;
-    contract.navigate(historyPath, { replace: false });
-    isUpdatingFromRouter = false;
-  });
+    // Contract -> TanStack sync: when contract emits, update memory history
+    contractSubscription = contract.location$.subscribe(loc => {
+      if (isUpdatingFromRouter) {
+        return; // Skip - this emission was caused by our own navigate
+      }
+      const newPath = `${loc.pathname}${loc.search}${loc.hash}`;
+      const currentPath = `${memoryHistory.location.pathname}${memoryHistory.location.search}${memoryHistory.location.hash}`;
+
+      if (newPath !== currentPath) {
+        isUpdatingFromContract = true;
+        memoryHistory.push(newPath);
+        router.load().catch(() => {
+          // Route resolution errors are handled by TanStack Router's error boundary
+        });
+        isUpdatingFromContract = false;
+      }
+    });
+
+    // TanStack -> Contract sync: when router navigates, forward to contract
+    historyUnsubscribe = memoryHistory.subscribe(() => {
+      if (isUpdatingFromContract) {
+        return; // Skip - this was caused by our own contract sync
+      }
+      const historyPath = `${memoryHistory.location.pathname}${memoryHistory.location.search}${memoryHistory.location.hash}`;
+      if (historyPath === lastForwardedPath) {
+        return; // Skip - path unchanged (e.g., URL normalization)
+      }
+      isUpdatingFromRouter = true;
+      lastForwardedPath = historyPath;
+      contract.navigate(historyPath, { replace: false });
+      isUpdatingFromRouter = false;
+    });
+  }
+
+  function unsubscribeAll(): void {
+    contractSubscription?.unsubscribe();
+    contractSubscription = undefined;
+    historyUnsubscribe?.();
+    historyUnsubscribe = undefined;
+  }
 
   function RouterProviderComponent() {
-    return React.createElement(TanStackRouterProvider, { router });
+    // Subscriptions are managed by useSyncExternalStore's subscribe lifecycle
+    // in the React Router adapters. TanStack adapter does not use
+    // useSyncExternalStore, so we use useEffect for lifecycle management.
+    // This is safe because TanStack's RouterProvider handles its own rendering
+    // and the subscriptions only sync state between contract and memory history.
+    useEffect(() => {
+      subscribeToContract();
+      return () => unsubscribeAll();
+    }, []);
+
+    return createElement(TanStackRouterProvider, { router });
+  }
+
+  function ScopedRouter({ children }: { children: ReactNode }) {
+    return createElement(
+      ChildrenContext.Provider,
+      { value: children },
+      createElement(RouterProviderComponent),
+    );
   }
 
   return {
+    Router: ScopedRouter,
     RouterProvider: RouterProviderComponent,
     router,
-    dispose: () => {
-      contractSubscription.unsubscribe();
-      historyUnsubscribe();
-    },
+    dispose: () => unsubscribeAll(),
   };
 }

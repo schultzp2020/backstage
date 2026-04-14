@@ -15,6 +15,7 @@
  */
 
 import { BackstageRouteObject } from './types';
+import { escapeRegExp } from './escapeRegExp';
 
 /** @internal */
 export interface RouteRefMatch {
@@ -72,10 +73,6 @@ function compilePath(
     regexp: new RegExp(regexpSource),
     paramNames,
   };
-}
-
-function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function matchPath(

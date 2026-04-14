@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { render, act } from '@testing-library/react';
+import { render, act, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type {
   RoutingContract,
@@ -22,6 +22,7 @@ import type {
 } from '@backstage/frontend-plugin-api';
 import type { Observer, Subscription } from '@backstage/types';
 import { createScopedRouter } from './createScopedRouter';
+import { useRouterState } from '@tanstack/react-router';
 
 function createMockContract(
   initialLocation: RoutingLocation = {
@@ -80,8 +81,8 @@ describe('createScopedRouter (TanStack)', () => {
     const contract = createMockContract();
     const { RouterProvider } = createScopedRouter(contract);
 
-    render(<RouterProvider />);
-    // If it renders without throwing, the adapter wired up correctly
+    const { container } = render(<RouterProvider />);
+    expect(container).toBeDefined();
   });
 
   it('should sync initial location from contract', () => {
@@ -96,7 +97,7 @@ describe('createScopedRouter (TanStack)', () => {
     expect(result.router.state.location.pathname).toBe('/home');
   });
 
-  it('should update when contract emits new location', () => {
+  it('should update when contract emits new location', async () => {
     const contract = createMockContract({
       pathname: '/home',
       search: '',
@@ -104,6 +105,16 @@ describe('createScopedRouter (TanStack)', () => {
       state: undefined,
     });
     const result = createScopedRouter(contract);
+
+    // Subscriptions are only active when RouterProvider is mounted
+    render(
+      <result.Router>
+        <div data-testid="mounted">ok</div>
+      </result.Router>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('mounted')).toBeInTheDocument();
+    });
 
     act(() => {
       contract.emit({
@@ -146,5 +157,82 @@ describe('createScopedRouter (TanStack)', () => {
     expect(typeof result.router.state).toBe('object');
     expect(typeof result.dispose).toBe('function');
     expect(typeof result.RouterProvider).toBe('function');
+    expect(typeof result.Router).toBe('function');
+  });
+
+  describe('Router (children wrapper)', () => {
+    it('should render children inside the TanStack router context', async () => {
+      const contract = createMockContract();
+      const { Router } = createScopedRouter(contract);
+
+      render(
+        <Router>
+          <div data-testid="child">Hello from inside TanStack</div>
+        </Router>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('child')).toHaveTextContent(
+          'Hello from inside TanStack',
+        );
+      });
+    });
+
+    it('should give children access to TanStack router state', async () => {
+      const contract = createMockContract({
+        pathname: '/home/dashboard',
+        search: '?tab=overview',
+        hash: '',
+        state: undefined,
+      });
+      const { Router } = createScopedRouter(contract);
+
+      function LocationDisplay() {
+        const { location } = useRouterState();
+        return <div data-testid="location">{location.pathname}</div>;
+      }
+
+      render(
+        <Router>
+          <LocationDisplay />
+        </Router>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('location')).toHaveTextContent(
+          '/home/dashboard',
+        );
+      });
+    });
+
+    it('should clean up subscriptions on unmount', async () => {
+      const contract = createMockContract();
+      const result = createScopedRouter(contract);
+
+      const { unmount } = render(
+        <result.Router>
+          <div data-testid="content">content</div>
+        </result.Router>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('content')).toBeInTheDocument();
+      });
+
+      unmount();
+
+      // After unmount, emitting should not cause errors
+      act(() => {
+        contract.emit({
+          pathname: '/home/after-unmount',
+          search: '',
+          hash: '',
+          state: undefined,
+        });
+      });
+
+      // Router should still have the old location since subscriptions were cleaned up
+      expect(result.router.state.location.pathname).toBe('/home');
+    });
   });
 });

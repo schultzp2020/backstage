@@ -57,37 +57,70 @@ export function createScopedRouter(
     );
   }
 
-  // Store for useSyncExternalStore — keeps the latest location from the contract
+  // Store for useSyncExternalStore — keeps the latest location from the contract.
+  // The initial value is captured synchronously since contract.location$ emits
+  // synchronously on subscribe.
   let latestLocation: Location = {
     pathname: '/',
     search: '',
     hash: '',
     state: null,
     key: 'default',
+    unstable_mask: undefined,
   };
+
+  // Capture the initial value synchronously
+  const initialSub = contract.location$.subscribe(loc => {
+    latestLocation = {
+      pathname: loc.pathname,
+      search: loc.search,
+      hash: loc.hash,
+      state: loc.state ?? null,
+      key: 'default',
+      unstable_mask: undefined,
+    };
+  });
+  initialSub.unsubscribe();
 
   // Set of listener callbacks for useSyncExternalStore
   const listeners = new Set<() => void>();
 
-  // Subscribe to the contract's location$ eagerly so we capture the initial value.
-  // The subscription is stored so it can be cleaned up via dispose().
-  const subscription = contract.location$.subscribe(routingLocation => {
-    latestLocation = {
-      pathname: routingLocation.pathname,
-      search: routingLocation.search,
-      hash: routingLocation.hash,
-      state: routingLocation.state ?? null,
-      key: 'default',
-    };
-    for (const listener of listeners) {
-      listener();
-    }
-  });
+  // Subscription reference — managed by useSyncExternalStore's subscribe lifecycle.
+  // React calls subscribe during commit and the returned cleanup on unmount,
+  // so this correctly handles Strict Mode and concurrent rendering without
+  // requiring render-phase side effects.
+  let subscription: { unsubscribe(): void } | undefined;
+
+  function subscribeToContract(): void {
+    if (subscription) return;
+    subscription = contract.location$.subscribe(routingLocation => {
+      latestLocation = {
+        pathname: routingLocation.pathname,
+        search: routingLocation.search,
+        hash: routingLocation.hash,
+        state: routingLocation.state ?? null,
+        key: 'default',
+        unstable_mask: undefined,
+      };
+      for (const listener of listeners) {
+        listener();
+      }
+    });
+  }
+
+  function unsubscribeFromContract(): void {
+    subscription?.unsubscribe();
+    subscription = undefined;
+  }
 
   function subscribe(listener: () => void): () => void {
     listeners.add(listener);
+    subscribeToContract();
     return () => {
       listeners.delete(listener);
+      if (listeners.size === 0) {
+        unsubscribeFromContract();
+      }
     };
   }
 
@@ -183,7 +216,10 @@ export function createScopedRouter(
       useRRParams() as T,
     useSearchParams: (...args: Parameters<typeof useRRSearchParams>) =>
       useRRSearchParams(...args),
-    dispose: () => subscription.unsubscribe(),
+    dispose: () => {
+      unsubscribeFromContract();
+      listeners.clear();
+    },
   };
 }
 

@@ -22,6 +22,9 @@
  *
  * @internal
  */
+
+import { escapeRegExp } from './escapeRegExp';
+
 export class RouteTable {
   private readonly paths: Array<{ path: string; matcher?: RegExp }>;
 
@@ -47,11 +50,27 @@ export class RouteTable {
   }
 
   match(pathname: string): string | undefined {
-    return this.paths.find(({ path, matcher }) =>
+    const result = this.paths.find(({ path, matcher }) =>
       path === '/'
         ? true // root catches everything
         : matcher?.test(pathname),
     )?.path;
+
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      result === '/' &&
+      pathname !== '/' &&
+      pathname.split('/').filter(Boolean).length > 1
+    ) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[RouteTable] Pathname "${pathname}" fell through to the root "/" catch-all. This may indicate a missing route registration. Registered paths: ${this.paths
+          .map(p => p.path)
+          .join(', ')}`,
+      );
+    }
+
+    return result;
   }
 }
 
@@ -71,8 +90,4 @@ function compileMatcher(path: string): RegExp {
 
   pattern += '(?:/|$)';
   return new RegExp(pattern);
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
