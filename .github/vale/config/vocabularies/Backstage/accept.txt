@@ -592,3 +592,4 @@ zod
 Zolotusky
 zoomable
 zsh
+oxlint
