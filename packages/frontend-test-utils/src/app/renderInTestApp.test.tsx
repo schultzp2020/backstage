@@ -22,8 +22,10 @@ import {
   createRouteRef,
   createExternalRouteRef,
   useRouteRef,
+  useApi,
+  navigationControllerApiRef,
 } from '@backstage/frontend-plugin-api';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation, Link } from 'react-router-dom';
 import { renderInTestApp } from './renderInTestApp';
 
 describe('renderInTestApp', () => {
@@ -148,5 +150,75 @@ describe('renderInTestApp', () => {
     });
 
     expect(screen.getByText('Link: /items/test')).toBeInTheDocument();
+  });
+
+  it('should drive navigation through the memory-history controller', async () => {
+    const LocationProbe = () => {
+      const { pathname } = useLocation();
+      const navigation = useApi(navigationControllerApiRef);
+      return (
+        <div>
+          <span>Path: {pathname}</span>
+          <button type="button" onClick={() => navigation.navigate('/next')}>
+            Go next
+          </button>
+        </div>
+      );
+    };
+
+    const { navigationController } = renderInTestApp(<LocationProbe />, {
+      initialRouteEntries: ['/start'],
+    });
+
+    expect(screen.getByText('Path: /start')).toBeInTheDocument();
+
+    const locations: string[] = [];
+    navigationController.location$.subscribe(loc =>
+      locations.push(loc.pathname),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Go next' }));
+
+    expect(await screen.findByText('Path: /next')).toBeInTheDocument();
+    expect(locations).toContain('/next');
+  });
+
+  it('should resolve locations under an app basename', async () => {
+    const LocationProbe = () => {
+      const { pathname } = useLocation();
+      return (
+        <div>
+          <span>Path: {pathname}</span>
+          <Link to="/catalog" data-testid="catalog-link">
+            Catalog
+          </Link>
+        </div>
+      );
+    };
+
+    const { navigationController } = renderInTestApp(<LocationProbe />, {
+      initialRouteEntries: ['/start'],
+      config: {
+        app: { baseUrl: 'http://localhost:3000/backstage' },
+        backend: { baseUrl: 'http://localhost:7007' },
+      },
+    });
+
+    expect(screen.getByText('Path: /start')).toBeInTheDocument();
+    expect(screen.getByTestId('catalog-link')).toHaveAttribute(
+      'href',
+      '/backstage/catalog',
+    );
+
+    navigationController.navigate('/catalog');
+    expect(await screen.findByText('Path: /catalog')).toBeInTheDocument();
+  });
+
+  it('should expose navigationController on the render result', () => {
+    const { navigationController } = renderInTestApp(<div>Hi</div>);
+    expect(navigationController).toBeDefined();
+    expect(typeof navigationController.navigate).toBe('function');
+    expect(typeof navigationController.go).toBe('function');
+    expect(typeof navigationController.createContract).toBe('function');
   });
 });
