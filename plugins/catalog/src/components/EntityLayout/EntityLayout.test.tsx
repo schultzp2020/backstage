@@ -36,11 +36,34 @@ import {
   TestApiProvider,
   TestApiRegistry,
 } from '@backstage/test-utils';
-import { mockApis } from '@backstage/frontend-test-utils';
+import {
+  createMockNavigationController,
+  createMockRouteResolutionApi,
+  mockApis,
+} from '@backstage/frontend-test-utils';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { EntityLayout } from './EntityLayout';
 import { rootRouteRef, unregisterRedirectRouteRef } from '../../routes';
-import { Route, Routes } from 'react-router-dom';
+import {
+  navigationControllerApiRef,
+  routeResolutionApiRef,
+} from '@backstage/frontend-plugin-api';
+
+/**
+ * Resolves only `entityRouteRef` so descendant `EntityRefLink`s can render
+ * via framework `RouteLink` once a NavigationControllerApi is present.
+ * Unmapped refs throw so legacy `useRouteRef` falls back to mountedRoutes.
+ */
+function createEntityLayoutRouteResolutionApi() {
+  return createMockRouteResolutionApi({
+    resolve: anyRouteRef => {
+      if ((anyRouteRef as unknown) === (entityRouteRef as unknown)) {
+        return () => '/mock';
+      }
+      throw new Error('Route not resolvable via the NFS test stub');
+    },
+  });
+}
 
 describe('EntityLayout', () => {
   const mockEntity = {
@@ -55,6 +78,8 @@ describe('EntityLayout', () => {
     [alertApiRef, mockApis.alert()],
     [starredEntitiesApiRef, new MockStarredEntitiesApi()],
     [permissionApiRef, mockApis.permission()],
+    [navigationControllerApiRef, createMockNavigationController()],
+    [routeResolutionApiRef, createEntityLayoutRouteResolutionApi()],
   );
 
   it('renders simplest case', async () => {
@@ -352,6 +377,7 @@ describe('EntityLayout - CleanUpAfterRemoval', () => {
   };
 
   it('redirects to externalRouteRef when unregisterRedirectRouteRef is bound', async () => {
+    const navigate = jest.fn();
     await renderInTestApp(
       <TestApiProvider
         apis={[
@@ -359,6 +385,11 @@ describe('EntityLayout - CleanUpAfterRemoval', () => {
           [alertApiRef, alertApi],
           [starredEntitiesApiRef, new MockStarredEntitiesApi()],
           [permissionApiRef, mockApis.permission()],
+          [
+            navigationControllerApiRef,
+            createMockNavigationController({ navigate }),
+          ],
+          [routeResolutionApiRef, createEntityLayoutRouteResolutionApi()],
         ]}
       >
         <EntityProvider entity={entity}>
@@ -368,10 +399,6 @@ describe('EntityLayout - CleanUpAfterRemoval', () => {
             </EntityLayout.Route>
           </EntityLayout>
         </EntityProvider>
-        <Routes>
-          <Route path="/catalog" element={<p>catalog-page</p>} />
-          <Route path="/testRoute" element={<p>external-page</p>} />
-        </Routes>
       </TestApiProvider>,
       {
         mountedRoutes: {
@@ -398,11 +425,12 @@ describe('EntityLayout - CleanUpAfterRemoval', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('external-page')).toBeInTheDocument();
+      expect(navigate).toHaveBeenCalledWith('/testRoute', undefined);
     });
   });
 
   it('redirects to rootRouteRef when unregisterRedirectRouteRef is not bound', async () => {
+    const navigate = jest.fn();
     await renderInTestApp(
       <TestApiProvider
         apis={[
@@ -410,6 +438,11 @@ describe('EntityLayout - CleanUpAfterRemoval', () => {
           [alertApiRef, alertApi],
           [starredEntitiesApiRef, new MockStarredEntitiesApi()],
           [permissionApiRef, mockApis.permission()],
+          [
+            navigationControllerApiRef,
+            createMockNavigationController({ navigate }),
+          ],
+          [routeResolutionApiRef, createEntityLayoutRouteResolutionApi()],
         ]}
       >
         <EntityProvider entity={entity}>
@@ -419,10 +452,6 @@ describe('EntityLayout - CleanUpAfterRemoval', () => {
             </EntityLayout.Route>
           </EntityLayout>
         </EntityProvider>
-        <Routes>
-          <Route path="/catalog" element={<p>catalog-page</p>} />
-          <Route path="/testRoute" element={<p>external-page</p>} />
-        </Routes>
       </TestApiProvider>,
       {
         mountedRoutes: {
@@ -448,7 +477,7 @@ describe('EntityLayout - CleanUpAfterRemoval', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('catalog-page')).toBeInTheDocument();
+      expect(navigate).toHaveBeenCalledWith('/catalog', undefined);
     });
   });
 });
