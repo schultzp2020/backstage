@@ -15,6 +15,7 @@
  */
 
 import { createMockDirectory } from '@backstage/backend-test-utils';
+import { join } from 'node:path';
 import { resolveEntryPath } from './startPackage';
 
 describe('resolveEntryPath', () => {
@@ -31,7 +32,7 @@ describe('resolveEntryPath', () => {
 
     const result = resolveEntryPath('dev/custom.tsx', mockDir.path);
 
-    expect(result).toBe('dev/custom');
+    expect(result).toBe(join('dev', 'custom'));
   });
 
   it('should remove trailing slashes', () => {
@@ -41,7 +42,7 @@ describe('resolveEntryPath', () => {
 
     const result = resolveEntryPath('dev/alpha/', mockDir.path);
 
-    expect(result).toBe('dev/alpha');
+    expect(result).toBe(join('dev', 'alpha'));
   });
 
   it('should handle multiple dots in filename', () => {
@@ -61,7 +62,7 @@ describe('resolveEntryPath', () => {
 
     const result = resolveEntryPath('dev', mockDir.path);
 
-    expect(result).toBe('dev/index');
+    expect(result).toBe(join('dev', 'index'));
   });
 
   it('should handle nested directory paths', () => {
@@ -71,7 +72,7 @@ describe('resolveEntryPath', () => {
 
     const result = resolveEntryPath('dev/alpha', mockDir.path);
 
-    expect(result).toBe('dev/alpha/index');
+    expect(result).toBe(join('dev', 'alpha', 'index'));
   });
 
   it('should return the file when there is a directory with the same name', () => {
@@ -84,6 +85,6 @@ describe('resolveEntryPath', () => {
 
     const result = resolveEntryPath('dev/alpha', mockDir.path);
 
-    expect(result).toBe('dev/alpha');
+    expect(result).toBe(join('dev', 'alpha'));
   });
 });
