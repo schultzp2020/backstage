@@ -14,6 +14,10 @@ CLI module that provides migration and version management commands for the Backs
 | `migrate package-lint-configs` | Migrates all packages to use @backstage/cli/config/eslint-factory |
 | `migrate react-router-deps`    | Migrates the react-router dependencies to be peer dependencies    |
 
+`versions:migrate` updates dependencies and references in each affected package's
+`src` directory, including nested files, on Windows, macOS, and Linux. Use
+`--skip-code-changes` to update only `package.json` files.
+
 ## Documentation
 
 - [Backstage Readme](https://github.com/backstage/backstage/blob/master/README.md)

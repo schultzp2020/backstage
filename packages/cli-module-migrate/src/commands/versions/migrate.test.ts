@@ -257,6 +257,47 @@ describe('versions:migrate', () => {
     );
   });
 
+  it('should migrate nested source files in directories with glob characters', async () => {
+    const original = "import { myThing } from '@backstage/custom';";
+    mockDir.setContent({
+      'package.json': JSON.stringify({ workspaces: ['packages/*'] }),
+      'node_modules/@backstage/custom/package.json': JSON.stringify({
+        name: '@backstage/custom',
+        version: '1.0.1',
+        backstage: { moved: '@backstage-community/custom' },
+      }),
+      'packages/app [test]': {
+        'package.json': JSON.stringify({
+          name: 'app',
+          dependencies: { '@backstage/custom': '^1.0.1' },
+        }),
+        'src/nested/index.ts': original,
+        'outside.ts': original,
+      },
+      'packages/other': {
+        'package.json': JSON.stringify({ name: 'other' }),
+        'src/nested/index.ts': original,
+      },
+    });
+
+    await withLogCollector(async () => {
+      await migrate({ args: [], info: { usage: 'test', name: 'test' } });
+    });
+
+    expect(
+      await fs.readFile(
+        mockDir.resolve('packages/app [test]/src/nested/index.ts'),
+        'utf-8',
+      ),
+    ).toBe("import { myThing } from '@backstage-community/custom';");
+    for (const file of [
+      'packages/app [test]/outside.ts',
+      'packages/other/src/nested/index.ts',
+    ]) {
+      expect(await fs.readFile(mockDir.resolve(file), 'utf-8')).toBe(original);
+    }
+  });
+
   it('should replace occurrences of changed packages, and is careful', async () => {
     mockDir.setContent({
       'package.json': JSON.stringify({

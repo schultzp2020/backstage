@@ -15,7 +15,7 @@
  */
 import { BackstagePackageJson, PackageGraph } from '@backstage/cli-node';
 import chalk from 'chalk';
-import { resolve as resolvePath, join as joinPath } from 'node:path';
+import { resolve as resolvePath } from 'node:path';
 import { cli } from 'cleye';
 import { readJson, writeJson } from 'fs-extra';
 import { minimatch } from 'minimatch';
@@ -29,6 +29,7 @@ declare module 'replace-in-file' {
     processor: (content: string, file: string) => string;
     ignore?: string | string[];
     allowEmptyPaths?: boolean;
+    glob?: { cwd: string; absolute: boolean };
   }): Promise<
     {
       file: string;
@@ -142,7 +143,8 @@ export async function migrateMovedPackages(options?: {
       if (!options?.skipCodeChanges) {
         // Replace all occurrences of the old package names in the code.
         const files = await replace({
-          files: joinPath(pkg.dir, 'src', '**'),
+          files: 'src/**',
+          glob: { cwd: pkg.dir, absolute: true },
           allowEmptyPaths: true,
           processor: content => {
             return Array.from(movedPackages.entries()).reduce(
