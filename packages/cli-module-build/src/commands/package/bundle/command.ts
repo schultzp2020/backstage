@@ -25,6 +25,7 @@ import {
   join as joinPath,
   resolve as resolvePath,
   relative as relativePath,
+  sep,
 } from 'node:path';
 
 import { loadConfigSchema } from '@backstage/config-loader';
@@ -57,6 +58,7 @@ interface BundleOptions {
  * For backend plugins, `createDistWorkspace` handles building (CJS) and packing
  * all local dependencies. The output is restructured so that the main plugin
  * sits at the bundle root and its local dependencies live under `embedded/`.
+ * Embedded dependency resolutions use forward-slash `file:` paths on all platforms.
  * A lockfile is seeded, pruned, and used to install a private `node_modules`.
  *
  * For frontend plugins, a module federation remote build produces the final
@@ -362,7 +364,9 @@ export async function bundleCommand(opts: BundleOptions): Promise<void> {
         continue;
       }
 
-      embeddedResolutions[dep.name] = `file:./embedded/${depRelDir}`;
+      embeddedResolutions[dep.name] = `file:./embedded/${depRelDir
+        .split(sep)
+        .join('/')}`;
     }
 
     if (Object.keys(embeddedResolutions).length === 0) {

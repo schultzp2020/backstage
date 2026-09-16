@@ -626,7 +626,17 @@ describe('bundle command', () => {
         );
 
         mockListTargetPackages.mockResolvedValue([
-          { packageJson: { name: backendPkg.name }, dir: ctx.pluginDir },
+          {
+            packageJson: {
+              ...backendPkg,
+              dependencies: { '@scope/plugin-foo-common': 'workspace:^' },
+            },
+            dir: ctx.pluginDir,
+          },
+          {
+            packageJson: { name: '@scope/plugin-foo-common', version: '1.0.0' },
+            dir: joinPath(mockDir.path, 'plugins/foo-common'),
+          },
         ]);
 
         await bundleCommand({ ...defaultOpts, prePackedDir: prePackedPath });
@@ -634,6 +644,13 @@ describe('bundle command', () => {
         const pkg = await fs.readJson(joinPath(ctx.targetDir, 'package.json'));
         expect(pkg.name).toBe(backendPkg.name);
         expect(pkg.bundleDependencies).toBe(true);
+        expect(pkg.resolutions['@scope/plugin-foo-common']).toBe(
+          'file:./embedded/plugins/foo-common',
+        );
+        await expectPathExists(
+          [ctx.targetDir, 'embedded', 'plugins/foo-common', 'package.json'],
+          true,
+        );
       });
 
       it('should print warning when package not found in pre-packed dir', async () => {
@@ -669,7 +686,7 @@ describe('bundle command', () => {
             `  Package ${chalk.cyan(
               '@scope/other-dep',
             )} not found in pre-packed dir (expected at ${chalk.cyan(
-              'packages/other-dep',
+              joinPath('packages', 'other-dep'),
             )})`,
           ),
         );
