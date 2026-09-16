@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-jest.mock('keytar', () => {
-  throw new Error('keytar not available');
-});
+jest.mock(
+  'keytar',
+  () => {
+    throw new Error('keytar not available');
+  },
+  { virtual: true },
+);
 
 import fs from 'fs-extra';
 import path from 'node:path';
@@ -26,14 +30,21 @@ import { getSecretStore, resetSecretStore } from '@internal/cli';
 const mockDir = createMockDirectory();
 
 describe('secretStore', () => {
+  let originalDataHome: string | undefined;
+
   beforeEach(() => {
+    originalDataHome = process.env.XDG_DATA_HOME;
     mockDir.clear();
     process.env.XDG_DATA_HOME = mockDir.resolve('data');
     resetSecretStore();
   });
 
   afterEach(() => {
-    delete process.env.XDG_DATA_HOME;
+    if (originalDataHome === undefined) {
+      delete process.env.XDG_DATA_HOME;
+    } else {
+      process.env.XDG_DATA_HOME = originalDataHome;
+    }
     resetSecretStore();
   });
 
