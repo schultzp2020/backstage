@@ -2142,11 +2142,6 @@ export interface RouteResolutionApi {
   resolvePath(options: { pathname: string; node?: AppNode }): {
     matches: readonly RouteResolutionMatch[];
   };
-  resolveTarget(options: {
-    to: string;
-    pathname: string;
-    node?: AppNode;
-  }): string;
 }
 
 // @public
