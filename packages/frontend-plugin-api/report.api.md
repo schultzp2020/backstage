@@ -1622,6 +1622,25 @@ export const microsoftAuthApiRef: ApiRef_2<
   readonly $$type: '@backstage/ApiRef';
 };
 
+// @public
+export interface Navigation {
+  createHref(target: string): string;
+  navigate(target: string, options?: AppNavigateOptions): void;
+  pathname: string;
+}
+
+// @public
+export function NavigationProvider(
+  input: NavigationProviderProps,
+): JSX_3.Element;
+
+// @public (undocumented)
+export interface NavigationProviderProps {
+  // (undocumented)
+  children: ReactNode;
+  useNavigation: () => Navigation;
+}
+
 // @public (undocumented)
 export const NotFoundErrorPage: {
   (props: NotFoundErrorPageProps): JSX.Element | null;
@@ -2142,11 +2161,6 @@ export interface RouteResolutionApi {
   resolvePath(options: { pathname: string; node?: AppNode }): {
     matches: readonly RouteResolutionMatch[];
   };
-  resolveTarget(options: {
-    to: string;
-    pathname: string;
-    node?: AppNode;
-  }): string;
 }
 
 // @public
@@ -2559,6 +2573,9 @@ export function useAppSearchParams(
 export function useBreadcrumbEntries(): {
   items: BreadcrumbEntryData[];
 };
+
+// @public
+export function useNavigation(): Navigation;
 
 // @public
 export function useRouteRef<TParams extends AnyRouteRefParams>(
